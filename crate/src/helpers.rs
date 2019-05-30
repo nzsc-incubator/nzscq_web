@@ -1,7 +1,7 @@
 use crate::paint::{ImageMap, ImageType};
 
 use js_sys::Function;
-use nzscq::choices::{BatchChoices, Character, Move};
+use nzscq::choices::{BatchChoices, Booster, Character, Move};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlImageElement};
 
@@ -13,7 +13,48 @@ pub fn log<T: std::fmt::Debug>(message: &T) {
     console::log_1(&message);
 }
 
-pub fn all_moves() -> Vec<Move> {
+pub fn millis_to_secs(millis: f64) -> f64 {
+    millis * 0.001
+}
+
+pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, JsValue> {
+    let mut map = HashMap::new();
+
+    for m in all_moves() {
+        let image =
+            get_move_images.call1(&JsValue::NULL, &JsValue::from_str(&m.to_string()[..]))?;
+        map.insert(ImageType::Move(m), image.dyn_into::<HtmlImageElement>()?);
+    }
+
+    for b in all_boosters() {
+        let image = if b == Booster::None {
+            get_move_images.call1(&JsValue::NULL, &JsValue::from_str("No Booster"))
+        } else {
+            let logo_move = booster_logo_move(&b).unwrap();
+            get_move_images.call1(
+                &JsValue::NULL,
+                &JsValue::from_str(&logo_move.to_string()[..]),
+            )
+        }?;
+        map.insert(ImageType::Booster(b), image.dyn_into::<HtmlImageElement>()?);
+    }
+
+    for c in Character::all() {
+        let logo_move = character_logo_move(&c);
+        let image = get_move_images.call1(
+            &JsValue::NULL,
+            &JsValue::from_str(&logo_move.to_string()[..]),
+        )?;
+        map.insert(
+            ImageType::Character(c),
+            image.dyn_into::<HtmlImageElement>()?,
+        );
+    }
+
+    Ok(map)
+}
+
+fn all_moves() -> Vec<Move> {
     vec![
         Move::Kick,
         Move::NinjaSword,
@@ -47,20 +88,41 @@ pub fn all_moves() -> Vec<Move> {
     ]
 }
 
-pub fn millis_to_secs(millis: f64) -> f64 {
-    millis * 0.001
+fn all_boosters() -> Vec<Booster> {
+    vec![
+        Booster::Shadow,
+        Booster::Speedy,
+        Booster::Regenerative,
+        Booster::ZombieCorps,
+        Booster::Atlas,
+        Booster::Strong,
+        Booster::Backwards,
+        Booster::Moustachio,
+        Booster::None,
+    ]
 }
 
-pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, JsValue> {
-    let mut map = HashMap::new();
-
-    for m in all_moves() {
-        let image =
-            get_move_images.call1(&JsValue::NULL, &JsValue::from_str(&m.to_string()[..]))?;
-        map.insert(ImageType::Move(m), image.dyn_into::<HtmlImageElement>()?);
+pub fn character_logo_move(c: &Character) -> Move {
+    match c {
+        Character::Ninja => Move::Kick,
+        Character::Zombie => Move::Rampage,
+        Character::Samurai => Move::Helmet,
+        Character::Clown => Move::Nose,
     }
+}
 
-    Ok(map)
+pub fn booster_logo_move(b: &Booster) -> Option<Move> {
+    match b {
+        Booster::Shadow => Some(Move::ShadowSlip),
+        Booster::Speedy => Some(Move::LightningFastKarateChop),
+        Booster::Regenerative => Some(Move::Regenerate),
+        Booster::ZombieCorps => Some(Move::ZombieCorps),
+        Booster::Atlas => Some(Move::Lightning),
+        Booster::Strong => Some(Move::Bend),
+        Booster::Backwards => Some(Move::BackwardsMoustachio),
+        Booster::Moustachio => Some(Move::BigHairyDeal),
+        Booster::None => None,
+    }
 }
 
 pub trait IntoConcreteBatchChoices<T> {

@@ -11,17 +11,25 @@ module.exports = {
     filename: "bundle.js"
   },
   devServer: {
-    contentBase: dist,
+    contentBase: dist
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: ["file-loader"]
+      }
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: 'index.html'
+      template: "index.html"
     }),
 
     new WasmPackPlugin({
-      crateDirectory: path.resolve(__dirname, "crate"),
+      crateDirectory: path.resolve(__dirname, "crate")
       // WasmPackPlugin defaults to compiling in "dev" profile. To change that, use forceMode: 'release':
       // forceMode: 'release'
-    }),
+    })
   ]
 };

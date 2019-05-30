@@ -81,6 +81,16 @@ impl App {
         Ok(())
     }
 
+    pub fn draw_if_needed(&mut self) -> Result<(), JsValue> {
+        if self.completion_factor() < 1.0 {
+            helpers::log(&"Drawing".to_string());
+            self.draw()
+        } else {
+            helpers::log(&"not needed".to_string());
+            Ok(())
+        }
+    }
+
     fn draw(&mut self) -> Result<(), JsValue> {
         let components = (self.completion_factor(), &self.phase).render();
         let ideal_dimensions = self.ideal_dimensions();

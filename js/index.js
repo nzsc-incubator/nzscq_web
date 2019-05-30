@@ -1,10 +1,22 @@
-import("../crate/pkg").then(module => {
-  const app = module.run();
+import loadImageGetter from "./loadImageGetter";
 
-  window.addEventListener("resize", () => {
-    app.resize();
-  });
-  window.addEventListener("orientationchange", () => {
-    app.resize();
-  });
-});
+Promise.all([import("../crate/pkg"), loadImageGetter()]).then(
+  ([module, getImage]) => {
+    const app = module.run(getImage);
+
+    window.addEventListener("resize", () => {
+      app.resize();
+    });
+    window.addEventListener("orientationchange", () => {
+      app.resize();
+    });
+
+    drawLoop();
+
+    function drawLoop() {
+      requestAnimationFrame(drawLoop);
+
+      app.draw_if_needed();
+    }
+  }
+);
