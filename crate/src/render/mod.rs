@@ -30,12 +30,12 @@ impl Render for (f64, &Phase) {
                         vec![
                             Lerpable::Rect {
                                 fill_color: colors::character_color(character),
-                                start: rect_button::background_at(i).translate(900.0, 0.0),
+                                start: rect_button::background_at(i).translate(1800.0, 0.0),
                                 end: rect_button::background_at(i),
                             },
                             Lerpable::Image {
                                 image_type: ImageType::Character(*character),
-                                start: rect_button::foreground_at(i).translate(900.0, 0.0),
+                                start: rect_button::foreground_at(i).translate(1800.0, 0.0),
                                 end: rect_button::foreground_at(i),
                             },
                         ]

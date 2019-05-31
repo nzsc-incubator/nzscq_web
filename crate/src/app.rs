@@ -21,10 +21,11 @@ pub struct App {
     game: BatchChoiceGame,
     phase: Phase,
     animation_start_secs: f64,
+    has_drawn_past_completion: bool,
 }
 
 impl App {
-    const IDEAL_DIMENSIONS: (u32, u32) = (900, 500);
+    const IDEAL_DIMENSIONS: (u32, u32) = (1800, 1000);
     const HUMAN: usize = 0;
 }
 
@@ -58,6 +59,7 @@ impl App {
                 currently_available: initial_human_choices,
             },
             animation_start_secs: helpers::millis_to_secs(Date::now()),
+            has_drawn_past_completion: false,
         };
 
         app.init()?;
@@ -67,36 +69,82 @@ impl App {
 
     fn init(&mut self) -> Result<(), JsValue> {
         self.body.append_child(&self.canvas)?;
-        self.resize()?;
+        self.init_canvas()?;
 
         Ok(())
     }
 
-    pub fn resize(&mut self) -> Result<(), JsValue> {
-        let (width, height) = self.dimensions()?;
-        self.canvas.set_width(width);
-        self.canvas.set_height(height);
-        self.draw()?;
+    fn init_canvas(&mut self) -> Result<(), JsValue> {
+        let (ideal_width, ideal_height) = self.ideal_dimensions();
+        self.canvas.set_width(ideal_width);
+        self.canvas.set_height(ideal_height);
+        self.canvas.style().set_property("position", "absolute")?;
 
-        Ok(())
+        self.resize()
+    }
+
+    pub fn resize(&mut self) -> Result<(), JsValue> {
+        let (actual_width, actual_height) = self.dimensions()?;
+        let (actual_width, actual_height) = (actual_width as f64, actual_height as f64);
+        let (ideal_width, ideal_height) = self.ideal_dimensions();
+        let (ideal_width, ideal_height) = (ideal_width as f64, ideal_height as f64);
+
+        let style = self.canvas.style();
+
+        if self.aspect()? > self.ideal_aspect() {
+            let scale = actual_height / ideal_height;
+            let scaled_width = ideal_width * scale;
+            let left = (actual_width - scaled_width) / 2.0;
+
+            style.set_property("height", &helpers::px(actual_height)[..])?;
+            style.set_property("width", &helpers::px(scaled_width)[..])?;
+            style.set_property("left", &helpers::px(left)[..])?;
+
+            style.set_property("top", "0")?;
+        } else {
+            let scale = actual_width / ideal_width;
+            let scaled_height = ideal_height * scale;
+            let top = (actual_height - scaled_height) / 2.0;
+            style.set_property("width", &helpers::px(actual_width)[..])?;
+            style.set_property("height", &helpers::px(scaled_height)[..])?;
+            style.set_property("top", &helpers::px(top)[..])?;
+
+            style.set_property("left", "0")?;
+        }
+
+        self.draw()
+    }
+
+    fn aspect(&self) -> Result<f64, JsValue> {
+        let (width, height) = self.dimensions()?;
+
+        Ok(width as f64 / height as f64)
+    }
+
+    fn ideal_aspect(&self) -> f64 {
+        let (width, height) = self.ideal_dimensions();
+
+        width as f64 / height as f64
     }
 
     pub fn draw_if_needed(&mut self) -> Result<(), JsValue> {
         if self.completion_factor() < 1.0 {
-            helpers::log(&"Drawing".to_string());
             self.draw()
         } else {
-            helpers::log(&"not needed".to_string());
-            Ok(())
+            if self.has_drawn_past_completion {
+                Ok(())
+            } else {
+                self.has_drawn_past_completion = true;
+                self.draw()
+            }
         }
     }
 
     fn draw(&mut self) -> Result<(), JsValue> {
         let components = (self.completion_factor(), &self.phase).render();
         let ideal_dimensions = self.ideal_dimensions();
-        let dimensions = self.dimensions()?;
-        let mut painter =
-            Painter::new(&mut self.ctx, &self.image_map, ideal_dimensions, dimensions);
+        let body_style = self.body.style();
+        let mut painter = Painter::new(&self.ctx, &body_style, &self.image_map, ideal_dimensions);
         painter.paint(components)?;
 
         Ok(())

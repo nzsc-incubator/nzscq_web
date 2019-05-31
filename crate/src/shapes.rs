@@ -40,10 +40,10 @@ impl Translate for Circle {
 pub mod rect_button {
     use super::Rect;
 
-    const WIDTH: f64 = 200.0;
-    const HEIGHT: f64 = 400.0;
-    const H_MARGIN: f64 = 20.0;
-    const V_MARGIN: f64 = 50.0;
+    const WIDTH: f64 = 400.0;
+    const HEIGHT: f64 = 800.0;
+    const H_MARGIN: f64 = 40.0;
+    const V_MARGIN: f64 = 100.0;
 
     pub fn background_at(index: usize) -> Rect {
         Rect {

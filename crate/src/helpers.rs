@@ -125,6 +125,10 @@ pub fn booster_logo_move(b: &Booster) -> Option<Move> {
     }
 }
 
+pub fn px(px: f64) -> String {
+    format!("{}px", px)
+}
+
 pub trait IntoConcreteBatchChoices<T> {
     fn into_concrete(self) -> Option<Vec<Vec<T>>>;
 }
