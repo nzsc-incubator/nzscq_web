@@ -66,7 +66,7 @@ pub mod rect_button {
 }
 
 pub mod rect_focus {
-    use super::Rect;
+    use super::{Rect,Translate};
     use crate::canvas_dimensions;
 
     const H_MARGIN: f64 = 200.0;
@@ -95,25 +95,19 @@ pub mod rect_focus {
         }
     }
 
-    pub fn right_initial_background() -> Rect {
-        Rect {
-            x: RIGHT_INITIAL_X,
-            y: V_MARGIN,
-            width: WIDTH,
-            height: HEIGHT,
-        }
+    pub fn far_left_background() -> Rect {
+        let left_bg = left_background();
+
+        left_bg.translate(-(left_bg.x + left_bg.width), 0.0)
     }
 
-    pub fn right_initial_foreground() -> Rect {
-        Rect {
-            x: RIGHT_INITIAL_X,
-            y: V_MARGIN + (HEIGHT - WIDTH) / 2.0,
-            width: WIDTH,
-            height: WIDTH,
-        }
+    pub fn far_left_foreground() -> Rect {
+        let left_fg = left_foreground();
+
+        left_fg.translate(-(left_fg.x + left_fg.width), 0.0)
     }
 
-    pub fn right_final_background() -> Rect {
+pub fn right_background() -> Rect {
         Rect {
             x: RIGHT_FINAL_X,
             y: V_MARGIN,
@@ -122,7 +116,7 @@ pub mod rect_focus {
         }
     }
 
-    pub fn right_final_foreground() -> Rect {
+    pub fn right_foreground() -> Rect {
         Rect {
             x: RIGHT_FINAL_X,
             y: V_MARGIN + (HEIGHT - WIDTH) / 2.0,
@@ -130,4 +124,18 @@ pub mod rect_focus {
             height: WIDTH,
         }
     }
+
+    pub fn far_right_background() -> Rect {
+        let right_bg = right_background();
+
+        right_bg.translate(1800.0 - right_bg.x, 0.0)
+    }
+
+    pub fn far_right_foreground() -> Rect {
+        let right_fg = right_foreground();
+
+        right_fg.translate(1800.0 - right_fg.x, 0.0)
+    }
+
+    
 }

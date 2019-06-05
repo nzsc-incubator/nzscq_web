@@ -12,11 +12,17 @@ impl Lerper {
         Lerper(factor.max(0.0).min(1.0))
     }
 
-    pub fn lerp<T, U>(&self, start: T, end: T)  -> U where (T, T): LerpInto<U>{
+    pub fn lerp<T, U>(&self, start: T, end: T) -> U
+    where
+        (T, T): LerpInto<U>,
+    {
         (start, end).lerp_into(self)
     }
 
-    pub fn lerp1<T, U>(&self, lerpable: T) -> U where T: LerpInto<U> {
+    pub fn lerp1<T, U>(&self, lerpable: T) -> U
+    where
+        T: LerpInto<U>,
+    {
         lerpable.lerp_into(self)
     }
 
@@ -36,7 +42,8 @@ impl Lerper {
             Bound::Unbounded => panic!("start bound required"),
         };
         let new_completion_factor = (completion_factor - min) / (max - min);
-        Lerper(new_completion_factor)
+
+        Lerper::from_completion_factor(new_completion_factor)
     }
 }
 
@@ -62,12 +69,14 @@ impl LerpInto<u8> for (u8, u8) {
 
 impl LerpInto<Rgba> for (Rgba, Rgba) {
     fn lerp_into(self, lerper: &Lerper) -> Rgba {
-        let (
-            Rgba(r0, g0, b0, a0),
-            Rgba(r1, g1, b1, a1)
-        ) = self;
+        let (Rgba(r0, g0, b0, a0), Rgba(r1, g1, b1, a1)) = self;
 
-        Rgba(lerper.lerp(r0, r1), lerper.lerp(g0, g1), lerper.lerp(b0, b1), lerper.lerp(a0, a1))
+        Rgba(
+            lerper.lerp(r0, r1),
+            lerper.lerp(g0, g1),
+            lerper.lerp(b0, b1),
+            lerper.lerp(a0, a1),
+        )
     }
 }
 

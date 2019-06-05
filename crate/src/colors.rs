@@ -4,7 +4,7 @@ use nzscq::choices::{Booster, Character, Move};
 
 pub const BACKGROUND: Rgba = Rgba(0xF1, 0xF1, 0xF1, 0xFF);
 pub const OVERLAY: Rgba = Rgba(0x33, 0x33, 0x33, 0xAA);
-
+pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 0.2;
 
 
 pub fn character_color(c: &Character) -> Rgba {
@@ -75,6 +75,10 @@ impl Rgba {
     pub fn to_upper_hash_hex(&self) -> String {
         let Rgba(r, g, b, a) = self;
         format!("#{:X}{:X}{:X}{:X}", r, g, b, a)
+    }
+
+    pub fn with_alpha(self, alpha: u8) -> Rgba {
+        Rgba(self.0, self.1, self.2, alpha)
     }
 
     fn composite_over(self, background: Rgba) -> Rgba {
