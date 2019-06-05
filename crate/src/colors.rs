@@ -61,7 +61,7 @@ pub struct Rgba(pub u8, pub u8, pub u8, pub u8);
 
 impl Rgba {
     pub fn opaque(r: u8, g: u8, b: u8) -> Rgba {
-        Rgba(r,g,b,0xFF)
+        Rgba(r, g, b, 0xFF)
     }
 
     pub fn transparent() -> Rgba {
@@ -69,12 +69,15 @@ impl Rgba {
     }
 
     pub fn composite(colors: Vec<Rgba>) -> Rgba {
-        colors.into_iter().fold(Rgba::transparent(), |acc, color| color.composite_over(acc))
+        colors
+            .into_iter()
+            .fold(Rgba::transparent(), |acc, color| color.composite_over(acc))
     }
 
     pub fn to_upper_hash_hex(&self) -> String {
         let Rgba(r, g, b, a) = self;
-        format!("#{:X}{:X}{:X}{:X}", r, g, b, a)
+
+        format!("#{:02X}{:02X}{:02X}{:02X}", r, g, b, a)
     }
 
     pub fn with_alpha(self, alpha: u8) -> Rgba {
@@ -86,10 +89,10 @@ impl Rgba {
         let (bg_color, bg_alpha) = background.into();
         let out_alpha = fg_alpha + bg_alpha * (1.0 - fg_alpha);
 
-        Rgba::from(
-            ((fg_color * fg_alpha + bg_color * bg_alpha * (1.0 - fg_alpha)) / out_alpha,
-            out_alpha)
-        )
+        Rgba::from((
+            (fg_color * fg_alpha + bg_color * bg_alpha * (1.0 - fg_alpha)) / out_alpha,
+            out_alpha,
+        ))
     }
 }
 
@@ -133,5 +136,4 @@ impl std::ops::Add for Rgb {
         Rgb(self.0 + other.0, self.1 + other.1, self.2 + other.2)
     }
 }
-
 
