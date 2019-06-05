@@ -1,9 +1,9 @@
 use crate::{
     click::Action,
+    colors,
     paint::{Component, ImageType},
     render::{
-        colors,
-        lerp::{LerpInto, Lerpable, Lerper},
+        lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch4},
     },
     shapes::{rect_button, rect_focus},
@@ -52,7 +52,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 .position(|character| *character == human_character)
                 .expect("human should have chosen character");
 
-            let mut components = vec![Component::Background(colors::BACKGROUND)];
+            let mut components = vec![Component::Background {
+                color: colors::BACKGROUND,
+            }];
             let components_dipslaying_characters_not_chosen_by_human: Vec<Component> =
                 index_value_pairs_of_unchosen_characters
                     .map(|(i, character)| {
@@ -64,6 +66,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                             },
                             Component::Image {
                                 image_type: ImageType::Character(*character),
+                                alpha: 1.0,
                                 shape: rect_button::foreground_at(i),
 
                                 on_click: None,
@@ -72,25 +75,32 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                     })
                     .flatten()
                     .collect();
+            let overlay = Component::Background {
+                color: colors::OVERLAY,
+            };
             let components_displaying_human_character: Vec<Component> = vec![
-                Lerpable::Rect {
-                    fill_color: colors::character_color(&human_character),
-                    start: rect_button::background_at(index_of_chosen_character),
-                    end: rect_focus::left_background(),
+                LerpableComponent::Rect {
+                    start_color: colors::character_color(&human_character),
+                    end_color: colors::character_color(&human_character),
+                    start_shape: rect_button::background_at(index_of_chosen_character),
+                    end_shape: rect_focus::left_background(),
                     on_click: None,
                 },
-                Lerpable::Image {
+                LerpableComponent::Image {
                     image_type: ImageType::Character(human_character),
-                    start: rect_button::foreground_at(index_of_chosen_character),
-                    end: rect_focus::left_foreground(),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: rect_button::foreground_at(index_of_chosen_character),
+                    end_shape: rect_focus::left_foreground(),
                     on_click: None,
                 },
             ]
             .into_iter()
-            .map(|lerpable| lerpable.lerp(&lerper))
+            .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
 
             components.extend(components_dipslaying_characters_not_chosen_by_human);
+            components.push(overlay);
             components.extend(components_displaying_human_character);
 
             components
@@ -108,7 +118,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 .enumerate()
                 .filter(|(_i, character)| **character != human_character);
 
-            let mut components = vec![Component::Background(colors::BACKGROUND)];
+            let mut components = vec![Component::Background {
+                color: colors::BACKGROUND,
+            }];
             let components_displaying_characters_not_chosen_by_human: Vec<Component> =
                 index_value_pairs_of_unchosen_characters
                     .map(|(i, character)| {
@@ -120,6 +132,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                             },
                             Component::Image {
                                 image_type: ImageType::Character(*character),
+                                alpha: 1.0,
                                 shape: rect_button::foreground_at(i),
 
                                 on_click: None,
@@ -128,6 +141,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                     })
                     .flatten()
                     .collect();
+            let overlay = Component::Background {
+                color: colors::OVERLAY,
+            };
             let components_displaying_human_character: Vec<Component> = vec![
                 Component::Rect {
                     fill_color: colors::character_color(&human_character),
@@ -136,29 +152,34 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 },
                 Component::Image {
                     image_type: ImageType::Character(human_character),
+                    alpha: 1.0,
                     shape: rect_focus::left_foreground(),
                     on_click: None,
                 },
             ];
             let components_displaying_computer_character: Vec<Component> = vec![
-                Lerpable::Rect {
-                    fill_color: colors::character_color(&computer_character),
-                    start: rect_focus::right_initial_background(),
-                    end: rect_focus::right_final_background(),
+                LerpableComponent::Rect {
+                    start_color: colors::character_color(&computer_character),
+                    end_color: colors::character_color(&computer_character),
+                    start_shape: rect_focus::right_initial_background(),
+                    end_shape: rect_focus::right_final_background(),
                     on_click: None,
                 },
-                Lerpable::Image {
+                LerpableComponent::Image {
                     image_type: ImageType::Character(computer_character),
-                    start: rect_focus::right_initial_foreground(),
-                    end: rect_focus::right_final_foreground(),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: rect_focus::right_initial_foreground(),
+                    end_shape: rect_focus::right_final_foreground(),
                     on_click: None,
                 },
             ]
             .into_iter()
-            .map(|lerpable| lerpable.lerp(&lerper))
+            .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
 
             components.extend(components_displaying_characters_not_chosen_by_human);
+            components.push(overlay);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 

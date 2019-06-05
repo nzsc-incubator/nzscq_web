@@ -1,0 +1,133 @@
+use crate::helpers::{booster_logo_move, character_logo_move};
+
+use nzscq::choices::{Booster, Character, Move};
+
+pub const BACKGROUND: Rgba = Rgba(0xF1, 0xF1, 0xF1, 0xFF);
+pub const OVERLAY: Rgba = Rgba(0x33, 0x33, 0x33, 0xAA);
+
+
+
+pub fn character_color(c: &Character) -> Rgba {
+    move_color(&character_logo_move(c))
+}
+
+pub fn booster_color(b: &Booster) -> Rgba {
+    if b == &Booster::None {
+        NO_BOOSTER_BACKGROUND
+    } else {
+        move_color(&booster_logo_move(b).unwrap())
+    }
+}
+
+const NO_BOOSTER_BACKGROUND: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
+
+pub fn move_color(m: &Move) -> Rgba {
+    match m {
+        Move::Kick
+        | Move::Nunchucks
+        | Move::ShadowFireball
+        | Move::RunInCircles
+        | Move::LightningFastKarateChop
+        | Move::Rampage
+        | Move::Muscle
+        | Move::Zap
+        | Move::Gravedigger
+        | Move::ZombieCorps
+        | Move::Apocalypse
+        | Move::Helmet
+        | Move::Smash
+        | Move::StrongSmash
+        | Move::Lightning
+        | Move::Earthquake
+        | Move::Nose
+        | Move::NoseOfTheTaunted => Rgba::opaque(0x11, 0x11, 0x11),
+
+        Move::NinjaSword
+        | Move::ShadowSlip
+        | Move::Regenerate
+        | Move::SamuraiSword
+        | Move::Twist
+        | Move::Bend
+        | Move::AcidSpray
+        | Move::MustacheMash
+        | Move::BigHairyDeal => Rgba::opaque(0xDD, 0xDD, 0xDD),
+
+        Move::BackwardsMoustachio | Move::JugglingKnives => Rgba::opaque(0x88, 0x88, 0x88),
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Rgba(pub u8, pub u8, pub u8, pub u8);
+
+impl Rgba {
+    pub fn opaque(r: u8, g: u8, b: u8) -> Rgba {
+        Rgba(r,g,b,0xFF)
+    }
+
+    pub fn transparent() -> Rgba {
+        Rgba(0, 0, 0, 0)
+    }
+
+    pub fn composite(colors: Vec<Rgba>) -> Rgba {
+        colors.into_iter().fold(Rgba::transparent(), |acc, color| color.composite_over(acc))
+    }
+
+    pub fn to_upper_hash_hex(&self) -> String {
+        let Rgba(r, g, b, a) = self;
+        format!("#{:X}{:X}{:X}{:X}", r, g, b, a)
+    }
+
+    fn composite_over(self, background: Rgba) -> Rgba {
+        let (fg_color, fg_alpha) = self.into();
+        let (bg_color, bg_alpha) = background.into();
+        let out_alpha = fg_alpha + bg_alpha * (1.0 - fg_alpha);
+
+        Rgba::from(
+            ((fg_color * fg_alpha + bg_color * bg_alpha * (1.0 - fg_alpha)) / out_alpha,
+            out_alpha)
+        )
+    }
+}
+
+impl Into<(Rgb, f64)> for Rgba {
+    fn into(self) -> (Rgb, f64) {
+        let color = Rgb(self.0 as f64, self.1 as f64, self.2 as f64);
+        let alpha = self.3 as f64 / 255.0;
+
+        (color, alpha)
+    }
+}
+
+impl From<(Rgb, f64)> for Rgba {
+    fn from((rgb, a): (Rgb, f64)) -> Rgba {
+        Rgba(rgb.0 as u8, rgb.1 as u8, rgb.2 as u8, (a * 255.0) as u8)
+    }
+}
+
+struct Rgb(pub f64, pub f64, pub f64);
+
+impl std::ops::Mul<f64> for Rgb {
+    type Output = Rgb;
+
+    fn mul(self, alpha: f64) -> Rgb {
+        Rgb(self.0 * alpha, self.1 * alpha, self.2 * alpha)
+    }
+}
+
+impl std::ops::Div<f64> for Rgb {
+    type Output = Rgb;
+
+    fn div(self, alpha: f64) -> Rgb {
+        Rgb(self.0 / alpha, self.1 / alpha, self.2 / alpha)
+    }
+}
+
+impl std::ops::Add for Rgb {
+    type Output = Rgb;
+
+    fn add(self, other: Rgb) -> Rgb {
+        Rgb(self.0 + other.0, self.1 + other.1, self.2 + other.2)
+    }
+}
+
+

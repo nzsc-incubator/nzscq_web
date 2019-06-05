@@ -2,6 +2,7 @@ use crate::{
     click::Action,
     paint::{Component, ImageType},
     shapes::{Circle, Rect},
+    colors::Rgba,
 };
 
 pub struct Lerper(f64);
@@ -11,24 +12,28 @@ impl Lerper {
         Lerper(factor)
     }
 
-    pub fn lerp(&self, start: f64, end: f64) -> f64 {
-        start + (end - start) * self.0
+    pub fn lerp<T, U>(&self, start: T, end: T)  -> U where (T, T): LerpInto<U>{
+        (start, end).lerp_into(self)
+    }
+
+    pub fn lerp1<T, U>(&self, lerpable: T) -> U where T: LerpInto<U> {
+        lerpable.lerp_into(self)
     }
 
     pub fn sub_lerper<T: std::ops::RangeBounds<f64>>(&self, range: T) -> Lerper {
         use std::ops::Bound;
 
         let completion_factor = self.0;
-        
+
         let min = match range.start_bound() {
             Bound::Included(min) => min,
             Bound::Excluded(min) => min,
-            Bound::Unbounded => panic!("start bound required")
+            Bound::Unbounded => panic!("start bound required"),
         };
         let max = match range.end_bound() {
             Bound::Included(min) => min,
             Bound::Excluded(min) => min,
-            Bound::Unbounded => panic!("start bound required")
+            Bound::Unbounded => panic!("start bound required"),
         };
         let new_completion_factor = (completion_factor - min) / (max - min);
         Lerper(new_completion_factor)
@@ -36,11 +41,38 @@ impl Lerper {
 }
 
 pub trait LerpInto<T> {
-    fn lerp(self, lerper: &Lerper) -> T;
+    fn lerp_into(self, lerper: &Lerper) -> T;
+}
+
+impl LerpInto<f64> for (f64, f64) {
+    fn lerp_into(self, lerper: &Lerper) -> f64 {
+        let (start, end) = self;
+
+        start + (end - start) * lerper.0
+    }
+}
+
+impl LerpInto<u8> for (u8, u8) {
+    fn lerp_into(self, lerper: &Lerper) -> u8 {
+        let (start, end) = self;
+
+        lerper.lerp(start as f64, end as f64) as u8
+    }
+}
+
+impl LerpInto<Rgba> for (Rgba, Rgba) {
+    fn lerp_into(self, lerper: &Lerper) -> Rgba {
+        let (
+            Rgba(r0, g0, b0, a0),
+            Rgba(r1, g1, b1, a1)
+        ) = self;
+
+        Rgba(lerper.lerp(r0, r1), lerper.lerp(g0, g1), lerper.lerp(b0, b1), lerper.lerp(a0, a1))
+    }
 }
 
 impl LerpInto<Rect> for (Rect, Rect) {
-    fn lerp(self, lerper: &Lerper) -> Rect {
+    fn lerp_into(self, lerper: &Lerper) -> Rect {
         let (start, end) = self;
         let (x, y, width, height) = (
             lerper.lerp(start.x, end.x),
@@ -59,7 +91,7 @@ impl LerpInto<Rect> for (Rect, Rect) {
 }
 
 impl LerpInto<Circle> for (Circle, Circle) {
-    fn lerp(self, lerper: &Lerper) -> Circle {
+    fn lerp_into(self, lerper: &Lerper) -> Circle {
         let (start, end) = self;
         let (x, y, radius) = (
             lerper.lerp(start.x, end.x),
@@ -72,60 +104,69 @@ impl LerpInto<Circle> for (Circle, Circle) {
 }
 
 #[derive(Debug, Clone)]
-pub enum Lerpable {
+pub enum LerpableComponent {
     Rect {
-        fill_color: &'static str,
-        start: Rect,
-        end: Rect,
+        start_color: Rgba,
+        end_color: Rgba,
+        start_shape: Rect,
+        end_shape: Rect,
         on_click: Option<Action>,
     },
     Circle {
-        fill_color: &'static str,
-        start: Circle,
-        end: Circle,
+        start_color: Rgba,
+        end_color: Rgba,
+        start_shape: Circle,
+        end_shape: Circle,
         on_click: Option<Action>,
     },
     Image {
         image_type: ImageType,
-        start: Rect,
-        end: Rect,
+        start_alpha: f64,
+        end_alpha: f64,
+        start_shape: Rect,
+        end_shape: Rect,
         on_click: Option<Action>,
     },
 }
 
-impl LerpInto<Component> for Lerpable {
-    fn lerp(self, lerper: &Lerper) -> Component {
+impl LerpInto<Component> for LerpableComponent {
+    fn lerp_into(self, lerper: &Lerper) -> Component {
         match self {
-            Lerpable::Rect {
-                fill_color,
-                start,
-                end,
+            LerpableComponent::Rect {
+                start_color,
+                end_color,
+                start_shape,
+                end_shape,
                 on_click,
             } => Component::Rect {
-                fill_color,
-                shape: (start, end).lerp(lerper),
+                fill_color: lerper.lerp(start_color, end_color),
+                shape: lerper.lerp(start_shape, end_shape),
                 on_click,
             },
 
-            Lerpable::Circle {
-                fill_color,
-                start,
-                end,
+            LerpableComponent::Circle {
+                start_color,
+                end_color,
+                start_shape,
+                end_shape,
                 on_click,
             } => Component::Circle {
-                fill_color,
-                shape: (start, end).lerp(lerper),
+                fill_color: lerper.lerp(start_color, end_color),
+                shape: lerper.lerp(start_shape, end_shape),
                 on_click,
             },
 
-            Lerpable::Image {
+            LerpableComponent::Image {
                 image_type,
-                start,
-                end,
+                start_alpha,
+                end_alpha,
+                start_shape,
+                end_shape,
                 on_click,
             } => Component::Image {
                 image_type,
-                shape: (start, end).lerp(lerper),
+                alpha: lerper.lerp(start_alpha, end_alpha),
+                shape: lerper.lerp(start_shape, end_shape),
                 on_click,
             },
         }

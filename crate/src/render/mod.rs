@@ -1,19 +1,13 @@
-mod colors;
 mod lerp;
 mod phase_specific_renderers;
 mod switch;
 
 use crate::{
-    click::Action,
-    paint::{Component, ImageType},
+    paint::{Component, },
     phase::Phase,
-    shapes::{rect_button, rect_focus, Translate},
 };
-use lerp::{LerpInto, Lerpable, Lerper};
 use phase_specific_renderers::{BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer};
-use switch::{Switch, Switch4};
 
-use nzscq::choices::{Booster, Character};
 
 pub trait Render {
     fn render(&self) -> Vec<Component>;

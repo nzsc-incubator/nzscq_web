@@ -8,6 +8,7 @@ mod paint;
 mod phase;
 mod render;
 mod shapes;
+mod colors;
 
 use app::App;
 

@@ -37,7 +37,7 @@ trait Touches {
 impl Touches for Component {
     fn touches(&self, canvas_coords: (f64, f64)) -> bool {
         match self {
-            Component::Background(_) => true,
+            Component::Background { .. } => true,
             Component::Rect { shape, .. } => shape.touches(canvas_coords),
             Component::Circle { shape, .. } => shape.touches(canvas_coords),
             Component::Image { shape, .. } => shape.touches(canvas_coords),

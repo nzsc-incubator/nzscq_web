@@ -1,4 +1,4 @@
-use super::lerp::{Lerper};
+use super::lerp::Lerper;
 use crate::paint::Component;
 
 pub trait Switch {
