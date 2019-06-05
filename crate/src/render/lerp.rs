@@ -9,7 +9,7 @@ pub struct Lerper(f64);
 
 impl Lerper {
     pub fn from_completion_factor(factor: f64) -> Lerper {
-        Lerper(factor)
+        Lerper(factor.max(0.0).min(1.0))
     }
 
     pub fn lerp<T, U>(&self, start: T, end: T)  -> U where (T, T): LerpInto<U>{
