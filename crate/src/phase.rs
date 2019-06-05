@@ -1,38 +1,39 @@
-use nzscq::choices::{Booster, Character};
+use nzscq::{
+    choices::{Booster, Character},
+    outcomes::CharacterHeadstart,
+};
 
+#[derive(Debug, Clone)]
 pub enum Phase {
-    ChoosingCharacters {
-        previously_available: Vec<Character>,
+    ChooseCharacter {
         currently_available: Vec<Character>,
     },
-    ChosenCharacters {
+    RechooseCharacter {
         previously_available: Vec<Character>,
-        chosen: Vec<Character>,
+        character_headstarts: Vec<CharacterHeadstart>,
+        currently_available: Vec<Character>,
     },
-    ChoosingBoosters {
+    ChooseBooster {
         previously_available: Vec<Character>,
+        character_headstarts: Vec<CharacterHeadstart>,
         currently_available: Vec<Booster>,
     },
-    ChosenBoosters {
-        previously_available: Vec<Booster>,
-        chosen: Vec<Booster>,
-    },
-    ChoosingDequeue, //TODO ↓
-    ChosenDequeue,
-    ChoosingAction,
-    ChosenAction,
+    ChooseDequeue, //TODO ↓
+    ChooseAction,
     GameOver,
 }
 
 impl Phase {
     pub fn duration_secs(&self) -> f64 {
         match self {
-            Phase::ChoosingCharacters { .. } => durations::CHOOSING_CHARACTERS,
-            _ => 0.0, // TODO
+            Phase::ChooseCharacter { .. } => durations::CHOOSING_CHARACTERS,
+            Phase::ChooseBooster { .. } => durations::CHOOSING_BOOSTERS,
+            _ => panic!("TODO choose duration"),
         }
     }
 }
 
 mod durations {
     pub const CHOOSING_CHARACTERS: f64 = 0.5;
+    pub const CHOOSING_BOOSTERS: f64 = 2.0;
 }

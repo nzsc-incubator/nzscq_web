@@ -1,7 +1,7 @@
 use crate::paint::{ImageMap, ImageType};
 
 use js_sys::Function;
-use nzscq::choices::{BatchChoices, Booster, Character, Move};
+use nzscq::choices::{Action, BatchChoices, Booster, Character, DequeueChoice, Move};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlImageElement};
 
@@ -20,13 +20,13 @@ pub fn millis_to_secs(millis: f64) -> f64 {
 pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, JsValue> {
     let mut map = HashMap::new();
 
-    for m in all_moves() {
+    for m in Move::all() {
         let image =
             get_move_images.call1(&JsValue::NULL, &JsValue::from_str(&m.to_string()[..]))?;
         map.insert(ImageType::Move(m), image.dyn_into::<HtmlImageElement>()?);
     }
 
-    for b in all_boosters() {
+    for b in Booster::all() {
         let image = if b == Booster::None {
             get_move_images.call1(&JsValue::NULL, &JsValue::from_str("No Booster"))
         } else {
@@ -52,54 +52,6 @@ pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, Js
     }
 
     Ok(map)
-}
-
-fn all_moves() -> Vec<Move> {
-    vec![
-        Move::Kick,
-        Move::NinjaSword,
-        Move::Nunchucks,
-        Move::ShadowFireball,
-        Move::ShadowSlip,
-        Move::RunInCircles,
-        Move::LightningFastKarateChop,
-        Move::Rampage,
-        Move::Muscle,
-        Move::Zap,
-        Move::Regenerate,
-        Move::Gravedigger,
-        Move::ZombieCorps,
-        Move::Apocalypse,
-        Move::SamuraiSword,
-        Move::Helmet,
-        Move::Smash,
-        Move::StrongSmash,
-        Move::Lightning,
-        Move::Earthquake,
-        Move::Twist,
-        Move::Bend,
-        Move::JugglingKnives,
-        Move::AcidSpray,
-        Move::Nose,
-        Move::BackwardsMoustachio,
-        Move::NoseOfTheTaunted,
-        Move::MustacheMash,
-        Move::BigHairyDeal,
-    ]
-}
-
-fn all_boosters() -> Vec<Booster> {
-    vec![
-        Booster::Shadow,
-        Booster::Speedy,
-        Booster::Regenerative,
-        Booster::ZombieCorps,
-        Booster::Atlas,
-        Booster::Strong,
-        Booster::Backwards,
-        Booster::Moustachio,
-        Booster::None,
-    ]
 }
 
 pub fn character_logo_move(c: &Character) -> Move {
@@ -135,7 +87,37 @@ pub trait IntoConcreteBatchChoices<T> {
 
 impl IntoConcreteBatchChoices<Character> for BatchChoices {
     fn into_concrete(self) -> Option<Vec<Vec<Character>>> {
-        if let BatchChoices::Character(choices) = self {
+        if let BatchChoices::Characters(choices) = self {
+            Some(choices)
+        } else {
+            None
+        }
+    }
+}
+
+impl IntoConcreteBatchChoices<Booster> for BatchChoices {
+    fn into_concrete(self) -> Option<Vec<Vec<Booster>>> {
+        if let BatchChoices::Boosters(choices) = self {
+            Some(choices)
+        } else {
+            None
+        }
+    }
+}
+
+impl IntoConcreteBatchChoices<DequeueChoice> for BatchChoices {
+    fn into_concrete(self) -> Option<Vec<Vec<DequeueChoice>>> {
+        if let BatchChoices::DequeueChoices(choices) = self {
+            Some(choices)
+        } else {
+            None
+        }
+    }
+}
+
+impl IntoConcreteBatchChoices<Action> for BatchChoices {
+    fn into_concrete(self) -> Option<Vec<Vec<Action>>> {
+        if let BatchChoices::Actions(choices) = self {
             Some(choices)
         } else {
             None

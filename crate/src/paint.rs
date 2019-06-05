@@ -1,4 +1,7 @@
-use crate::shapes::{Circle, Rect};
+use crate::{
+    click::Action,
+    shapes::{Circle, Rect},
+};
 use nzscq::choices::{Booster, Character, Move};
 use wasm_bindgen::JsValue;
 use web_sys::{CanvasRenderingContext2d, CssStyleDeclaration, HtmlImageElement};
@@ -38,13 +41,19 @@ impl<'a> Painter<'a> {
     fn paint_component(&mut self, component: Component) -> Result<(), JsValue> {
         match component {
             Component::Background(color) => self.paint_background(color),
-            Component::Rect { fill_color, shape } => {
+            Component::Rect {
+                fill_color, shape, ..
+            } => {
                 self.paint_rect(fill_color, shape);
 
                 Ok(())
             }
-            Component::Circle { fill_color, shape } => self.paint_circle(fill_color, shape),
-            Component::Image { image_type, shape } => self.paint_image(image_type, shape),
+            Component::Circle {
+                fill_color, shape, ..
+            } => self.paint_circle(fill_color, shape),
+            Component::Image {
+                image_type, shape, ..
+            } => self.paint_image(image_type, shape),
         }
     }
 
@@ -100,15 +109,29 @@ pub enum Component {
     Rect {
         fill_color: &'static str,
         shape: Rect,
+        on_click: Option<Action>,
     },
     Circle {
         fill_color: &'static str,
         shape: Circle,
+        on_click: Option<Action>,
     },
     Image {
         image_type: ImageType,
         shape: Rect,
+        on_click: Option<Action>,
     },
+}
+
+impl Component {
+    pub fn on_click(&self) -> Option<Action> {
+        match self {
+            Component::Background(_) => None,
+            Component::Rect { on_click, .. } => on_click.clone(),
+            Component::Circle { on_click, .. } => on_click.clone(),
+            Component::Image { on_click, .. } => on_click.clone(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

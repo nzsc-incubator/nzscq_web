@@ -1,12 +1,19 @@
 use crate::{
+    click,
     helpers::{self, IntoConcreteBatchChoices},
-    paint::{ImageMap, Painter},
+    letterbox::Letterbox,
+    opponent::{Opponent, Random},
+    paint::{Component, ImageMap, Painter},
     phase::Phase,
     render::Render,
 };
 
-use js_sys::{Date, Function};
-use nzscq::{choices::Character, game::BatchChoiceGame};
+use js_sys::{Date, Function, Math};
+use nzscq::{
+    choices::{BatchChoice, Character},
+    game::BatchChoiceGame,
+    outcomes::Outcome,
+};
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, HtmlElement, Window};
 
@@ -19,6 +26,7 @@ pub struct App {
     ctx: CanvasRenderingContext2d,
     image_map: ImageMap,
     game: BatchChoiceGame,
+    computer: Opponent<JsPrng>,
     phase: Phase,
     animation_start_secs: f64,
     has_drawn_past_completion: bool,
@@ -44,6 +52,7 @@ impl App {
             .dyn_into::<CanvasRenderingContext2d>()?;
         let image_map = helpers::image_map_from_function(get_image)?;
         let game = BatchChoiceGame::default();
+        let computer = Opponent::<JsPrng>::new(JsPrng);
         let initial_human_choices = game.choices().into_concrete().unwrap().remove(App::HUMAN);
 
         let mut app = App {
@@ -54,8 +63,8 @@ impl App {
             ctx,
             image_map,
             game,
-            phase: Phase::ChoosingCharacters {
-                previously_available: Character::all(),
+            computer,
+            phase: Phase::ChooseCharacter {
                 currently_available: initial_human_choices,
             },
             animation_start_secs: helpers::millis_to_secs(Date::now()),
@@ -81,6 +90,10 @@ impl App {
         self.canvas.style().set_property("position", "absolute")?;
 
         self.resize()
+    }
+
+    pub fn call_with_canvas(&self, callback: Function) -> Result<JsValue, JsValue> {
+        callback.call1(&JsValue::NULL, &self.canvas)
     }
 
     pub fn resize(&mut self) -> Result<(), JsValue> {
@@ -127,6 +140,77 @@ impl App {
         width as f64 / height as f64
     }
 
+    pub fn on_click(&mut self, client_x: u32, client_y: u32) -> Result<(), JsValue> {
+        let canvas_coords = self.canvas_coords((client_x, client_y))?;
+        let components = self.render();
+        let action = click::action_triggered_by_click_at(canvas_coords, &components);
+        if let Some(action) = action {
+            self.handle_action(action);
+        }
+
+        Ok(())
+    }
+
+    fn canvas_coords(&self, client_coords: (u32, u32)) -> Result<(f64, f64), JsValue> {
+        let (x, y) = client_coords;
+        let (mut x, mut y) = (x as f64, y as f64);
+        let letterbox = self.letterbox()?;
+        x -= letterbox.left;
+        y -= letterbox.top;
+        x /= letterbox.scale;
+        y /= letterbox.scale;
+
+        Ok((x, y))
+    }
+
+    fn letterbox(&self) -> Result<Letterbox, JsValue> {
+        Ok(Letterbox::new(self.ideal_dimensions(), self.dimensions()?))
+    }
+
+    fn handle_action(&mut self, action: click::Action) {
+        match action {
+            click::Action::ChooseCharacter(human_character) => {
+                let previously_available: Vec<Character> = self
+                    .game
+                    .choices()
+                    .into_concrete()
+                    .expect("should be able to choose character")
+                    .remove(App::HUMAN);
+                let computer_character = self
+                    .computer
+                    .choose_character(&self.game)
+                    .expect("should choose character");
+                let choices = BatchChoice::Characters(vec![human_character, computer_character]);
+                let outcome = self.game.choose(choices).expect("should have outcome");
+
+                match outcome {
+                    Outcome::CharacterPhaseDone(character_headstarts) => {
+                        self.phase = Phase::ChooseBooster {
+                            previously_available,
+                            character_headstarts,
+                            currently_available: self
+                                .game
+                                .choices()
+                                .into_concrete()
+                                .expect("should be able to choose booster")
+                                .remove(App::HUMAN),
+                        };
+                    }
+                    Outcome::CharacterPhaseRechoose(characters) => {}
+                    _ => panic!("outcome should be character outcome"),
+                }
+
+                self.start_animation();
+            }
+            _ => (),
+        }
+    }
+
+    fn start_animation(&mut self) {
+        self.animation_start_secs = helpers::millis_to_secs(Date::now());
+        self.has_drawn_past_completion = false;
+    }
+
     pub fn draw_if_needed(&mut self) -> Result<(), JsValue> {
         if self.completion_factor() < 1.0 {
             self.draw()
@@ -141,13 +225,17 @@ impl App {
     }
 
     fn draw(&mut self) -> Result<(), JsValue> {
-        let components = (self.completion_factor(), &self.phase).render();
+        let components = self.render();
         let ideal_dimensions = self.ideal_dimensions();
         let body_style = self.body.style();
         let mut painter = Painter::new(&self.ctx, &body_style, &self.image_map, ideal_dimensions);
         painter.paint(components)?;
 
         Ok(())
+    }
+
+    fn render(&self) -> Vec<Component> {
+        (self.completion_factor(), &self.phase).render()
     }
 
     fn completion_factor(&self) -> f64 {
@@ -168,5 +256,13 @@ impl App {
         let height = self.window.inner_height()?.as_f64().unwrap() as u32;
 
         Ok((width, height))
+    }
+}
+
+struct JsPrng;
+
+impl Random for JsPrng {
+    fn random(&mut self) -> f64 {
+        Math::random()
     }
 }

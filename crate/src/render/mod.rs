@@ -1,12 +1,19 @@
 mod colors;
 mod lerp;
+mod phase_specific_renderers;
+mod switch;
 
 use crate::{
+    click::Action,
     paint::{Component, ImageType},
     phase::Phase,
-    shapes::{rect_button, Translate},
+    shapes::{rect_button, rect_focus, Translate},
 };
 use lerp::{LerpInto, Lerpable, Lerper};
+use phase_specific_renderers::{BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer};
+use switch::{Switch, Switch4};
+
+use nzscq::choices::{Booster, Character};
 
 pub trait Render {
     fn render(&self) -> Vec<Component>;
@@ -15,39 +22,31 @@ pub trait Render {
 impl Render for (f64, &Phase) {
     fn render(&self) -> Vec<Component> {
         let (completion_factor, phase) = self;
+        let completion_factor = *completion_factor;
 
         match phase {
-            Phase::ChoosingCharacters {
+            Phase::ChooseCharacter {
                 currently_available,
                 ..
-            } => {
-                let lerper = Lerper::from_completion_factor(*completion_factor);
-                let mut components = vec![Component::Background(colors::BACKGROUND)];
-                let character_buttons: Vec<Component> = currently_available
-                    .iter()
-                    .enumerate()
-                    .map(|(i, character)| {
-                        vec![
-                            Lerpable::Rect {
-                                fill_color: colors::character_color(character),
-                                start: rect_button::background_at(i).translate(1800.0, 0.0),
-                                end: rect_button::background_at(i),
-                            },
-                            Lerpable::Image {
-                                image_type: ImageType::Character(*character),
-                                start: rect_button::foreground_at(i).translate(1800.0, 0.0),
-                                end: rect_button::foreground_at(i),
-                            },
-                        ]
-                        .into_iter()
-                    })
-                    .flatten()
-                    .map(|lerpable| lerpable.lerp(&lerper))
-                    .collect();
-                components.extend(character_buttons);
-                components
+            } => CharacterChoosingPhaseRenderer {
+                completion_factor,
+                characters: &currently_available,
             }
-            _ => vec![],
+            .render(),
+
+            Phase::ChooseBooster {
+                previously_available,
+                character_headstarts,
+                currently_available,
+            } => BoosterChoosingPhaseRenderer {
+                completion_factor,
+                previously_available_characters: previously_available,
+                previous_outcomes: character_headstarts,
+                available_boosters: currently_available,
+            }
+            .render(),
+
+            _ => panic!("Phase renderer not implemented"),
         }
     }
 }

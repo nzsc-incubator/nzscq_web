@@ -11,6 +11,11 @@ Promise.all([import("../crate/pkg"), loadImageGetter()]).then(
     window.addEventListener("orientationchange", () => {
       app.resize();
     });
+    app.call_with_canvas(canvas => {
+      canvas.addEventListener("click", ({ clientX, clientY }) => {
+        app.on_click(clientX, clientY);
+      });
+    });
 
     drawLoop();
 

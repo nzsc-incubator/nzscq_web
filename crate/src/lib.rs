@@ -1,5 +1,9 @@
 mod app;
+mod canvas_dimensions;
+mod click;
 mod helpers;
+mod letterbox;
+mod opponent;
 mod paint;
 mod phase;
 mod render;

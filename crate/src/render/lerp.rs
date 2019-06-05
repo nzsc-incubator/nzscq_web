@@ -1,4 +1,5 @@
 use crate::{
+    click::Action,
     paint::{Component, ImageType},
     shapes::{Circle, Rect},
 };
@@ -12,6 +13,25 @@ impl Lerper {
 
     pub fn lerp(&self, start: f64, end: f64) -> f64 {
         start + (end - start) * self.0
+    }
+
+    pub fn sub_lerper<T: std::ops::RangeBounds<f64>>(&self, range: T) -> Lerper {
+        use std::ops::Bound;
+
+        let completion_factor = self.0;
+        
+        let min = match range.start_bound() {
+            Bound::Included(min) => min,
+            Bound::Excluded(min) => min,
+            Bound::Unbounded => panic!("start bound required")
+        };
+        let max = match range.end_bound() {
+            Bound::Included(min) => min,
+            Bound::Excluded(min) => min,
+            Bound::Unbounded => panic!("start bound required")
+        };
+        let new_completion_factor = (completion_factor - min) / (max - min);
+        Lerper(new_completion_factor)
     }
 }
 
@@ -57,16 +77,19 @@ pub enum Lerpable {
         fill_color: &'static str,
         start: Rect,
         end: Rect,
+        on_click: Option<Action>,
     },
     Circle {
         fill_color: &'static str,
         start: Circle,
         end: Circle,
+        on_click: Option<Action>,
     },
     Image {
         image_type: ImageType,
         start: Rect,
         end: Rect,
+        on_click: Option<Action>,
     },
 }
 
@@ -77,27 +100,33 @@ impl LerpInto<Component> for Lerpable {
                 fill_color,
                 start,
                 end,
+                on_click,
             } => Component::Rect {
                 fill_color,
                 shape: (start, end).lerp(lerper),
+                on_click,
             },
 
             Lerpable::Circle {
                 fill_color,
                 start,
                 end,
+                on_click,
             } => Component::Circle {
                 fill_color,
                 shape: (start, end).lerp(lerper),
+                on_click,
             },
 
             Lerpable::Image {
                 image_type,
                 start,
                 end,
+                on_click,
             } => Component::Image {
                 image_type,
                 shape: (start, end).lerp(lerper),
+                on_click,
             },
         }
     }
