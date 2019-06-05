@@ -44,3 +44,49 @@ where
         }
     }
 }
+
+pub struct Switch5<A, B, C, D, E>(
+    pub (std::ops::Range<f64>, A),
+    pub (std::ops::Range<f64>, B),
+    pub (std::ops::Range<f64>, C),
+    pub (std::ops::Range<f64>, D),
+    pub (std::ops::RangeInclusive<f64>, E),
+)
+where
+    A: FnOnce(Lerper) -> Vec<Component>,
+    B: FnOnce(Lerper) -> Vec<Component>,
+    C: FnOnce(Lerper) -> Vec<Component>,
+    D: FnOnce(Lerper) -> Vec<Component>,
+    E: FnOnce(Lerper) -> Vec<Component>;
+
+impl<A, B, C, D, E> Switch for Switch5<A, B, C, D, E>
+where
+    A: FnOnce(Lerper) -> Vec<Component>,
+    B: FnOnce(Lerper) -> Vec<Component>,
+    C: FnOnce(Lerper) -> Vec<Component>,
+    D: FnOnce(Lerper) -> Vec<Component>,
+    E: FnOnce(Lerper) -> Vec<Component>,
+{
+    fn case(self, completion_factor: f64) -> Option<Vec<Component>> {
+        let lerper = Lerper::from_completion_factor(completion_factor);
+
+        if (self.0).0.contains(&completion_factor) {
+            let lerper = lerper.sub_lerper((self.0).0);
+            Some((self.0).1(lerper))
+        } else if (self.1).0.contains(&completion_factor) {
+            let lerper = lerper.sub_lerper((self.1).0);
+            Some((self.1).1(lerper))
+        } else if (self.2).0.contains(&completion_factor) {
+            let lerper = lerper.sub_lerper((self.2).0);
+            Some((self.2).1(lerper))
+        } else if (self.3).0.contains(&completion_factor) {
+            let lerper = lerper.sub_lerper((self.3).0);
+            Some((self.3).1(lerper))
+        } else if (self.4).0.contains(&completion_factor) {
+            let lerper = lerper.sub_lerper((self.4).0);
+            Some((self.4).1(lerper))
+        } else {
+            None
+        }
+    }
+}

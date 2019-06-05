@@ -35,5 +35,5 @@ impl Phase {
 
 mod durations {
     pub const CHOOSING_CHARACTERS: f64 = 0.5;
-    pub const CHOOSING_BOOSTERS: f64 = 2.0;
+    pub const CHOOSING_BOOSTERS: f64 = 2.5;
 }

@@ -4,7 +4,7 @@ use crate::{
     paint::{Component, ImageType},
     render::{
         lerp::{LerpableComponent, Lerper},
-        switch::{Switch, Switch4},
+        switch::{Switch, Switch5},
     },
     shapes::{rect_button, rect_focus},
 };
@@ -27,12 +27,14 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
         let computer_entrance = self.computer_entrance();
         let fade = self.fade();
         let exit = self.exit();
+        let boosters = self.boosters();
 
-        Switch4(
-            (0.0..0.15, human_entrance),
-            (0.15..0.30, computer_entrance),
-            (0.30..0.85, fade),
-            (0.85..=1.0, exit),
+        Switch5(
+            (0.00..0.12, human_entrance),
+            (0.12..0.24, computer_entrance),
+            (0.24..0.68, fade),
+            (0.68..0.80, exit),
+            (0.80..=1.00, boosters),
         )
         .case(self.completion_factor)
         .expect("should have legal completion range")
@@ -383,6 +385,46 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
+            components
+        }
+    }
+
+    fn boosters(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
+        use crate::shapes::Translate;
+
+        let available_boosters = self.available_boosters;
+
+        move |lerper| {
+            let mut components = vec![Component::Background {
+                color: colors::BACKGROUND,
+            }];
+            let character_buttons: Vec<Component> = available_boosters
+                .iter()
+                .enumerate()
+                .map(|(i, booster)| {
+                    vec![
+                        LerpableComponent::Rect {
+                            start_color: colors::booster_color(booster),
+                            end_color: colors::booster_color(booster),
+                            start_shape: rect_button::background_at(i).translate(1800.0, 0.0),
+                            end_shape: rect_button::background_at(i),
+                            on_click: Some(Action::ChooseBooster(*booster)),
+                        },
+                        LerpableComponent::Image {
+                            image_type: ImageType::Booster(*booster),
+                            start_alpha: 1.0,
+                            end_alpha: 1.0,
+                            start_shape: rect_button::foreground_at(i).translate(1800.0, 0.0),
+                            end_shape: rect_button::foreground_at(i),
+                            on_click: None,
+                        },
+                    ]
+                    .into_iter()
+                })
+                .flatten()
+                .map(|lerpable| lerper.lerp1(lerpable))
+                .collect();
+            components.extend(character_buttons);
             components
         }
     }
