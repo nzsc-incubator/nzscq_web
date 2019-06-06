@@ -6,7 +6,7 @@ use nzscq::{
 #[derive(Debug, Clone)]
 pub enum Phase {
     ChooseCharacter {
-        currently_available: Vec<Character>,
+        available_characters: Vec<Character>,
     },
     RechooseCharacter {
         previously_available_characters: Vec<Character>,

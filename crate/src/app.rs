@@ -64,7 +64,7 @@ impl App {
             game,
             computer,
             phase: Phase::ChooseCharacter {
-                currently_available: initial_human_choices,
+                available_characters: initial_human_choices,
             },
             animation_start_secs: helpers::millis_to_secs(Date::now()),
             has_drawn_past_completion: false,

@@ -20,10 +20,10 @@ impl Render for (f64, &Phase) {
 
         match phase {
             Phase::ChooseCharacter {
-                currently_available,
+                available_characters,
             } => CharacterChoosingPhaseRenderer {
                 completion_factor,
-                characters: &currently_available,
+                available_characters,
             }
             .render(),
 

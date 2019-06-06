@@ -10,7 +10,7 @@ use nzscq::choices::Character;
 
 pub struct CharacterChoosingPhaseRenderer<'a> {
     pub completion_factor: f64,
-    pub characters: &'a Vec<Character>,
+    pub available_characters: &'a Vec<Character>,
 }
 
 impl<'a> CharacterChoosingPhaseRenderer<'a> {
@@ -20,7 +20,7 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
             color: colors::BACKGROUND,
         }];
         let character_buttons: Vec<Component> = self
-            .characters
+            .available_characters
             .iter()
             .enumerate()
             .map(|(i, character)| {
