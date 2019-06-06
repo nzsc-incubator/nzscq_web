@@ -39,14 +39,14 @@ impl Render for (f64, &Phase) {
             }.render(),
 
             Phase::ChooseBooster {
-                previously_available,
-                character_headstarts,
-                currently_available,
+                previously_available_characters,
+                previous_outcome,
+                available_boosters,
             } => BoosterChoosingPhaseRenderer {
                 completion_factor,
-                previously_available_characters: previously_available,
-                previous_outcomes: character_headstarts,
-                available_boosters: currently_available,
+                previously_available_characters,
+                previous_outcome,
+                available_boosters,
             }
             .render(),
 

@@ -17,7 +17,7 @@ use nzscq::{
 pub struct BoosterChoosingPhaseRenderer<'a> {
     pub completion_factor: f64,
     pub previously_available_characters: &'a Vec<Character>,
-    pub previous_outcomes: &'a Vec<CharacterHeadstart>,
+    pub previous_outcome: &'a Vec<CharacterHeadstart>,
     pub available_boosters: &'a Vec<Booster>,
 }
 
@@ -41,7 +41,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
     }
 
     fn human_entrance(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        let human_character = self.previous_outcomes[HUMAN].0;
+        let human_character = self.previous_outcome[HUMAN].0;
         let previously_available_characters = self.previously_available_characters;
 
         move |lerper| {
@@ -110,8 +110,8 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
     }
 
     fn computer_entrance(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        let human_character = self.previous_outcomes[HUMAN].0;
-        let computer_character = self.previous_outcomes[COMPUTER].0;
+        let human_character = self.previous_outcome[HUMAN].0;
+        let computer_character = self.previous_outcome[COMPUTER].0;
         let previously_available_characters = self.previously_available_characters;
 
         move |lerper| {
@@ -190,10 +190,10 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
     }
 
     fn fade(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        let human_character = self.previous_outcomes[HUMAN].0;
-        let human_got_point = self.previous_outcomes[HUMAN].1 > 0;
-        let computer_character = self.previous_outcomes[COMPUTER].0;
-        let computer_got_point = self.previous_outcomes[COMPUTER].1 > 0;
+        let human_character = self.previous_outcome[HUMAN].0;
+        let human_got_point = self.previous_outcome[HUMAN].1 > 0;
+        let computer_character = self.previous_outcome[COMPUTER].0;
+        let computer_got_point = self.previous_outcome[COMPUTER].1 > 0;
         let previously_available_characters = self.previously_available_characters;
 
         move |lerper| {
@@ -293,10 +293,10 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
     }
 
     fn exit(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        let human_character = self.previous_outcomes[HUMAN].0;
-        let human_got_point = self.previous_outcomes[HUMAN].1 > 0;
-        let computer_character = self.previous_outcomes[COMPUTER].0;
-        let computer_got_point = self.previous_outcomes[COMPUTER].1 > 0;
+        let human_character = self.previous_outcome[HUMAN].0;
+        let human_got_point = self.previous_outcome[HUMAN].1 > 0;
+        let computer_character = self.previous_outcome[COMPUTER].0;
+        let computer_got_point = self.previous_outcome[COMPUTER].1 > 0;
         let previously_available_characters = self.previously_available_characters;
 
         move |lerper| {

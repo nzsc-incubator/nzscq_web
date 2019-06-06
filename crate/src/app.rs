@@ -186,9 +186,9 @@ impl App {
                 match outcome {
                     Outcome::CharacterPhaseDone(character_headstarts) => {
                         self.phase = Phase::ChooseBooster {
-                            previously_available: previously_available_characters,
-                            character_headstarts,
-                            currently_available: self
+                            previously_available_characters,
+                            previous_outcome: character_headstarts,
+                            available_boosters: self
                                 .game
                                 .choices()
                                 .boosters()

@@ -14,9 +14,9 @@ pub enum Phase {
         available_characters: Vec<Character>,
     },
     ChooseBooster {
-        previously_available: Vec<Character>,
-        character_headstarts: Vec<CharacterHeadstart>,
-        currently_available: Vec<Booster>,
+        previously_available_characters: Vec<Character>,
+        previous_outcome: Vec<CharacterHeadstart>,
+        available_boosters: Vec<Booster>,
     },
     ChooseDequeue, //TODO ↓
     ChooseAction,
