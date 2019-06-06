@@ -9,9 +9,9 @@ pub enum Phase {
         currently_available: Vec<Character>,
     },
     RechooseCharacter {
-        previously_available: Vec<Character>,
-        character_headstarts: Vec<CharacterHeadstart>,
-        currently_available: Vec<Character>,
+        previously_available_characters: Vec<Character>,
+        previously_mutually_chosen_character: Character,
+        available_characters: Vec<Character>,
     },
     ChooseBooster {
         previously_available: Vec<Character>,
@@ -27,6 +27,7 @@ impl Phase {
     pub fn duration_secs(&self) -> f64 {
         match self {
             Phase::ChooseCharacter { .. } => durations::CHOOSING_CHARACTERS,
+            Phase::RechooseCharacter { .. } => durations::RECHOOSING_CHARACTERS,
             Phase::ChooseBooster { .. } => durations::CHOOSING_BOOSTERS,
             _ => panic!("TODO choose duration"),
         }
@@ -35,5 +36,6 @@ impl Phase {
 
 mod durations {
     pub const CHOOSING_CHARACTERS: f64 = 0.5;
+    pub const RECHOOSING_CHARACTERS: f64 = 2.0;
     pub const CHOOSING_BOOSTERS: f64 = 2.5;
 }

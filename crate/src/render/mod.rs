@@ -6,7 +6,7 @@ use crate::{
     paint::{Component, },
     phase::Phase,
 };
-use phase_specific_renderers::{BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer};
+use phase_specific_renderers::{BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer,CharacterRechoosingPhaseRenderer};
 
 
 pub trait Render {
@@ -21,12 +21,22 @@ impl Render for (f64, &Phase) {
         match phase {
             Phase::ChooseCharacter {
                 currently_available,
-                ..
             } => CharacterChoosingPhaseRenderer {
                 completion_factor,
                 characters: &currently_available,
             }
             .render(),
+
+            Phase::RechooseCharacter {
+                previously_available_characters,
+                previously_mutually_chosen_character,
+                available_characters
+            } => CharacterRechoosingPhaseRenderer {
+                completion_factor,
+                previously_available_characters,
+                previously_mutually_chosen_character: *previously_mutually_chosen_character,
+                available_characters,
+            }.render(),
 
             Phase::ChooseBooster {
                 previously_available,

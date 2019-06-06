@@ -15,7 +15,7 @@ crate-type = ["cdylib"]
 [dependencies]
 wasm-bindgen = "0.2.25"
 js-sys = "0.3.22"
-nzscq = "0.3.0"
+nzscq = "0.4.0"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

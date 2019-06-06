@@ -1,6 +1,5 @@
 use crate::{
-    click,
-    helpers::{self, IntoConcreteBatchChoices},
+    click, helpers,
     letterbox::Letterbox,
     opponent::{Opponent, Random},
     paint::{Component, ImageMap, Painter},
@@ -53,7 +52,7 @@ impl App {
         let image_map = helpers::image_map_from_function(get_image)?;
         let game = BatchChoiceGame::default();
         let computer = Opponent::<JsPrng>::new(JsPrng);
-        let initial_human_choices = game.choices().into_concrete().unwrap().remove(App::HUMAN);
+        let initial_human_choices = game.choices().characters().unwrap().remove(App::HUMAN);
 
         let mut app = App {
             window,
@@ -170,10 +169,10 @@ impl App {
     fn handle_action(&mut self, action: click::Action) {
         match action {
             click::Action::ChooseCharacter(human_character) => {
-                let previously_available: Vec<Character> = self
+                let previously_available_characters: Vec<Character> = self
                     .game
                     .choices()
-                    .into_concrete()
+                    .characters()
                     .expect("should be able to choose character")
                     .remove(App::HUMAN);
                 let computer_character = self
@@ -181,22 +180,34 @@ impl App {
                     .choose_character(&self.game)
                     .expect("should choose character");
                 let choices = BatchChoice::Characters(vec![human_character, computer_character]);
+
                 let outcome = self.game.choose(choices).expect("should have outcome");
 
                 match outcome {
                     Outcome::CharacterPhaseDone(character_headstarts) => {
                         self.phase = Phase::ChooseBooster {
-                            previously_available,
+                            previously_available: previously_available_characters,
                             character_headstarts,
                             currently_available: self
                                 .game
                                 .choices()
-                                .into_concrete()
+                                .boosters()
                                 .expect("should be able to choose booster")
                                 .remove(App::HUMAN),
                         };
                     }
-                    Outcome::CharacterPhaseRechoose(characters) => {}
+                    Outcome::CharacterPhaseRechoose(characters) => {
+                        self.phase = Phase::RechooseCharacter {
+                            previously_available_characters,
+                            previously_mutually_chosen_character: characters[0],
+                            available_characters: self
+                                .game
+                                .choices()
+                                .characters()
+                                .expect("should be able to choose character")
+                                .remove(App::HUMAN),
+                        };
+                    }
                     _ => panic!("outcome should be character outcome"),
                 }
 
