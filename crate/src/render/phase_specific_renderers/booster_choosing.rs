@@ -398,7 +398,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let character_buttons: Vec<Component> = available_boosters
+            let booster_buttons: Vec<Component> = available_boosters
                 .iter()
                 .enumerate()
                 .map(|(i, booster)| {
@@ -424,7 +424,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 .flatten()
                 .map(|lerpable| lerper.lerp1(lerpable))
                 .collect();
-            components.extend(character_buttons);
+            components.extend(booster_buttons);
             components
         }
     }
