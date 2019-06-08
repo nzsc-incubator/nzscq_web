@@ -4,7 +4,7 @@ use nzscq::choices::{Booster, Character, Move};
 
 pub const BACKGROUND: Rgba = Rgba(0xF1, 0xF1, 0xF1, 0xFF);
 pub const OVERLAY: Rgba = Rgba(0x33, 0x33, 0x33, 0xAA);
-pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 0.2;
+pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 1.0 / (5.0 * 0.55);
 
 
 pub fn character_color(c: &Character) -> Rgba {
