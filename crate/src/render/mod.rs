@@ -1,6 +1,7 @@
 mod lerp;
 mod phase_specific_renderers;
 mod switch;
+mod heart;
 
 use crate::{
     paint::{Component, },

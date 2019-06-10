@@ -29,6 +29,8 @@ import BigHairyDeal from "./images/BigHairyDeal.png";
 
 import NoBooster from "./images/NoBooster.png";
 
+import Heart from "./images/Heart.png";
+
 import "./shims";
 
 const srcs = {
@@ -60,7 +62,8 @@ const srcs = {
   NoseOfTheTaunted,
   MustacheMash,
   BigHairyDeal,
-  NoBooster
+  NoBooster,
+  Heart
 };
 
 function loadImages() {

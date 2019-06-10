@@ -6,6 +6,24 @@ pub struct Rect {
     pub height: f64,
 }
 
+pub struct CenteredRect {
+    pub x: f64,
+    pub y: f64,
+    pub width: f64,
+    pub height: f64,
+}
+
+impl Into<Rect> for CenteredRect {
+    fn into(self) -> Rect {
+        Rect {
+            x: self.x - self.width / 2.0,
+            y: self.y - self.height / 2.0,
+            width: self.width,
+            height: self.height,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Circle {
     pub x: f64,
@@ -66,7 +84,7 @@ pub mod rect_button {
 }
 
 pub mod rect_focus {
-    use super::{Rect,Translate};
+    use super::{Rect, Translate};
     use crate::canvas_dimensions;
 
     const H_MARGIN: f64 = 200.0;
@@ -107,7 +125,7 @@ pub mod rect_focus {
         left_fg.translate(-(left_fg.x + left_fg.width), 0.0)
     }
 
-pub fn right_background() -> Rect {
+    pub fn right_background() -> Rect {
         Rect {
             x: RIGHT_FINAL_X,
             y: V_MARGIN,
@@ -136,6 +154,4 @@ pub fn right_background() -> Rect {
 
         right_fg.translate(1800.0 - right_fg.x, 0.0)
     }
-
-    
 }

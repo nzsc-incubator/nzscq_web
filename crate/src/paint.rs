@@ -132,7 +132,9 @@ impl<'a> Painter<'a> {
     }
 
     fn image_src(&self, image_type: &ImageType) -> &HtmlImageElement {
-        self.image_map.get(&image_type).unwrap()
+        self.image_map
+            .get(&image_type)
+            .expect(&format!("should have image for {:?}", image_type)[..])
     }
 }
 
@@ -176,6 +178,7 @@ pub enum ImageType {
     Booster(Booster),
     Move(Move),
     Mirror,
+    Heart,
 }
 
 pub type ImageMap = HashMap<ImageType, HtmlImageElement>;
