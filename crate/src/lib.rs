@@ -1,6 +1,7 @@
 mod app;
 mod canvas_dimensions;
 mod click;
+mod colors;
 mod helpers;
 mod letterbox;
 mod opponent;
@@ -8,7 +9,6 @@ mod paint;
 mod phase;
 mod render;
 mod shapes;
-mod colors;
 
 use app::App;
 

@@ -9,9 +9,7 @@ use crate::{
     shapes::{rect_button, rect_focus},
 };
 
-use nzscq::{
-    choices::{ Character},
-};
+use nzscq::choices::Character;
 
 pub struct CharacterRechoosingPhaseRenderer<'a> {
     pub completion_factor: f64,
@@ -296,45 +294,45 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
                 color: colors::OVERLAY,
             };
             let components_displaying_human_character: Vec<Component> = vec![
-                    LerpableComponent::Rect {
-                        start_color: colors::character_color(&mutual_character),
-                        end_color: colors::character_color(&mutual_character),
-                        start_shape: rect_focus::left_background(),
-                        end_shape: rect_focus::far_left_background(),
-                        on_click: None,
-                    },
-                    LerpableComponent::Image {
-                        image_type: ImageType::Character(mutual_character),
-                        start_alpha: 1.0,
-                        end_alpha: 1.0,
-                        start_shape: rect_focus::left_foreground(),
-                        end_shape: rect_focus::far_left_foreground(),
-                        on_click: None,
-                    },
-                ]
-                .into_iter()
-                .map(|lerpable| lerper.lerp1(lerpable))
-                .collect();
+                LerpableComponent::Rect {
+                    start_color: colors::character_color(&mutual_character),
+                    end_color: colors::character_color(&mutual_character),
+                    start_shape: rect_focus::left_background(),
+                    end_shape: rect_focus::far_left_background(),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::Character(mutual_character),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: rect_focus::left_foreground(),
+                    end_shape: rect_focus::far_left_foreground(),
+                    on_click: None,
+                },
+            ]
+            .into_iter()
+            .map(|lerpable| lerper.lerp1(lerpable))
+            .collect();
             let components_displaying_computer_character: Vec<Component> = vec![
-                    LerpableComponent::Rect {
-                        start_color: colors::character_color(&mutual_character),
-                        end_color: colors::character_color(&mutual_character),
-                        start_shape: rect_focus::right_background(),
-                        end_shape: rect_focus::far_right_background(),
-                        on_click: None,
-                    },
-                    LerpableComponent::Image {
-                        image_type: ImageType::Character(mutual_character),
-                        start_alpha: 1.0,
-                        end_alpha: 1.0,
-                        start_shape: rect_focus::right_foreground(),
-                        end_shape: rect_focus::far_right_foreground(),
-                        on_click: None,
-                    },
-                ]
-                .into_iter()
-                .map(|lerpable| lerper.lerp1(lerpable))
-                .collect();
+                LerpableComponent::Rect {
+                    start_color: colors::character_color(&mutual_character),
+                    end_color: colors::character_color(&mutual_character),
+                    start_shape: rect_focus::right_background(),
+                    end_shape: rect_focus::far_right_background(),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::Character(mutual_character),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: rect_focus::right_foreground(),
+                    end_shape: rect_focus::far_right_foreground(),
+                    on_click: None,
+                },
+            ]
+            .into_iter()
+            .map(|lerpable| lerper.lerp1(lerpable))
+            .collect();
 
             components.extend(components_displaying_characters_not_chosen_by_human);
             components.push(overlay);

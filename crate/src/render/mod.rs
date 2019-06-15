@@ -1,14 +1,12 @@
+mod heart;
 mod lerp;
 mod phase_specific_renderers;
 mod switch;
-mod heart;
 
-use crate::{
-    paint::{Component, },
-    phase::Phase,
+use crate::{paint::Component, phase::Phase};
+use phase_specific_renderers::{
+    BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer, CharacterRechoosingPhaseRenderer,
 };
-use phase_specific_renderers::{BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer,CharacterRechoosingPhaseRenderer};
-
 
 pub trait Render {
     fn render(&self) -> Vec<Component>;
@@ -31,13 +29,14 @@ impl Render for (f64, &Phase) {
             Phase::RechooseCharacter {
                 previously_available_characters,
                 previously_mutually_chosen_character,
-                available_characters
+                available_characters,
             } => CharacterRechoosingPhaseRenderer {
                 completion_factor,
                 previously_available_characters,
                 previously_mutually_chosen_character: *previously_mutually_chosen_character,
                 available_characters,
-            }.render(),
+            }
+            .render(),
 
             Phase::ChooseBooster {
                 previously_available_characters,

@@ -1,6 +1,5 @@
 use crate::{
     click::Action,
-
     colors,
     paint::{Component, ImageType},
     render::{
@@ -51,6 +50,22 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
             .flatten()
             .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
+        let trapezoids = vec![
+            Component::HealthTrapezoid {
+                x: 20.0,
+                y: 15.0,
+                border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                border_color: colors::TRAPEZOID_BORDER,
+                fill_color: colors::TRAPEZOID_FILL,
+            },
+            Component::HealthTrapezoid {
+                x: 1340.0,
+                y: 15.0,
+                border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                border_color: colors::TRAPEZOID_BORDER,
+                fill_color: colors::TRAPEZOID_FILL,
+            },
+        ];
         let human_hearts: Vec<Component> = (0..5)
             .into_iter()
             .map(|i| heart::left_at(i).case(0.0).expect("should find a case"))
@@ -62,6 +77,7 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
             .flatten()
             .collect();
         components.extend(character_buttons);
+        components.extend(trapezoids);
         components.extend(human_hearts);
         components.extend(computer_hearts);
         components

@@ -6,6 +6,9 @@ pub const BACKGROUND: Rgba = Rgba(0xF1, 0xF1, 0xF1, 0xFF);
 pub const OVERLAY: Rgba = Rgba(0x33, 0x33, 0x33, 0xAA);
 pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 1.0 / (5.0 * 0.55);
 
+pub const TRAPEZOID_BORDER_WIDTH: f64 = 4.0;
+pub const TRAPEZOID_BORDER: Rgba = Rgba(0x77, 0x77, 0x77, 0xFF);
+pub const TRAPEZOID_FILL: Rgba = BACKGROUND;
 
 pub fn character_color(c: &Character) -> Rgba {
     move_color(&character_logo_move(c))
@@ -136,4 +139,3 @@ impl std::ops::Add for Rgb {
         Rgb(self.0 + other.0, self.1 + other.1, self.2 + other.2)
     }
 }
-

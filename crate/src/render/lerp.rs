@@ -1,8 +1,8 @@
 use crate::{
     click::Action,
+    colors::Rgba,
     paint::{Component, ImageType},
     shapes::{Circle, Rect},
-    colors::Rgba,
 };
 
 pub struct Lerper(f64);

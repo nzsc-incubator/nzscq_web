@@ -89,4 +89,3 @@ enum HeartPosition {
     FromLeft(usize),
     FromRight(usize),
 }
-

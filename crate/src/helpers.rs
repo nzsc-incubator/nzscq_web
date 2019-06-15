@@ -83,4 +83,3 @@ pub fn booster_logo_move(b: &Booster) -> Option<Move> {
 pub fn px(px: f64) -> String {
     format!("{}px", px)
 }
-
