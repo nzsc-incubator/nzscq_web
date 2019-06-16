@@ -9,7 +9,7 @@ use crate::{
 
 use js_sys::{Date, Function, Math};
 use nzscq::{
-    choices::{BatchChoice, Character},
+    choices::{BatchChoice, Booster, Character},
     game::BatchChoiceGame,
     outcomes::Outcome,
 };
@@ -34,6 +34,7 @@ pub struct App {
 impl App {
     const IDEAL_DIMENSIONS: (u32, u32) = (1800, 1000);
     const HUMAN: usize = 0;
+    const COMPUTER: usize = 1;
 }
 
 #[wasm_bindgen]
@@ -171,6 +172,11 @@ impl App {
             click::Action::ChooseCharacter(human_character) => {
                 self.handle_character_choice(human_character);
             }
+
+            click::Action::ChooseBooster(human_booster) => {
+                self.handle_booster_choice(human_booster);
+            }
+
             _ => panic!("Cannot handle action {:?}", action),
         }
     }
@@ -212,6 +218,54 @@ impl App {
                         .choices()
                         .characters()
                         .expect("should be able to choose character")
+                        .remove(App::HUMAN),
+                };
+            }
+            _ => panic!("outcome should be character outcome"),
+        }
+
+        self.start_animation();
+    }
+
+    fn handle_booster_choice(&mut self, human_booster: Booster) {
+        let previously_available_boosters: Vec<Booster> = self
+            .game
+            .choices()
+            .boosters()
+            .expect("should be able to choose booster")
+            .remove(App::HUMAN);
+        let computer_booster = self
+            .computer
+            .choose_booster(&self.game)
+            .expect("should choose character");
+        let choices = BatchChoice::Boosters(vec![human_booster, computer_booster]);
+
+        let outcome = self.game.choose(choices).expect("should have outcome");
+
+        match outcome {
+            Outcome::BoosterPhaseDone(boosters) => {
+                let points: Vec<u8> = self
+                    .game
+                    .scoreboard()
+                    .dequeueing()
+                    .expect("should be dequeueing")
+                    .into_iter()
+                    .map(|player| player.points)
+                    .collect();
+                let starting_health = self.game.config().points_to_win;
+                let health = vec![
+                    starting_health - points[App::COMPUTER],
+                    starting_health - points[App::HUMAN],
+                ];
+                self.phase = Phase::ChooseDequeue {
+                    previously_available_boosters,
+                    health,
+                    previous_outcome: boosters,
+                    available_dequeues: self
+                        .game
+                        .choices()
+                        .dequeue_choices()
+                        .expect("should be able to choose dequeue")
                         .remove(App::HUMAN),
                 };
             }
