@@ -3,7 +3,7 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
-        heart,
+        heart::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::Switch,
     },
@@ -50,36 +50,16 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
             .flatten()
             .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
-        let trapezoids = vec![
-            Component::HealthTrapezoid {
-                x: 20.0,
-                y: 15.0,
-                border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                border_color: colors::TRAPEZOID_BORDER,
-                fill_color: colors::TRAPEZOID_FILL,
-            },
-            Component::HealthTrapezoid {
-                x: 1340.0,
-                y: 15.0,
-                border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                border_color: colors::TRAPEZOID_BORDER,
-                fill_color: colors::TRAPEZOID_FILL,
-            },
-        ];
-        let human_hearts: Vec<Component> = (0..5)
-            .into_iter()
-            .map(|i| heart::left_at(i).case(0.0).expect("should find a case"))
-            .flatten()
-            .collect();
-        let computer_hearts: Vec<Component> = (0..5)
-            .into_iter()
-            .map(|i| heart::right_at(i).case(0.0).expect("should find a case"))
-            .flatten()
-            .collect();
         components.extend(character_buttons);
-        components.extend(trapezoids);
-        components.extend(human_hearts);
-        components.extend(computer_hearts);
+        components.extend(self.health_display());
         components
+    }
+
+    fn health_display(&self) -> Vec<Component> {
+        ConstantHealthDisplay {
+            human_health: 5,
+            computer_health: 5,
+        }
+        .into()
     }
 }

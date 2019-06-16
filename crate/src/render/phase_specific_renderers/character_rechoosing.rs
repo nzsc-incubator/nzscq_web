@@ -3,7 +3,7 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
-        heart,
+        heart::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
     },
@@ -41,6 +41,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     fn human_entrance(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         let mutual_character = self.previously_mutually_chosen_character;
         let previously_available_characters = self.previously_available_characters;
+        let health_display = self.health_display();
 
         move |lerper| {
             let index_value_pairs_of_unchosen_characters = previously_available_characters
@@ -101,6 +102,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(components_dipslaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(health_display);
             components.extend(components_displaying_human_character);
 
             components
@@ -110,6 +112,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     fn computer_entrance(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         let mutual_character = self.previously_mutually_chosen_character;
         let previously_available_characters = self.previously_available_characters;
+        let health_display = self.health_display();
 
         move |lerper| {
             let index_value_pairs_of_unchosen_characters = previously_available_characters
@@ -179,6 +182,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(components_displaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(health_display);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -189,6 +193,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     fn pause(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         let mutual_character = self.previously_mutually_chosen_character;
         let previously_available_characters = self.previously_available_characters;
+        let health_display = self.health_display();
 
         move |lerper| {
             let index_value_pairs_of_unchosen_characters = previously_available_characters
@@ -251,6 +256,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(components_displaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(health_display);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -261,6 +267,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     fn exit(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         let mutual_character = self.previously_mutually_chosen_character;
         let previously_available_characters = self.previously_available_characters;
+        let health_display = self.health_display();
 
         move |lerper| {
             let index_value_pairs_of_unchosen_characters = previously_available_characters
@@ -337,6 +344,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(components_displaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(health_display);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -345,40 +353,14 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     }
 
     fn rechoose_characters(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        use crate::shapes::Translate;
 
         let available_characters = self.available_characters;
+        let health_display = self.health_display();
 
         move |lerper| {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let trapezoids = vec![
-                Component::HealthTrapezoid {
-                    x: 20.0,
-                    y: 15.0,
-                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                    border_color: colors::TRAPEZOID_BORDER,
-                    fill_color: colors::TRAPEZOID_FILL,
-                },
-                Component::HealthTrapezoid {
-                    x: 1340.0,
-                    y: 15.0,
-                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                    border_color: colors::TRAPEZOID_BORDER,
-                    fill_color: colors::TRAPEZOID_FILL,
-                },
-            ];
-            let human_hearts: Vec<Component> = (0..5)
-                .into_iter()
-                .map(|i| heart::left_at(i).case(0.0).expect("should find a case"))
-                .flatten()
-                .collect();
-            let computer_hearts: Vec<Component> = (0..5)
-                .into_iter()
-                .map(|i| heart::right_at(i).case(0.0).expect("should find a case"))
-                .flatten()
-                .collect();
             let character_buttons: Vec<Component> = available_characters
                 .iter()
                 .enumerate()
@@ -401,11 +383,16 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
                 .flatten()
                 .collect();
             components.extend(character_buttons);
-            components.extend(trapezoids);
-            components.extend(human_hearts);
-            components.extend(computer_hearts);
+            components.extend(health_display);
             components
         }
+    }
+
+    fn health_display(&self) -> Vec<Component> {
+        ConstantHealthDisplay {
+            human_health: 5,
+            computer_health: 5
+        }.into()
     }
 }
 

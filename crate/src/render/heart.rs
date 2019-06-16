@@ -1,10 +1,12 @@
 use crate::{
-    paint::ImageType,
+    colors,
+    paint::{Component, ImageType},
     render::{
-        lerp::{LerpableComponent, Lerper},
+        lerp::{LerpInto, LerpableComponent, Lerper},
         switch::{Switch, Switch4},
     },
     shapes::{CenteredRect, Rect, Translate},
+
 };
 
 const LEFT_0_CENTER: (f64, f64) = (80.0, 50.0);
@@ -88,4 +90,106 @@ fn scale_heart(position: &HeartPosition, scale: f64) -> Rect {
 enum HeartPosition {
     FromLeft(usize),
     FromRight(usize),
+}
+
+pub struct ConstantHealthDisplay {
+    pub human_health: u8,
+    pub computer_health: u8,
+}
+
+impl Into<Vec<Component>> for ConstantHealthDisplay {
+    fn into(self) -> Vec<Component> {
+        let trapezoids = vec![
+            Component::HealthTrapezoid {
+                x: 20.0,
+                y: 15.0,
+                border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                fill_color: colors::TRAPEZOID_FILL,
+            },
+            Component::HealthTrapezoid {
+                x: 1340.0,
+                y: 15.0,
+                border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                fill_color: colors::TRAPEZOID_FILL,
+            },
+        ];
+        let human_hearts: Vec<Component> = (0..self.human_health as usize)
+            .into_iter()
+            .map(|i| left_at(i).case(0.0).expect("should find a case"))
+            .flatten()
+            .collect();
+        let computer_hearts: Vec<Component> = (0..self.computer_health as usize)
+            .into_iter()
+            .map(|i| right_at(i).case(0.0).expect("should find a case"))
+            .flatten()
+            .collect();
+
+        vec![trapezoids, human_hearts, computer_hearts]
+            .into_iter()
+            .flatten()
+            .collect()
+    }
+}
+
+pub struct FadingHealthDisplay {
+    pub previous_human_health: u8,
+    pub previous_computer_health: u8,
+    pub is_human_losing_a_heart: bool,
+    pub is_computer_losing_a_heart: bool,
+}
+
+impl LerpInto<Vec<Component>> for FadingHealthDisplay {
+    fn lerp_into(self, lerper: &Lerper) -> Vec<Component> {
+        let trapezoids = vec![
+                Component::HealthTrapezoid {
+                    x: 20.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+                Component::HealthTrapezoid {
+                    x: 1340.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+            ];
+            let human_hearts: Vec<Component> = (0..self.previous_human_health)
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == self.previous_human_health - 1 && self.is_human_losing_a_heart {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    left_at(i as usize)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
+            let computer_hearts: Vec<Component> = (0..self.previous_computer_health)
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == self.previous_computer_health - 1 && self.is_computer_losing_a_heart {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    right_at(i as usize)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
+
+        vec![trapezoids, human_hearts, computer_hearts]
+            .into_iter()
+            .flatten()
+            .collect()
+    }
 }
