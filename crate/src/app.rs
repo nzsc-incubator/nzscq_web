@@ -169,52 +169,56 @@ impl App {
     fn handle_action(&mut self, action: click::Action) {
         match action {
             click::Action::ChooseCharacter(human_character) => {
-                let previously_available_characters: Vec<Character> = self
-                    .game
-                    .choices()
-                    .characters()
-                    .expect("should be able to choose character")
-                    .remove(App::HUMAN);
-                let computer_character = self
-                    .computer
-                    .choose_character(&self.game)
-                    .expect("should choose character");
-                let choices = BatchChoice::Characters(vec![human_character, computer_character]);
-
-                let outcome = self.game.choose(choices).expect("should have outcome");
-
-                match outcome {
-                    Outcome::CharacterPhaseDone(character_headstarts) => {
-                        self.phase = Phase::ChooseBooster {
-                            previously_available_characters,
-                            previous_outcome: character_headstarts,
-                            available_boosters: self
-                                .game
-                                .choices()
-                                .boosters()
-                                .expect("should be able to choose booster")
-                                .remove(App::HUMAN),
-                        };
-                    }
-                    Outcome::CharacterPhaseRechoose(characters) => {
-                        self.phase = Phase::RechooseCharacter {
-                            previously_available_characters,
-                            previously_mutually_chosen_character: characters[0],
-                            available_characters: self
-                                .game
-                                .choices()
-                                .characters()
-                                .expect("should be able to choose character")
-                                .remove(App::HUMAN),
-                        };
-                    }
-                    _ => panic!("outcome should be character outcome"),
-                }
-
-                self.start_animation();
+                self.handle_character_choice(human_character);
             }
-            _ => (),
+            _ => panic!("Cannot handle action {:?}", action),
         }
+    }
+
+    fn handle_character_choice(&mut self, human_character: Character) {
+        let previously_available_characters: Vec<Character> = self
+            .game
+            .choices()
+            .characters()
+            .expect("should be able to choose character")
+            .remove(App::HUMAN);
+        let computer_character = self
+            .computer
+            .choose_character(&self.game)
+            .expect("should choose character");
+        let choices = BatchChoice::Characters(vec![human_character, computer_character]);
+
+        let outcome = self.game.choose(choices).expect("should have outcome");
+
+        match outcome {
+            Outcome::CharacterPhaseDone(character_headstarts) => {
+                self.phase = Phase::ChooseBooster {
+                    previously_available_characters,
+                    previous_outcome: character_headstarts,
+                    available_boosters: self
+                        .game
+                        .choices()
+                        .boosters()
+                        .expect("should be able to choose booster")
+                        .remove(App::HUMAN),
+                };
+            }
+            Outcome::CharacterPhaseRechoose(characters) => {
+                self.phase = Phase::RechooseCharacter {
+                    previously_available_characters,
+                    previously_mutually_chosen_character: characters[0],
+                    available_characters: self
+                        .game
+                        .choices()
+                        .characters()
+                        .expect("should be able to choose character")
+                        .remove(App::HUMAN),
+                };
+            }
+            _ => panic!("outcome should be character outcome"),
+        }
+
+        self.start_animation();
     }
 
     fn start_animation(&mut self) {
