@@ -3,9 +3,9 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
+        heart,
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
-        heart
     },
     shapes::{rect_button, rect_focus},
 };
@@ -370,15 +370,15 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
                 },
             ];
             let human_hearts: Vec<Component> = (0..5)
-            .into_iter()
-            .map(|i| heart::left_at(i).case(0.0).expect("should find a case"))
-            .flatten()
-            .collect();
-        let computer_hearts: Vec<Component> = (0..5)
-            .into_iter()
-            .map(|i| heart::right_at(i).case(0.0).expect("should find a case"))
-            .flatten()
-            .collect();
+                .into_iter()
+                .map(|i| heart::left_at(i).case(0.0).expect("should find a case"))
+                .flatten()
+                .collect();
+            let computer_hearts: Vec<Component> = (0..5)
+                .into_iter()
+                .map(|i| heart::right_at(i).case(0.0).expect("should find a case"))
+                .flatten()
+                .collect();
             let character_buttons: Vec<Component> = available_characters
                 .iter()
                 .enumerate()

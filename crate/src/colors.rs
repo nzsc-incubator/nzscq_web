@@ -8,6 +8,7 @@ pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 1.0 / (5.0 * 0.55);
 
 pub const TRAPEZOID_BORDER_WIDTH: f64 = 4.0;
 pub const TRAPEZOID_BORDER: Rgba = Rgba(0x77, 0x77, 0x77, 0xFF);
+pub const TRAPEZOID_OUTCOME_SCREEN_BORDER: Rgba = Rgba(0x49, 0x49, 0x49, 0xFF);
 pub const TRAPEZOID_FILL: Rgba = BACKGROUND;
 
 pub fn character_color(c: &Character) -> Rgba {
@@ -87,7 +88,7 @@ impl Rgba {
         Rgba(self.0, self.1, self.2, alpha)
     }
 
-    fn composite_over(self, background: Rgba) -> Rgba {
+    pub fn composite_over(self, background: Rgba) -> Rgba {
         let (fg_color, fg_alpha) = self.into();
         let (bg_color, bg_alpha) = background.into();
         let out_alpha = fg_alpha + bg_alpha * (1.0 - fg_alpha);

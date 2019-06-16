@@ -3,6 +3,7 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
+        heart,
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
     },
@@ -80,6 +81,32 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
+            let trapezoids = vec![
+                Component::HealthTrapezoid {
+                    x: 20.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+                Component::HealthTrapezoid {
+                    x: 1340.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+            ];
+            let human_hearts: Vec<Component> = (0..5)
+                .into_iter()
+                .map(|i| heart::left_at(i).case(0.0).expect("should find a case"))
+                .flatten()
+                .collect();
+            let computer_hearts: Vec<Component> = (0..5)
+                .into_iter()
+                .map(|i| heart::right_at(i).case(0.0).expect("should find a case"))
+                .flatten()
+                .collect();
             let components_displaying_human_character: Vec<Component> = vec![
                 LerpableComponent::Rect {
                     start_color: colors::character_color(&human_character),
@@ -103,6 +130,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(components_dipslaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(trapezoids);
+            components.extend(human_hearts);
+            components.extend(computer_hearts);
             components.extend(components_displaying_human_character);
 
             components
@@ -146,6 +176,32 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
+            let trapezoids = vec![
+                Component::HealthTrapezoid {
+                    x: 20.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+                Component::HealthTrapezoid {
+                    x: 1340.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+            ];
+            let human_hearts: Vec<Component> = (0..5)
+                .into_iter()
+                .map(|i| heart::left_at(i).case(0.0).expect("should find a case"))
+                .flatten()
+                .collect();
+            let computer_hearts: Vec<Component> = (0..5)
+                .into_iter()
+                .map(|i| heart::right_at(i).case(0.0).expect("should find a case"))
+                .flatten()
+                .collect();
             let components_displaying_human_character: Vec<Component> = vec![
                 Component::Rect {
                     fill_color: colors::character_color(&human_character),
@@ -182,6 +238,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(components_displaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(trapezoids);
+            components.extend(human_hearts);
+            components.extend(computer_hearts);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -228,6 +287,50 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
+            let trapezoids = vec![
+                Component::HealthTrapezoid {
+                    x: 20.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+                Component::HealthTrapezoid {
+                    x: 1340.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+            ];
+            let human_hearts: Vec<Component> = (0..5)
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == 4 && computer_got_point {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    heart::left_at(i)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
+            let computer_hearts: Vec<Component> = (0..5)
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == 0 && human_got_point {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    heart::right_at(i)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
             let components_displaying_human_character: Vec<Component> = {
                 let lerper = lerper.sub_lerper(0.0..colors::PORTION_OF_DURATION_SPENT_FADING);
                 let end_alpha = if computer_got_point { 0.0 } else { 1.0 };
@@ -285,6 +388,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(components_displaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(trapezoids);
+            components.extend(human_hearts);
+            components.extend(computer_hearts);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -331,6 +437,50 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
+            let trapezoids = vec![
+                Component::HealthTrapezoid {
+                    x: 20.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+                Component::HealthTrapezoid {
+                    x: 1340.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+            ];
+            let human_hearts: Vec<Component> = if computer_got_point { (0..4) } else { (0..5) }
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == 4 && computer_got_point {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    heart::left_at(i)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
+            let computer_hearts: Vec<Component> = if human_got_point { (1..5) } else { (0..5) }
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == 0 && human_got_point {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    heart::right_at(i)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
             let components_displaying_human_character: Vec<Component> = if computer_got_point {
                 vec![]
             } else {
@@ -382,6 +532,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(components_displaying_characters_not_chosen_by_human);
             components.push(overlay);
+            components.extend(trapezoids);
+            components.extend(human_hearts);
+            components.extend(computer_hearts);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -393,11 +546,57 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
         use crate::shapes::Translate;
 
         let available_boosters = self.available_boosters;
+        let human_got_point = self.previous_outcome[HUMAN].1 > 0;
+        let computer_got_point = self.previous_outcome[COMPUTER].1 > 0;
 
         move |lerper| {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
+            let trapezoids = vec![
+                Component::HealthTrapezoid {
+                    x: 20.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+                Component::HealthTrapezoid {
+                    x: 1340.0,
+                    y: 15.0,
+                    border_width: colors::TRAPEZOID_BORDER_WIDTH,
+                    border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    fill_color: colors::TRAPEZOID_FILL,
+                },
+            ];
+            let human_hearts: Vec<Component> = if computer_got_point { (0..4) } else { (0..5) }
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == 4 && computer_got_point {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    heart::left_at(i)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
+            let computer_hearts: Vec<Component> = if human_got_point { (1..5) } else { (0..5) }
+                .into_iter()
+                .map(|i| {
+                    let completion_factor = if i == 0 && human_got_point {
+                        lerper.lerp(0.0, 1.0)
+                    } else {
+                        0.0
+                    };
+                    heart::right_at(i)
+                        .case(completion_factor)
+                        .expect("should find a case")
+                })
+                .flatten()
+                .collect();
             let booster_buttons: Vec<Component> = available_boosters
                 .iter()
                 .enumerate()
@@ -425,6 +624,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 .map(|lerpable| lerper.lerp1(lerpable))
                 .collect();
             components.extend(booster_buttons);
+            components.extend(trapezoids);
+            components.extend(human_hearts);
+            components.extend(computer_hearts);
             components
         }
     }
