@@ -142,6 +142,7 @@ pub struct FadingHealthDisplay {
 
 impl LerpInto<Vec<Component>> for FadingHealthDisplay {
     fn lerp_into(self, lerper: &Lerper) -> Vec<Component> {
+        let sublerper = lerper.sub_lerper(0.0..colors::PORTION_OF_DURATION_SPENT_POPPING);
         let trapezoids = vec![
                 Component::HealthTrapezoid {
                     x: 20.0,
@@ -162,7 +163,7 @@ impl LerpInto<Vec<Component>> for FadingHealthDisplay {
                 .into_iter()
                 .map(|i| {
                     let completion_factor = if i == self.previous_human_health - 1 && self.is_human_losing_a_heart {
-                        lerper.lerp(0.0, 1.0)
+                        sublerper.lerp(0.0, 1.0)
                     } else {
                         0.0
                     };
@@ -176,7 +177,7 @@ impl LerpInto<Vec<Component>> for FadingHealthDisplay {
                 .into_iter()
                 .map(|i| {
                     let completion_factor = if i == self.previous_computer_health - 1 && self.is_computer_losing_a_heart {
-                        lerper.lerp(0.0, 1.0)
+                        sublerper.lerp(0.0, 1.0)
                     } else {
                         0.0
                     };
