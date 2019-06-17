@@ -22,8 +22,8 @@ pub enum Phase {
         previously_available_boosters: Vec<Booster>,
         previous_outcome: Vec<Booster>,
         health: Vec<u8>,
-        available_dequeues: Vec<DequeueChoice>
-    }, 
+        available_dequeues: Vec<DequeueChoice>,
+    },
     ChooseAction, //TODO ↓
     GameOver,
 }
@@ -34,6 +34,7 @@ impl Phase {
             Phase::ChooseCharacter { .. } => durations::CHOOSING_CHARACTERS,
             Phase::RechooseCharacter { .. } => durations::RECHOOSING_CHARACTERS,
             Phase::ChooseBooster { .. } => durations::CHOOSING_BOOSTERS,
+            Phase::ChooseDequeue { .. } => durations::CHOOSING_DEQUEUE,
             _ => panic!("TODO choose duration"),
         }
     }
@@ -43,4 +44,5 @@ mod durations {
     pub const CHOOSING_CHARACTERS: f64 = 0.5;
     pub const RECHOOSING_CHARACTERS: f64 = 2.0;
     pub const CHOOSING_BOOSTERS: f64 = 2.5;
+    pub const CHOOSING_DEQUEUE: f64 = 2.5;
 }

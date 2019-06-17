@@ -155,3 +155,23 @@ pub mod rect_focus {
         right_fg.translate(1800.0 - right_fg.x, 0.0)
     }
 }
+
+pub mod dequeue_circle {
+    use super::Circle;
+    use crate::canvas_dimensions;
+
+    const TRAPEZOID_BOTTOM: f64 = 92.0;
+    const RADIUS: f64 = 100.0;
+    const DIAMETER: f64 = 2.0 * RADIUS;
+    const MARGIN: f64 = ((canvas_dimensions::HEIGHT - TRAPEZOID_BOTTOM) - (4.0 * DIAMETER)) / 5.0;
+    const ROW_0_X: f64 = 120.0;
+    const COLUMN_0_Y: f64 = TRAPEZOID_BOTTOM + MARGIN + RADIUS;
+
+    pub fn background_at(row: usize, column: usize) -> Circle {
+        Circle {
+            x: ROW_0_X + (DIAMETER + MARGIN) * row as f64,
+            y: COLUMN_0_Y + (DIAMETER + MARGIN) * column as f64,
+            radius: RADIUS,
+        }
+    }
+}

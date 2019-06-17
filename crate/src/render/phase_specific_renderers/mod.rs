@@ -4,3 +4,6 @@ mod character_rechoosing;
 pub use character_rechoosing::CharacterRechoosingPhaseRenderer;
 mod booster_choosing;
 pub use booster_choosing::BoosterChoosingPhaseRenderer;
+mod dequeueing;
+pub use dequeueing::DequeueingPhaseRenderer;
+
