@@ -74,10 +74,7 @@ impl<'a> Painter<'a> {
                 border_width,
                 border_color,
                 fill_color,
-            } => {
-                self.paint_trapezoid(x, y, border_width, border_color, fill_color);
-                Ok(())
-            }
+            } => self.paint_trapezoid(x, y, border_width, border_color, fill_color),
         }
     }
 
@@ -147,16 +144,16 @@ impl<'a> Painter<'a> {
         border_width: f64,
         border_color: Rgba,
         fill_color: Rgba,
-    ) {
-        self.ctx.translate(x, y);
+    ) -> Result<(), JsValue> {
+        self.ctx.translate(x, y)?;
         self.ctx.begin_path();
         self.ctx.move_to(80.0, 0.0);
-        self.ctx.arc_to(0.0, 0.0, 30.0, 70.0, 3.0);
-        self.ctx.arc_to(40.0, 75.0, 415.0, 70.0, 8.0);
-        self.ctx.arc_to(400.0, 75.0, 435.0, 0.0, 8.0);
-        self.ctx.arc_to(440.0, 0.0, 435.0, 0.0, 3.0);
+        self.ctx.arc_to(0.0, 0.0, 30.0, 70.0, 3.0)?;
+        self.ctx.arc_to(40.0, 75.0, 415.0, 70.0, 8.0)?;
+        self.ctx.arc_to(400.0, 75.0, 435.0, 0.0, 8.0)?;
+        self.ctx.arc_to(440.0, 0.0, 435.0, 0.0, 3.0)?;
         self.ctx.close_path();
-        self.ctx.translate(-x, -y);
+        self.ctx.translate(-x, -y)?;
 
         self.ctx
             .set_stroke_style(&JsValue::from_str(&border_color.to_upper_hash_hex()[..]));
@@ -166,6 +163,8 @@ impl<'a> Painter<'a> {
         self.ctx
             .set_fill_style(&JsValue::from_str(&fill_color.to_upper_hash_hex()[..]));
         self.ctx.fill();
+
+        Ok(())
     }
 
     fn image_src(&self, image_type: &ImageType) -> &HtmlImageElement {
