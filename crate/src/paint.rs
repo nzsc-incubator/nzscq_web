@@ -3,7 +3,7 @@ use crate::{
     colors::Rgba,
     shapes::{Circle, Rect},
 };
-use nzscq::choices::{Booster, Character, Move};
+use nzscq::choices::{ArsenalItem, Booster, Character, Move};
 use wasm_bindgen::JsValue;
 use web_sys::{CanvasRenderingContext2d, CssStyleDeclaration, HtmlImageElement};
 
@@ -106,7 +106,8 @@ impl<'a> Painter<'a> {
     fn paint_circle(&mut self, color: Rgba, shape: Circle) -> Result<(), JsValue> {
         let Circle { x, y, radius } = shape;
         self.ctx.begin_path();
-        self.ctx.arc(x, y, radius, 0.0, std::f64::consts::PI)?;
+        self.ctx
+            .arc(x, y, radius, 0.0, 2.0 * std::f64::consts::PI)?;
         self.ctx.close_path();
         self.ctx
             .set_fill_style(&JsValue::from_str(&color.to_upper_hash_hex()[..]));
@@ -223,6 +224,16 @@ pub enum ImageType {
     Move(Move),
     Mirror,
     Heart,
+    DeclineDequeue,
+}
+
+impl ImageType {
+    pub fn from_arsenal_item(item: ArsenalItem) -> ImageType {
+        match item {
+            ArsenalItem::Move(move_) => ImageType::Move(move_),
+            ArsenalItem::Mirror => ImageType::Mirror,
+        }
+    }
 }
 
 pub type ImageMap = HashMap<ImageType, HtmlImageElement>;

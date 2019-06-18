@@ -1,22 +1,24 @@
 use crate::{
     click::Action,
-    colors,
+    colors, helpers,
     paint::{Component, ImageType},
     render::{
         heart::{ConstantHealthDisplay, FadingHealthDisplay},
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
     },
-    shapes::{rect_button, rect_focus},
+    shapes::{dequeue_circle, rect_button, rect_focus},
 };
 
-use nzscq::choices::{Booster, DequeueChoice};
+use nzscq::{
+    choices::{ArsenalItem, Booster, DequeueChoice},
+    scoreboard::DequeueingPlayer,
+};
 
 pub struct DequeueingPhaseRenderer<'a> {
     pub completion_factor: f64,
     pub previously_available_boosters: &'a Vec<Booster>,
-    pub previous_outcome: &'a Vec<Booster>,
-    pub health: &'a Vec<u8>,
+    pub scoreboard: &'a [DequeueingPlayer; 2],
     pub available_dequeues: &'a Vec<DequeueChoice>,
 }
 
@@ -239,46 +241,18 @@ impl<'a> DequeueingPhaseRenderer<'a> {
         }
     }
 
-    fn dequeues(&self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
+    fn dequeues(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         use crate::shapes::Translate;
 
 
         move |lerper| {
-            // let mut components = vec![Component::Background {
-            //     color: colors::BACKGROUND,
-            // }];
-            // let booster_buttons: Vec<Component> = available_boosters
-            //     .iter()
-            //     .enumerate()
-            //     .map(|(i, booster)| {
-            //         vec![
-            //             LerpableComponent::Rect {
-            //                 start_color: colors::booster_color(booster),
-            //                 end_color: colors::booster_color(booster),
-            //                 start_shape: rect_button::background_at(i).translate(1800.0, 0.0),
-            //                 end_shape: rect_button::background_at(i),
-            //                 on_click: Some(Action::ChooseBooster(booster)),
-            //             },
-            //             LerpableComponent::Image {
-            //                 image_type: ImageType::Booster(booster),
-            //                 start_alpha: 1.0,
-            //                 end_alpha: 1.0,
-            //                 start_shape: rect_button::foreground_at(i).translate(1800.0, 0.0),
-            //                 end_shape: rect_button::foreground_at(i),
-            //                 on_click: None,
-            //             },
-            //         ]
-            //         .into_iter()
-            //     })
-            //     .flatten()
-            //     .map(|lerpable| lerper.lerp1(lerpable))
-            //     .collect();
-            // components.extend(booster_buttons);
-            // components.extend(self.health_display());
-            // components
-            vec![Component::Background {
+            let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
-            }]
+            }];
+            components.extend(self.human_scoreboard_display());
+            components.extend(self.computer_scoreboard_display());
+
+            components
         }
     }
 
@@ -310,20 +284,256 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .collect()
     }
 
+    fn human_scoreboard_display(&self) -> Vec<Component> {
+        vec![
+            self.human_pool_display(),
+            self.human_entrance_and_exit_display(),
+            self.human_arsenal_display(),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
+    }
+
+    fn human_pool_display(&self) -> Vec<Component> {
+        let drain_and_exit_enabled = self.available_dequeues.iter().any(|dequeue| {
+            if let DequeueChoice::DrainAndExit(_) = dequeue {
+                true
+            } else {
+                false
+            }
+        });
+
+        self.human_pool()
+            .iter()
+            .enumerate()
+            .flat_map(|(i, &arsenal_item)| {
+                let row = i / 3;
+                let column = i % 3;
+
+                if drain_and_exit_enabled {
+                    vec![
+                        Component::Circle {
+                            fill_color: colors::arsenal_item_color(arsenal_item),
+                            shape: dequeue_circle::left_background_at(row, column),
+                            on_click: Some(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
+                                arsenal_item,
+                            ))),
+                        },
+                        Component::Image {
+                            image_type: ImageType::from_arsenal_item(arsenal_item),
+                            alpha: 1.0,
+                            shape: dequeue_circle::left_foreground_at(row, column),
+                            on_click: None,
+                        },
+                    ]
+                } else {
+                    vec![
+                        Component::Circle {
+                            fill_color: colors::arsenal_item_color(arsenal_item)
+                                .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                            shape: dequeue_circle::left_background_at(row, column),
+                            on_click: None,
+                        },
+                        Component::Image {
+                            image_type: ImageType::from_arsenal_item(arsenal_item),
+                            alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                            shape: dequeue_circle::left_foreground_at(row, column),
+                            on_click: None,
+                        },
+                        Component::Circle {
+                            fill_color: colors::OVERLAY,
+                            shape: dequeue_circle::left_background_at(row, column),
+                            on_click: None,
+                        },
+                    ]
+                }
+            })
+            .collect()
+    }
+
+    fn human_entrance_and_exit_display(&self) -> Vec<Component> {
+        let entrance = self.human().queue.entrance;
+        let exit = self.human().queue.exit;
+        let just_exit_enabled = self
+            .available_dequeues
+            .iter()
+            .any(|&dequeue| DequeueChoice::JustExit == dequeue);
+        let row = self.human_pool_height_in_rows();
+
+
+        vec![
+            entrance.map(|entering_item| {
+                vec![
+                    Component::Circle {
+                        fill_color: colors::arsenal_item_color(entering_item)
+                            .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                        shape: dequeue_circle::left_background_at(row, 0),
+                        on_click: None,
+                    },
+                    Component::Image {
+                        image_type: ImageType::from_arsenal_item(entering_item),
+                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                        shape: dequeue_circle::left_foreground_at(row, 0),
+                        on_click: None,
+                    },
+                    Component::Circle {
+                        fill_color: colors::OVERLAY,
+                        shape: dequeue_circle::left_background_at(row, 0),
+                        on_click: None,
+                    },
+                ]
+            }),
+            Some(vec![
+                Component::Circle {
+                    fill_color: colors::DECLINE_DEQUEUE_COLOR,
+                    shape: dequeue_circle::left_background_at(row, 1),
+                    on_click: Some(Action::ChooseDequeue(DequeueChoice::Decline)),
+                },
+                Component::Image {
+                    image_type: ImageType::DeclineDequeue,
+                    alpha: 1.0,
+                    shape: dequeue_circle::left_foreground_at(row, 1),
+                    on_click: None,
+                },
+            ]),
+            if just_exit_enabled {
+                exit.map(|exiting_item| {
+                    vec![
+                        Component::Circle {
+                            fill_color: colors::arsenal_item_color(exiting_item),
+                            shape: dequeue_circle::left_background_at(row, 2),
+                            on_click: Some(Action::ChooseDequeue(DequeueChoice::JustExit)),
+                        },
+                        Component::Image {
+                            image_type: ImageType::from_arsenal_item(exiting_item),
+                            alpha: 1.0,
+                            shape: dequeue_circle::left_foreground_at(row, 2),
+                            on_click: None,
+                        },
+                    ]
+                })
+            } else {
+                exit.map(|exiting_item| {
+                    vec![
+                        Component::Circle {
+                            fill_color: colors::arsenal_item_color(exiting_item)
+                                .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                            shape: dequeue_circle::left_background_at(row, 2),
+                            on_click: None,
+                        },
+                        Component::Image {
+                            image_type: ImageType::from_arsenal_item(exiting_item),
+                            alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                            shape: dequeue_circle::left_foreground_at(row, 2),
+                            on_click: None,
+                        },
+                        Component::Circle {
+                            fill_color: colors::OVERLAY,
+                            shape: dequeue_circle::left_background_at(row, 2),
+                            on_click: None,
+                        },
+                    ]
+                })
+            },
+        ]
+        .into_iter()
+        .flatten()
+        .flatten()
+        .collect()
+    }
+
+    fn human_arsenal_display(&self) -> Vec<Component> {
+        let row_offset = self.human_pool_height_in_rows() + 1;
+
+        self.human()
+            .arsenal
+            .iter()
+            .enumerate()
+            .flat_map(|(i, &arsenal_item)| {
+                let row = i / 3;
+                let column = i % 3;
+                let row = row + row_offset;
+
+                vec![
+                    Component::Circle {
+                        fill_color: colors::arsenal_item_color(arsenal_item)
+                            .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                        shape: dequeue_circle::left_background_at(row, column),
+                        on_click: None,
+                    },
+                    Component::Image {
+                        image_type: ImageType::from_arsenal_item(arsenal_item),
+                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                        shape: dequeue_circle::left_foreground_at(row, column),
+                        on_click: None,
+                    },
+                    Component::Circle {
+                        fill_color: colors::OVERLAY,
+                        shape: dequeue_circle::left_background_at(row, column),
+                        on_click: None,
+                    },
+                ]
+            })
+            .collect()
+    }
+
+    fn computer_scoreboard_display(&self) -> Vec<Component> {
+        vec![
+            self.computer_pool_display(),
+            self.computer_entrance_and_exit_display(),
+            self.computer_arsenal_display(),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
+    }
+
+    fn computer_pool_display(&self) -> Vec<Component> {
+        // TODO
+        vec![]
+    }
+
+    fn computer_entrance_and_exit_display(&self) -> Vec<Component> {
+        // TODO
+        vec![]
+    }
+
+    fn computer_arsenal_display(&self) -> Vec<Component> {
+        // TODO
+        vec![]
+    }
+
+    fn human_pool_height_in_rows(&self) -> usize {
+        (self.human_pool().len() + 2) / 3
+    }
+
+    fn human_pool(&self) -> &Vec<ArsenalItem> {
+        &self.human().queue.pool
+    }
+
     fn human_booster(&self) -> Booster {
-        self.previous_outcome[HUMAN]
+        self.human().booster
     }
 
     fn computer_booster(&self) -> Booster {
-        self.previous_outcome[COMPUTER]
+        self.computer().booster
     }
 
     fn health_display(&self) -> Vec<Component> {
         ConstantHealthDisplay {
-            human_health: self.health[HUMAN],
-            computer_health: self.health[COMPUTER],
+            human_health: helpers::opponent_points_to_own_health(self.computer().points),
+            computer_health: helpers::opponent_points_to_own_health(self.human().points),
         }
         .into()
+    }
+
+    fn human(&self) -> &DequeueingPlayer {
+        &self.scoreboard[HUMAN]
+    }
+
+    fn computer(&self) -> &DequeueingPlayer {
+        &self.scoreboard[COMPUTER]
     }
 }
 

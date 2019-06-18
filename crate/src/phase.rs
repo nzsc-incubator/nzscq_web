@@ -1,6 +1,7 @@
 use nzscq::{
     choices::{Booster, Character, DequeueChoice},
     outcomes::CharacterHeadstart,
+    scoreboard::DequeueingPlayer
 };
 
 #[derive(Debug, Clone)]
@@ -20,8 +21,7 @@ pub enum Phase {
     },
     ChooseDequeue {
         previously_available_boosters: Vec<Booster>,
-        previous_outcome: Vec<Booster>,
-        health: Vec<u8>,
+        scoreboard: [DequeueingPlayer; 2],
         available_dequeues: Vec<DequeueChoice>,
     },
     ChooseAction, //TODO ↓

@@ -243,32 +243,17 @@ impl App {
         let outcome = self.game.choose(choices).expect("should have outcome");
 
         match outcome {
-            Outcome::BoosterPhaseDone(boosters) => {
-                let points: Vec<u8> = self
-                    .game
-                    .scoreboard()
-                    .dequeueing()
-                    .expect("should be dequeueing")
-                    .into_iter()
-                    .map(|player| player.points)
-                    .collect();
-                let starting_health = self.game.config().points_to_win;
-                let health = vec![
-                    starting_health - points[App::COMPUTER],
-                    starting_health - points[App::HUMAN],
-                ];
+            Outcome::BoosterPhaseDone(boosters) => 
                 self.phase = Phase::ChooseDequeue {
                     previously_available_boosters,
-                    health,
-                    previous_outcome: boosters,
+                    scoreboard: helpers::vec2_to_arr2(self.game.scoreboard().dequeueing().expect("should be dequeueing")),
                     available_dequeues: self
                         .game
                         .choices()
                         .dequeue_choices()
                         .expect("should be able to choose dequeue")
                         .remove(App::HUMAN),
-                };
-            }
+                },
             _ => panic!("outcome should be character outcome"),
         }
 

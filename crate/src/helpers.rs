@@ -54,6 +54,15 @@ pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, Js
     let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("Heart"))?;
     map.insert(ImageType::Heart, image.dyn_into::<HtmlImageElement>()?);
 
+    // TODO Replace placeholders with real images
+    let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("Heart"))?;
+    map.insert(ImageType::Mirror, image.dyn_into::<HtmlImageElement>()?);
+    let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("No Booster"))?;
+    map.insert(
+        ImageType::DeclineDequeue,
+        image.dyn_into::<HtmlImageElement>()?,
+    );
+
     Ok(map)
 }
 
@@ -82,4 +91,12 @@ pub fn booster_logo_move(b: Booster) -> Option<Move> {
 
 pub fn px(px: f64) -> String {
     format!("{}px", px)
+}
+
+pub fn opponent_points_to_own_health(points: u8) -> u8 {
+    5 - points
+}
+
+pub fn vec2_to_arr2<T>(mut vec: Vec<T>) -> [T; 2] {
+    [vec.remove(0), vec.remove(0)]
 }

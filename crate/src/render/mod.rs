@@ -6,7 +6,7 @@ mod switch;
 use crate::{paint::Component, phase::Phase};
 use phase_specific_renderers::{
     BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer, CharacterRechoosingPhaseRenderer,
-    DequeueingPhaseRenderer
+    DequeueingPhaseRenderer,
 };
 
 pub trait Render {
@@ -53,16 +53,15 @@ impl Render for (f64, &Phase) {
 
             Phase::ChooseDequeue {
                 previously_available_boosters,
-                previous_outcome,
-                health,
-                available_dequeues
+                scoreboard,
+                available_dequeues,
             } => DequeueingPhaseRenderer {
                 completion_factor,
                 previously_available_boosters,
-                previous_outcome,
-                health,
-                available_dequeues
-            }.render(),
+                scoreboard,
+                available_dequeues,
+            }
+            .render(),
 
             _ => panic!("Phase renderer not implemented"),
         }
