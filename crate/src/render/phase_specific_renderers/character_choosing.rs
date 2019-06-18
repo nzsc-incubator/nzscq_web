@@ -27,17 +27,17 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
             .available_characters
             .iter()
             .enumerate()
-            .map(|(i, character)| {
+            .map(|(i, &character)| {
                 vec![
                     LerpableComponent::Rect {
                         start_color: colors::character_color(character),
                         end_color: colors::character_color(character),
                         start_shape: rect_button::background_at(i).translate(1800.0, 0.0),
                         end_shape: rect_button::background_at(i),
-                        on_click: Some(Action::ChooseCharacter(*character)),
+                        on_click: Some(Action::ChooseCharacter(character)),
                     },
                     LerpableComponent::Image {
-                        image_type: ImageType::Character(*character),
+                        image_type: ImageType::Character(character),
                         start_alpha: 1.0,
                         end_alpha: 1.0,
                         start_shape: rect_button::foreground_at(i).translate(1800.0, 0.0),

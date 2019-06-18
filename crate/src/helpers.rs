@@ -30,7 +30,7 @@ pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, Js
         let image = if b == Booster::None {
             get_move_images.call1(&JsValue::NULL, &JsValue::from_str("No Booster"))
         } else {
-            let logo_move = booster_logo_move(&b).unwrap();
+            let logo_move = booster_logo_move(b).unwrap();
             get_move_images.call1(
                 &JsValue::NULL,
                 &JsValue::from_str(&logo_move.to_string()[..]),
@@ -40,7 +40,7 @@ pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, Js
     }
 
     for c in Character::all() {
-        let logo_move = character_logo_move(&c);
+        let logo_move = character_logo_move(c);
         let image = get_move_images.call1(
             &JsValue::NULL,
             &JsValue::from_str(&logo_move.to_string()[..]),
@@ -57,7 +57,7 @@ pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, Js
     Ok(map)
 }
 
-pub fn character_logo_move(c: &Character) -> Move {
+pub fn character_logo_move(c: Character) -> Move {
     match c {
         Character::Ninja => Move::Kick,
         Character::Zombie => Move::Rampage,
@@ -66,7 +66,7 @@ pub fn character_logo_move(c: &Character) -> Move {
     }
 }
 
-pub fn booster_logo_move(b: &Booster) -> Option<Move> {
+pub fn booster_logo_move(b: Booster) -> Option<Move> {
     match b {
         Booster::Shadow => Some(Move::ShadowSlip),
         Booster::Speedy => Some(Move::LightningFastKarateChop),

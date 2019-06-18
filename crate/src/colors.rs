@@ -1,4 +1,4 @@
-use crate::helpers::{booster_logo_move, character_logo_move};
+use crate::helpers;
 
 use nzscq::choices::{Booster, Character, Move};
 
@@ -12,21 +12,21 @@ pub const TRAPEZOID_BORDER: Rgba = Rgba(0x77, 0x77, 0x77, 0xFF);
 pub const TRAPEZOID_OUTCOME_SCREEN_BORDER: Rgba = Rgba(0x49, 0x49, 0x49, 0xFF);
 pub const TRAPEZOID_FILL: Rgba = BACKGROUND;
 
-pub fn character_color(c: &Character) -> Rgba {
-    move_color(&character_logo_move(c))
+pub fn character_color(c: Character) -> Rgba {
+    move_color(helpers::character_logo_move(c))
 }
 
-pub fn booster_color(b: &Booster) -> Rgba {
-    if b == &Booster::None {
+pub fn booster_color(b: Booster) -> Rgba {
+    if b == Booster::None {
         NO_BOOSTER_BACKGROUND
     } else {
-        move_color(&booster_logo_move(b).unwrap())
+        move_color(helpers::booster_logo_move(b).unwrap())
     }
 }
 
 const NO_BOOSTER_BACKGROUND: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
 
-pub fn move_color(m: &Move) -> Rgba {
+pub fn move_color(m: Move) -> Rgba {
     match m {
         Move::Kick
         | Move::Nunchucks
