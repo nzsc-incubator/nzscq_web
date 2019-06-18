@@ -43,40 +43,15 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_characters = self
-                .previously_available_characters
-                .iter()
-                .enumerate()
-                .filter(|(_i, character)| **character != self.human_character());
             let index_of_chosen_character = self
                 .previously_available_characters
                 .iter()
-                .position(|character| *character == self.human_character())
+                .position(|&character| character == self.human_character())
                 .expect("human should have chosen character");
 
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_dipslaying_characters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_characters
-                    .map(|(i, &character)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::character_color(character),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Character(character),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
@@ -101,7 +76,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
 
-            components.extend(components_dipslaying_characters_not_chosen_by_human);
+            components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
             components.extend(self.previous_health_display());
             components.extend(components_displaying_human_character);
@@ -112,39 +87,13 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
     fn computer_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_characters = self
-                .previously_available_characters
-                .iter()
-                .enumerate()
-                .filter(|(_i, character)| **character != self.human_character());
-
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_displaying_characters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_characters
-                    .map(|(i, &character)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::character_color(character),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Character(character),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
-            let components_displaying_human_character: Vec<Component> = vec![
+            let components_displaying_human_character = vec![
                 Component::Rect {
                     fill_color: colors::character_color(self.human_character()),
                     shape: rect_focus::left_background(),
@@ -178,7 +127,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
 
-            components.extend(components_displaying_characters_not_chosen_by_human);
+            components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
             components.extend(self.previous_health_display());
             components.extend(components_displaying_human_character);
@@ -190,42 +139,21 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
     fn fade(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_characters = self.previously_available_characters
-                .iter()
-                .enumerate()
-                .filter(|(_i, character)| **character != self.human_character());
-
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_displaying_characters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_characters
-                    .map(|(i, &character)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::character_color(character),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Character(character),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
             let components_displaying_human_character: Vec<Component> = {
                 let lerper = lerper.sub_lerper(0.0..colors::PORTION_OF_DURATION_SPENT_FADING);
-                let end_alpha = if self.did_computer_get_point() { 0.0 } else { 1.0 };
-                let end_color =
-                    colors::character_color(self.human_character()).with_alpha((end_alpha * 255.0) as u8);
+                let end_alpha = if self.did_computer_get_point() {
+                    0.0
+                } else {
+                    1.0
+                };
+                let end_color = colors::character_color(self.human_character())
+                    .with_alpha((end_alpha * 255.0) as u8);
 
                 vec![
                     LerpableComponent::Rect {
@@ -276,7 +204,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 .collect()
             };
 
-            components.extend(components_displaying_characters_not_chosen_by_human);
+            components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
             components.extend(lerper.lerp1(self.fading_health_display()));
             components.extend(components_displaying_human_character);
@@ -288,87 +216,64 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
     fn exit(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_characters = self.previously_available_characters
-                .iter()
-                .enumerate()
-                .filter(|(_i, character)| **character != self.human_character());
-
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_displaying_characters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_characters
-                    .map(|(i, &character)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::character_color(character),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Character(character),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
-            let components_displaying_human_character: Vec<Component> = if self.did_computer_get_point() {
-                vec![]
-            } else {
-                vec![
-                    LerpableComponent::Rect {
-                        start_color: colors::character_color(self.human_character()),
-                        end_color: colors::character_color(self.human_character()),
-                        start_shape: rect_focus::left_background(),
-                        end_shape: rect_focus::far_left_background(),
-                        on_click: None,
-                    },
-                    LerpableComponent::Image {
-                        image_type: ImageType::Character(self.human_character()),
-                        start_alpha: 1.0,
-                        end_alpha: 1.0,
-                        start_shape: rect_focus::left_foreground(),
-                        end_shape: rect_focus::far_left_foreground(),
-                        on_click: None,
-                    },
-                ]
-                .into_iter()
-                .map(|lerpable| lerper.lerp1(lerpable))
-                .collect()
-            };
-            let components_displaying_computer_character: Vec<Component> = if self.did_human_get_point() {
-                vec![]
-            } else {
-                vec![
-                    LerpableComponent::Rect {
-                        start_color: colors::character_color(self.computer_character()),
-                        end_color: colors::character_color(self.computer_character()),
-                        start_shape: rect_focus::right_background(),
-                        end_shape: rect_focus::far_right_background(),
-                        on_click: None,
-                    },
-                    LerpableComponent::Image {
-                        image_type: ImageType::Character(self.computer_character()),
-                        start_alpha: 1.0,
-                        end_alpha: 1.0,
-                        start_shape: rect_focus::right_foreground(),
-                        end_shape: rect_focus::far_right_foreground(),
-                        on_click: None,
-                    },
-                ]
-                .into_iter()
-                .map(|lerpable| lerper.lerp1(lerpable))
-                .collect()
-            };
+            let components_displaying_human_character: Vec<Component> =
+                if self.did_computer_get_point() {
+                    vec![]
+                } else {
+                    vec![
+                        LerpableComponent::Rect {
+                            start_color: colors::character_color(self.human_character()),
+                            end_color: colors::character_color(self.human_character()),
+                            start_shape: rect_focus::left_background(),
+                            end_shape: rect_focus::far_left_background(),
+                            on_click: None,
+                        },
+                        LerpableComponent::Image {
+                            image_type: ImageType::Character(self.human_character()),
+                            start_alpha: 1.0,
+                            end_alpha: 1.0,
+                            start_shape: rect_focus::left_foreground(),
+                            end_shape: rect_focus::far_left_foreground(),
+                            on_click: None,
+                        },
+                    ]
+                    .into_iter()
+                    .map(|lerpable| lerper.lerp1(lerpable))
+                    .collect()
+                };
+            let components_displaying_computer_character: Vec<Component> =
+                if self.did_human_get_point() {
+                    vec![]
+                } else {
+                    vec![
+                        LerpableComponent::Rect {
+                            start_color: colors::character_color(self.computer_character()),
+                            end_color: colors::character_color(self.computer_character()),
+                            start_shape: rect_focus::right_background(),
+                            end_shape: rect_focus::far_right_background(),
+                            on_click: None,
+                        },
+                        LerpableComponent::Image {
+                            image_type: ImageType::Character(self.computer_character()),
+                            start_alpha: 1.0,
+                            end_alpha: 1.0,
+                            start_shape: rect_focus::right_foreground(),
+                            end_shape: rect_focus::far_right_foreground(),
+                            on_click: None,
+                        },
+                    ]
+                    .into_iter()
+                    .map(|lerpable| lerper.lerp1(lerpable))
+                    .collect()
+                };
 
-            components.extend(components_displaying_characters_not_chosen_by_human);
+            components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
             components.extend(self.current_health_display());
             components.extend(components_displaying_human_character);
@@ -385,7 +290,8 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let booster_buttons: Vec<Component> = self.available_boosters
+            let booster_buttons: Vec<Component> = self
+                .available_boosters
                 .iter()
                 .enumerate()
                 .map(|(i, &booster)| {
@@ -415,6 +321,34 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             components.extend(self.current_health_display());
             components
         }
+    }
+
+    fn components_displaying_characters_not_chosen_by_human(&self) -> Vec<Component> {
+        let index_value_pairs_of_unchosen_characters = self
+            .previously_available_characters
+            .iter()
+            .enumerate()
+            .filter(|(_i, character)| **character != self.human_character());
+
+        index_value_pairs_of_unchosen_characters
+            .map(|(i, &character)| {
+                vec![
+                    Component::Rect {
+                        fill_color: colors::character_color(character),
+                        shape: rect_button::background_at(i),
+                        on_click: None,
+                    },
+                    Component::Image {
+                        image_type: ImageType::Character(character),
+                        alpha: 1.0,
+                        shape: rect_button::foreground_at(i),
+
+                        on_click: None,
+                    },
+                ]
+            })
+            .flatten()
+            .collect()
     }
 
     fn human_character(&self) -> Character {

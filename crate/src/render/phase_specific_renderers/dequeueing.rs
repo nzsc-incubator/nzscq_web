@@ -10,9 +10,7 @@ use crate::{
     shapes::{rect_button, rect_focus},
 };
 
-use nzscq::{
-    choices::{Booster, DequeueChoice},
-};
+use nzscq::choices::{Booster, DequeueChoice};
 
 pub struct DequeueingPhaseRenderer<'a> {
     pub completion_factor: f64,
@@ -43,11 +41,8 @@ impl<'a> DequeueingPhaseRenderer<'a> {
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_boosters = self.previously_available_boosters
-                .iter()
-                .enumerate()
-                .filter(|(_i, &booster)| booster != self.human_booster());
-            let index_of_chosen_booster = self.previously_available_boosters
+            let index_of_chosen_booster = self
+                .previously_available_boosters
                 .iter()
                 .position(|&booster| booster == self.human_booster())
                 .expect("human should have chosen booster");
@@ -55,26 +50,6 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_displaying_boosters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_boosters
-                    .map(|(i, &booster)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::booster_color(booster),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Booster(booster),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
@@ -99,7 +74,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
 
-            components.extend(components_displaying_boosters_not_chosen_by_human);
+            components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
             components.extend(self.health_display());
             components.extend(components_displaying_human_booster);
@@ -110,34 +85,9 @@ impl<'a> DequeueingPhaseRenderer<'a> {
 
     fn computer_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_boosters = self.previously_available_boosters
-                .iter()
-                .enumerate()
-                .filter(|(_i, &booster)| booster != self.human_booster());
-
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_displaying_boosters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_boosters
-                    .map(|(i, &booster)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::booster_color(booster),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Booster(booster),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
@@ -175,7 +125,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
 
-            components.extend(components_displaying_boosters_not_chosen_by_human);
+            components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
             components.extend(self.health_display());
             components.extend(components_displaying_human_booster);
@@ -187,64 +137,40 @@ impl<'a> DequeueingPhaseRenderer<'a> {
 
     fn pause(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_boosters = self.previously_available_boosters
-                .iter()
-                .enumerate()
-                .filter(|(_i, &booster)| booster != self.human_booster());
-
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_displaying_boosters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_boosters
-                    .map(|(i, &booster)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::booster_color(booster),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Booster(booster),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
             let components_displaying_human_booster = vec![
-                    Component::Rect {
-                        fill_color: colors::booster_color(self.human_booster()),
-                        shape: rect_focus::left_background(),
-                        on_click: None,
-                    },
-                    Component::Image {
-                        image_type: ImageType::Booster(self.human_booster()),
-                        alpha: 1.0,
-                        shape: rect_focus::left_foreground(),
-                        on_click: None,
-                    },
-                ];
+                Component::Rect {
+                    fill_color: colors::booster_color(self.human_booster()),
+                    shape: rect_focus::left_background(),
+                    on_click: None,
+                },
+                Component::Image {
+                    image_type: ImageType::Booster(self.human_booster()),
+                    alpha: 1.0,
+                    shape: rect_focus::left_foreground(),
+                    on_click: None,
+                },
+            ];
             let components_displaying_computer_booster = vec![
-                    Component::Rect {
-                        fill_color: colors::booster_color(self.computer_booster()),
-                        shape: rect_focus::right_background(),
-                        on_click: None,
-                    },
-                    Component::Image {
-                        image_type: ImageType::Booster(self.computer_booster()),
-                        alpha: 1.0,
-                        shape: rect_focus::right_foreground(),
-                        on_click: None,
-                    },];
+                Component::Rect {
+                    fill_color: colors::booster_color(self.computer_booster()),
+                    shape: rect_focus::right_background(),
+                    on_click: None,
+                },
+                Component::Image {
+                    image_type: ImageType::Booster(self.computer_booster()),
+                    alpha: 1.0,
+                    shape: rect_focus::right_foreground(),
+                    on_click: None,
+                },
+            ];
 
-            components.extend(components_displaying_boosters_not_chosen_by_human);
+            components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
             components.extend(self.health_display());
             components.extend(components_displaying_human_booster);
@@ -256,79 +182,54 @@ impl<'a> DequeueingPhaseRenderer<'a> {
 
     fn exit(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_value_pairs_of_unchosen_boosters = self.previously_available_boosters
-                .iter()
-                .enumerate()
-                .filter(|(_i, &booster)| booster != self.human_booster());
-
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let components_displaying_boosters_not_chosen_by_human: Vec<Component> =
-                index_value_pairs_of_unchosen_boosters
-                    .map(|(i, &booster)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::booster_color(booster),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Booster(booster),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
-
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect();
             let overlay = Component::Background {
                 color: colors::OVERLAY,
             };
             let components_displaying_human_booster: Vec<Component> = vec![
-                    LerpableComponent::Rect {
-                        start_color: colors::booster_color(self.human_booster()),
-                        end_color: colors::booster_color(self.human_booster()),
-                        start_shape: rect_focus::left_background(),
-                        end_shape: rect_focus::far_left_background(),
-                        on_click: None,
-                    },
-                    LerpableComponent::Image {
-                        image_type: ImageType::Booster(self.human_booster()),
-                        start_alpha: 1.0,
-                        end_alpha: 1.0,
-                        start_shape: rect_focus::left_foreground(),
-                        end_shape: rect_focus::far_left_foreground(),
-                        on_click: None,
-                    },
-                ]
-                .into_iter()
-                .map(|lerpable| lerper.lerp1(lerpable))
-                .collect();
+                LerpableComponent::Rect {
+                    start_color: colors::booster_color(self.human_booster()),
+                    end_color: colors::booster_color(self.human_booster()),
+                    start_shape: rect_focus::left_background(),
+                    end_shape: rect_focus::far_left_background(),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::Booster(self.human_booster()),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: rect_focus::left_foreground(),
+                    end_shape: rect_focus::far_left_foreground(),
+                    on_click: None,
+                },
+            ]
+            .into_iter()
+            .map(|lerpable| lerper.lerp1(lerpable))
+            .collect();
             let components_displaying_computer_booster: Vec<Component> = vec![
-                    LerpableComponent::Rect {
-                        start_color: colors::booster_color(self.computer_booster()),
-                        end_color: colors::booster_color(self.computer_booster()),
-                        start_shape: rect_focus::right_background(),
-                        end_shape: rect_focus::far_right_background(),
-                        on_click: None,
-                    },
-                    LerpableComponent::Image {
-                        image_type: ImageType::Booster(self.computer_booster()),
-                        start_alpha: 1.0,
-                        end_alpha: 1.0,
-                        start_shape: rect_focus::right_foreground(),
-                        end_shape: rect_focus::far_right_foreground(),
-                        on_click: None,
-                    },
-                ]
-                .into_iter()
-                .map(|lerpable| lerper.lerp1(lerpable))
-                .collect();
+                LerpableComponent::Rect {
+                    start_color: colors::booster_color(self.computer_booster()),
+                    end_color: colors::booster_color(self.computer_booster()),
+                    start_shape: rect_focus::right_background(),
+                    end_shape: rect_focus::far_right_background(),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::Booster(self.computer_booster()),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: rect_focus::right_foreground(),
+                    end_shape: rect_focus::far_right_foreground(),
+                    on_click: None,
+                },
+            ]
+            .into_iter()
+            .map(|lerpable| lerper.lerp1(lerpable))
+            .collect();
 
-            components.extend(components_displaying_boosters_not_chosen_by_human);
+            components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
             components.extend(self.health_display());
             components.extend(components_displaying_human_booster);
@@ -375,8 +276,38 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             // components.extend(booster_buttons);
             // components.extend(self.health_display());
             // components
-            vec![Component::Background { color: colors::BACKGROUND }]
+            vec![Component::Background {
+                color: colors::BACKGROUND,
+            }]
         }
+    }
+
+    fn components_displaying_boosters_not_chosen_by_human(&self) -> Vec<Component> {
+        let index_value_pairs_of_unchosen_boosters = self
+            .previously_available_boosters
+            .iter()
+            .enumerate()
+            .filter(|(_i, &booster)| booster != self.human_booster());
+
+        index_value_pairs_of_unchosen_boosters
+            .map(|(i, &booster)| {
+                vec![
+                    Component::Rect {
+                        fill_color: colors::booster_color(booster),
+                        shape: rect_button::background_at(i),
+                        on_click: None,
+                    },
+                    Component::Image {
+                        image_type: ImageType::Booster(booster),
+                        alpha: 1.0,
+                        shape: rect_button::foreground_at(i),
+
+                        on_click: None,
+                    },
+                ]
+            })
+            .flatten()
+            .collect()
     }
 
     fn human_booster(&self) -> Booster {
