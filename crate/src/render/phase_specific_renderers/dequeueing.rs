@@ -3,6 +3,7 @@ use crate::{
     colors, helpers,
     paint::{Component, ImageType},
     render::{
+        arrow,
         dequeue_background::DequeueBackground,
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
@@ -292,6 +293,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             self.human_pool_display(),
             self.human_entrance_and_exit_display(),
             self.human_arsenal_display(),
+            self.human_arrows(),
         ]
         .into_iter()
         .flatten()
@@ -493,6 +495,26 @@ impl<'a> DequeueingPhaseRenderer<'a> {
 
     fn human_arsenal_rows(&self) -> usize {
         helpers::rows(&self.human().arsenal, 3)
+    }
+
+    fn human_arrows(&self) -> Vec<Component> {
+        let entrance_and_exit_to_pool = if self.human_pool_height_in_rows() == 0 {
+            vec![]
+        } else {
+            vec![
+                arrow::left_up_arrow_above(self.human_pool_height_in_rows(), 0),
+                arrow::left_down_arrow_above(self.human_pool_height_in_rows(), 2),
+            ]
+        };
+        let arsenal_to_entrance_and_exit = vec![
+            arrow::left_up_arrow_above(self.human_pool_height_in_rows() + 1, 0),
+            arrow::left_down_arrow_above(self.human_pool_height_in_rows() + 1, 2),
+        ];
+
+        entrance_and_exit_to_pool
+            .into_iter()
+            .chain(arsenal_to_entrance_and_exit)
+            .collect()
     }
 
     fn computer_scoreboard_display(&self) -> Vec<Component> {

@@ -9,6 +9,7 @@ pub const PORTION_OF_DURATION_SPENT_POPPING: f64 = 0.6 / 1.1;
 pub const DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA: u8 = 0x80;
 pub const DECLINE_DEQUEUE_COLOR: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
 pub const DEQUEUE_BACKGROUND_COLOR: Rgba = Rgba(0x72, 0x72, 0x72, 0xFF);
+pub const ARROW_COLOR: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
 
 pub const TRAPEZOID_BORDER_WIDTH: f64 = 4.0;
 pub const TRAPEZOID_BORDER: Rgba = Rgba(0x77, 0x77, 0x77, 0xFF);

@@ -103,3 +103,5 @@ pub fn vec2_to_arr2<T>(mut vec: Vec<T>) -> [T; 2] {
 pub fn rows<T>(items: &[T], columns: usize) -> usize {
     (items.len() + columns - 1) / columns
 }
+
+pub const SQRT_3: f64 = 1.7320508075688772;

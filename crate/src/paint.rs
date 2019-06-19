@@ -1,7 +1,7 @@
 use crate::{
     click::Action,
     colors::Rgba,
-    shapes::{Circle, Rect},
+    shapes::{Circle, Rect, Translate},
 };
 use nzscq::choices::{ArsenalItem, Booster, Character, Move};
 use wasm_bindgen::JsValue;
@@ -75,6 +75,14 @@ impl<'a> Painter<'a> {
                 border_color,
                 fill_color,
             } => self.paint_trapezoid(x, y, border_width, border_color, fill_color),
+            Component::LinearPath {
+                path,
+                fill_color,
+                stroke,
+            } => {
+                self.paint_linear_path(path, fill_color, stroke);
+                Ok(())
+            }
         }
     }
 
@@ -168,6 +176,36 @@ impl<'a> Painter<'a> {
         Ok(())
     }
 
+    fn paint_linear_path(
+        &mut self,
+        path: LinearPath,
+        fill_color: Option<Rgba>,
+        stroke: Option<Stroke>,
+    ) {
+        let mut points = path.points;
+        let start_point = points.remove(0);
+
+        self.ctx.begin_path();
+        self.ctx.move_to(start_point.0, start_point.1);
+        for point in points {
+            self.ctx.line_to(point.0, point.1);
+        }
+        self.ctx.close_path();
+
+        if let Some(fill_color) = fill_color {
+            self.ctx
+                .set_fill_style(&JsValue::from_str(&fill_color.to_upper_hash_hex()[..]));
+            self.ctx.fill();
+        }
+
+        if let Some(stroke) = stroke {
+            self.ctx
+                .set_fill_style(&JsValue::from_str(&stroke.color.to_upper_hash_hex()[..]));
+            self.ctx.set_line_width(stroke.width);
+            self.ctx.stroke();
+        }
+    }
+
     fn image_src(&self, image_type: &ImageType) -> &HtmlImageElement {
         self.image_map
             .get(&image_type)
@@ -203,6 +241,11 @@ pub enum Component {
         border_color: Rgba,
         fill_color: Rgba,
     },
+    LinearPath {
+        path: LinearPath,
+        fill_color: Option<Rgba>,
+        stroke: Option<Stroke>,
+    },
 }
 
 impl Component {
@@ -213,8 +256,28 @@ impl Component {
             Component::Circle { on_click, .. } => on_click.clone(),
             Component::Image { on_click, .. } => on_click.clone(),
             Component::HealthTrapezoid { .. } => None,
+            Component::LinearPath { .. } => None,
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct LinearPath {
+    pub points: Vec<(f64, f64)>,
+}
+
+impl Translate for LinearPath {
+    fn translate(&self, dx: f64, dy: f64) -> LinearPath {
+        LinearPath {
+            points: self.points.iter().map(|&(x, y)| (x + dx, y + dy)).collect(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Stroke {
+    pub color: Rgba,
+    pub width: f64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

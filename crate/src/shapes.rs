@@ -163,15 +163,16 @@ pub mod dequeue_circle {
     const TRAPEZOID_BOTTOM: f64 = 92.0;
     const RADIUS: f64 = 100.0;
     pub const DIAMETER: f64 = 2.0 * RADIUS;
-    pub const MARGIN: f64 = ((canvas_dimensions::HEIGHT - TRAPEZOID_BOTTOM) - (4.0 * DIAMETER)) / 5.0;
-    const LEFT_ROW_0_X: f64 = 120.0;
-    const RIGHT_ROW_0_X: f64 = canvas_dimensions::WIDTH - 120.0;
-    const COLUMN_0_Y: f64 = TRAPEZOID_BOTTOM + MARGIN + RADIUS;
+    pub const MARGIN: f64 =
+        ((canvas_dimensions::HEIGHT - TRAPEZOID_BOTTOM) - (4.0 * DIAMETER)) / 5.0;
+    pub const LEFT_COLUMN_0_X: f64 = 120.0;
+    pub const RIGHT_COLUMN_0_X: f64 = canvas_dimensions::WIDTH - 120.0;
+    pub const ROW_0_Y: f64 = TRAPEZOID_BOTTOM + MARGIN + RADIUS;
 
     pub fn left_background_at(row: usize, column: usize) -> Circle {
         Circle {
-            x: LEFT_ROW_0_X + (DIAMETER + MARGIN) * column as f64,
-            y: COLUMN_0_Y + (DIAMETER + MARGIN) * row as f64,
+            x: LEFT_COLUMN_0_X + (DIAMETER + MARGIN) * column as f64,
+            y: ROW_0_Y + (DIAMETER + MARGIN) * row as f64,
             radius: RADIUS,
         }
     }
@@ -189,8 +190,8 @@ pub mod dequeue_circle {
 
     pub fn right_background_at(row: usize, column: usize) -> Circle {
         Circle {
-            x: RIGHT_ROW_0_X - (DIAMETER + MARGIN) * column as f64,
-            y: COLUMN_0_Y + (DIAMETER + MARGIN) * row as f64,
+            x: RIGHT_COLUMN_0_X - (DIAMETER + MARGIN) * column as f64,
+            y: ROW_0_Y + (DIAMETER + MARGIN) * row as f64,
             radius: RADIUS,
         }
     }
