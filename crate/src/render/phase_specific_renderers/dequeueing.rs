@@ -3,7 +3,7 @@ use crate::{
     colors, helpers,
     paint::{Component, ImageType},
     render::{
-        health_display::{ConstantHealthDisplay, FadingHealthDisplay},
+        health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
         Render,
@@ -139,7 +139,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
     }
 
     fn pause(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        move |lerper| {
+        move |_| {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];

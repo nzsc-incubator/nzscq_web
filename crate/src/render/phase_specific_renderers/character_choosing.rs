@@ -5,7 +5,6 @@ use crate::{
     render::{
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
-        switch::Switch,
         Render,
     },
     shapes::{rect_button, Translate},

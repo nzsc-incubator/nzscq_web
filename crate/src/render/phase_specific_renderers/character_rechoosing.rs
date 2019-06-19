@@ -136,7 +136,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     }
 
     fn pause(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        move |lerper| {
+        move |_| {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
@@ -240,7 +240,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     }
 
     fn rechoose_characters(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        move |lerper| {
+        move |_| {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
@@ -308,6 +308,3 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
         .render()
     }
 }
-
-const HUMAN: usize = 0;
-const COMPUTER: usize = 1;
