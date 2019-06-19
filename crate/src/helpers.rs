@@ -99,3 +99,7 @@ pub fn opponent_points_to_own_health(points: u8) -> u8 {
 pub fn vec2_to_arr2<T>(mut vec: Vec<T>) -> [T; 2] {
     [vec.remove(0), vec.remove(0)]
 }
+
+pub fn rows<T>(items: &[T], columns: usize) -> usize {
+    (items.len() + columns - 1) / columns
+}

@@ -162,8 +162,8 @@ pub mod dequeue_circle {
 
     const TRAPEZOID_BOTTOM: f64 = 92.0;
     const RADIUS: f64 = 100.0;
-    const DIAMETER: f64 = 2.0 * RADIUS;
-    const MARGIN: f64 = ((canvas_dimensions::HEIGHT - TRAPEZOID_BOTTOM) - (4.0 * DIAMETER)) / 5.0;
+    pub const DIAMETER: f64 = 2.0 * RADIUS;
+    pub const MARGIN: f64 = ((canvas_dimensions::HEIGHT - TRAPEZOID_BOTTOM) - (4.0 * DIAMETER)) / 5.0;
     const LEFT_ROW_0_X: f64 = 120.0;
     const RIGHT_ROW_0_X: f64 = canvas_dimensions::WIDTH - 120.0;
     const COLUMN_0_Y: f64 = TRAPEZOID_BOTTOM + MARGIN + RADIUS;

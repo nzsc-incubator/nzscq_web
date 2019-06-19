@@ -3,6 +3,7 @@ use crate::{
     colors, helpers,
     paint::{Component, ImageType},
     render::{
+        dequeue_background::DequeueBackground,
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
@@ -306,7 +307,10 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             }
         });
 
-        self.human_pool()
+        let background = DequeueBackground::left_at(0).n_rows(self.human_pool_height_in_rows());
+
+        let human_pool = self
+            .human_pool()
             .iter()
             .enumerate()
             .flat_map(|(i, &arsenal_item)| {
@@ -350,8 +354,9 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                         },
                     ]
                 }
-            })
-            .collect()
+            });
+
+        background.into_iter().chain(human_pool).collect()
     }
 
     fn human_entrance_and_exit_display(&self) -> Vec<Component> {
@@ -363,7 +368,10 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .any(|&dequeue| DequeueChoice::JustExit == dequeue);
         let row = self.human_pool_height_in_rows();
 
+        let background = DequeueBackground::left_at(self.human_pool_height_in_rows()).n_rows(1);
+
         vec![
+            Some(background),
             entrance.map(|entering_item| {
                 vec![
                     Component::Circle {
@@ -447,36 +455,44 @@ impl<'a> DequeueingPhaseRenderer<'a> {
     fn human_arsenal_display(&self) -> Vec<Component> {
         let row_offset = self.human_pool_height_in_rows() + 1;
 
-        self.human()
-            .arsenal
-            .iter()
-            .enumerate()
-            .flat_map(|(i, &arsenal_item)| {
-                let row = i / 3;
-                let column = i % 3;
-                let row = row + row_offset;
+        let background = DequeueBackground::left_at(row_offset).n_rows(self.human_arsenal_rows());
 
-                vec![
-                    Component::Circle {
-                        fill_color: colors::arsenal_item_color(arsenal_item)
-                            .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                        shape: dequeue_circle::left_background_at(row, column),
-                        on_click: None,
-                    },
-                    Component::Image {
-                        image_type: ImageType::from_arsenal_item(arsenal_item),
-                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                        shape: dequeue_circle::left_foreground_at(row, column),
-                        on_click: None,
-                    },
-                    Component::Circle {
-                        fill_color: colors::OVERLAY,
-                        shape: dequeue_circle::left_background_at(row, column),
-                        on_click: None,
-                    },
-                ]
-            })
-            .collect()
+        let arsenal_items =
+            self.human()
+                .arsenal
+                .iter()
+                .enumerate()
+                .flat_map(|(i, &arsenal_item)| {
+                    let row = i / 3;
+                    let column = i % 3;
+                    let row = row + row_offset;
+
+                    vec![
+                        Component::Circle {
+                            fill_color: colors::arsenal_item_color(arsenal_item)
+                                .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                            shape: dequeue_circle::left_background_at(row, column),
+                            on_click: None,
+                        },
+                        Component::Image {
+                            image_type: ImageType::from_arsenal_item(arsenal_item),
+                            alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                            shape: dequeue_circle::left_foreground_at(row, column),
+                            on_click: None,
+                        },
+                        Component::Circle {
+                            fill_color: colors::OVERLAY,
+                            shape: dequeue_circle::left_background_at(row, column),
+                            on_click: None,
+                        },
+                    ]
+                });
+
+        background.into_iter().chain(arsenal_items).collect()
+    }
+
+    fn human_arsenal_rows(&self) -> usize {
+        helpers::rows(&self.human().arsenal, 3)
     }
 
     fn computer_scoreboard_display(&self) -> Vec<Component> {
@@ -506,7 +522,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
     }
 
     fn human_pool_height_in_rows(&self) -> usize {
-        (self.human_pool().len() + 2) / 3
+        helpers::rows(&self.human().queue.pool, 3)
     }
 
     fn human_pool(&self) -> &Vec<ArsenalItem> {

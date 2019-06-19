@@ -1,7 +1,8 @@
-mod health_display;
+pub mod dequeue_background;
 mod lerp;
 mod phase_specific_renderers;
 mod switch;
+mod health_display;
 
 use crate::{paint::Component, phase::Phase};
 use phase_specific_renderers::{
