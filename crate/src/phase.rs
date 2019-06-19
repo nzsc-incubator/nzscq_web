@@ -1,7 +1,7 @@
 use nzscq::{
     choices::{Booster, Character, DequeueChoice},
     outcomes::CharacterHeadstart,
-    scoreboard::DequeueingPlayer
+    scoreboard::DequeueingPlayer,
 };
 
 #[derive(Debug, Clone)]

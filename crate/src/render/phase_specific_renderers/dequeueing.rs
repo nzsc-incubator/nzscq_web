@@ -3,11 +3,11 @@ use crate::{
     colors, helpers,
     paint::{Component, ImageType},
     render::{
-
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
         Render,
+    },
     shapes::{dequeue_circle, rect_button, rect_focus},
 };
 
@@ -245,7 +245,6 @@ impl<'a> DequeueingPhaseRenderer<'a> {
     fn dequeues(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         use crate::shapes::Translate;
 
-
         move |lerper| {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
@@ -361,7 +360,6 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .iter()
             .any(|&dequeue| DequeueChoice::JustExit == dequeue);
         let row = self.human_pool_height_in_rows();
-
 
         vec![
             entrance.map(|entering_item| {

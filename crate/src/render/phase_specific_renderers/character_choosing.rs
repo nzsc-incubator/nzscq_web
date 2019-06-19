@@ -3,10 +3,10 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
-        Render,
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::Switch,
+        Render,
     },
     shapes::{rect_button, Translate},
 };

@@ -3,11 +3,11 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
-
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
         Render,
+    },
     shapes::{rect_button, rect_focus},
 };
 

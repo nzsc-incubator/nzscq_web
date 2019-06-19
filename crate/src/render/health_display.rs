@@ -113,7 +113,6 @@ use crate::{
         switch::{Switch, Switch4},
     },
     shapes::{CenteredRect, Rect, Translate},
-
 };
 
 const LEFT_0_CENTER: (f64, f64) = (80.0, 50.0);
@@ -198,4 +197,3 @@ enum HeartPosition {
     FromLeft(usize),
     FromRight(usize),
 }
-

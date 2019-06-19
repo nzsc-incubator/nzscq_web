@@ -243,17 +243,23 @@ impl App {
         let outcome = self.game.choose(choices).expect("should have outcome");
 
         match outcome {
-            Outcome::BoosterPhaseDone(boosters) => 
+            Outcome::BoosterPhaseDone(boosters) => {
                 self.phase = Phase::ChooseDequeue {
                     previously_available_boosters,
-                    scoreboard: helpers::vec2_to_arr2(self.game.scoreboard().dequeueing().expect("should be dequeueing")),
+                    scoreboard: helpers::vec2_to_arr2(
+                        self.game
+                            .scoreboard()
+                            .dequeueing()
+                            .expect("should be dequeueing"),
+                    ),
                     available_dequeues: self
                         .game
                         .choices()
                         .dequeue_choices()
                         .expect("should be able to choose dequeue")
                         .remove(App::HUMAN),
-                },
+                }
+            }
             _ => panic!("outcome should be character outcome"),
         }
 

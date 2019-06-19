@@ -54,8 +54,7 @@ pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, Js
     let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("Heart"))?;
     map.insert(ImageType::Heart, image.dyn_into::<HtmlImageElement>()?);
 
-    // TODO Replace placeholders with real images
-    let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("Heart"))?;
+    let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("Mirror"))?;
     map.insert(ImageType::Mirror, image.dyn_into::<HtmlImageElement>()?);
     let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("No Booster"))?;
     map.insert(

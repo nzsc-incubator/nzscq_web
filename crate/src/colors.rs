@@ -1,14 +1,13 @@
 use crate::helpers;
 
-use nzscq::choices::{Booster, Character, Move, ArsenalItem};
+use nzscq::choices::{ArsenalItem, Booster, Character, Move};
 
 pub const BACKGROUND: Rgba = Rgba(0xF1, 0xF1, 0xF1, 0xFF);
 pub const OVERLAY: Rgba = Rgba(0x33, 0x33, 0x33, 0xAA);
 pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 1.0 / (5.0 * 0.55);
 pub const PORTION_OF_DURATION_SPENT_POPPING: f64 = 0.6 / 1.1;
 pub const DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA: u8 = 0x80;
-// TODO Replace red placeholder with actual color
-pub const DECLINE_DEQUEUE_COLOR: Rgba = Rgba(0xFF, 0x00, 0x00, 0xFF);
+pub const DECLINE_DEQUEUE_COLOR: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
 
 pub const TRAPEZOID_BORDER_WIDTH: f64 = 4.0;
 pub const TRAPEZOID_BORDER: Rgba = Rgba(0x77, 0x77, 0x77, 0xFF);
@@ -67,12 +66,11 @@ pub fn move_color(m: Move) -> Rgba {
 pub fn arsenal_item_color(arsenal_item: ArsenalItem) -> Rgba {
     match arsenal_item {
         ArsenalItem::Move(move_) => move_color(move_),
-        ArsenalItem::Mirror => MIRROR_COLOR
+        ArsenalItem::Mirror => MIRROR_COLOR,
     }
 }
 
-// TODO Replace red placeholder
-const MIRROR_COLOR: Rgba = Rgba(0xFF, 0x00, 0x00, 0xFF);
+const MIRROR_COLOR: Rgba = Rgba(0x88, 0x88, 0x88, 0xFF);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rgba(pub u8, pub u8, pub u8, pub u8);

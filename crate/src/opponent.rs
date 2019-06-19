@@ -1,5 +1,5 @@
 use nzscq::{
-    choices::{BatchChoices, Character, Booster},
+    choices::{BatchChoices, Booster, Character},
     game::BatchChoiceGame,
 };
 
