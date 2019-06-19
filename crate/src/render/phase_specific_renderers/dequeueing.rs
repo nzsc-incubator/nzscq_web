@@ -243,16 +243,18 @@ impl<'a> DequeueingPhaseRenderer<'a> {
     }
 
     fn dequeues(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        use crate::shapes::Translate;
-
         move |lerper| {
-            let mut components = vec![Component::Background {
-                color: colors::BACKGROUND,
-            }];
-            components.extend(self.human_scoreboard_display());
-            components.extend(self.computer_scoreboard_display());
-
-            components
+            vec![
+                vec![Component::Background {
+                    color: colors::BACKGROUND,
+                }],
+                self.health_display(),
+                self.human_scoreboard_display(),
+                self.computer_scoreboard_display(),
+            ]
+            .into_iter()
+            .flatten()
+            .collect()
         }
     }
 
