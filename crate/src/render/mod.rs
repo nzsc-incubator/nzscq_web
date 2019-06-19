@@ -1,4 +1,4 @@
-mod heart;
+mod health_display;
 mod lerp;
 mod phase_specific_renderers;
 mod switch;

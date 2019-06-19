@@ -3,10 +3,11 @@ use crate::{
     colors, helpers,
     paint::{Component, ImageType},
     render::{
-        heart::{ConstantHealthDisplay, FadingHealthDisplay},
+
+        health_display::{ConstantHealthDisplay, FadingHealthDisplay},
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
-    },
+        Render,
     shapes::{dequeue_circle, rect_button, rect_focus},
 };
 
@@ -525,7 +526,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             human_health: helpers::opponent_points_to_own_health(self.computer().points),
             computer_health: helpers::opponent_points_to_own_health(self.human().points),
         }
-        .into()
+        .render()
     }
 
     fn human(&self) -> &DequeueingPlayer {

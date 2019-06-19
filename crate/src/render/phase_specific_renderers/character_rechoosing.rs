@@ -3,10 +3,11 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
-        heart::ConstantHealthDisplay,
+
+        health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
-    },
+        Render,
     shapes::{rect_button, rect_focus},
 };
 
@@ -40,7 +41,8 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            let index_of_chosen_character = self.previously_available_characters
+            let index_of_chosen_character = self
+                .previously_available_characters
                 .iter()
                 .position(|&character| character == self.previously_mutually_chosen_character)
                 .expect("human should have chosen character");
@@ -242,7 +244,8 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
             let mut components = vec![Component::Background {
                 color: colors::BACKGROUND,
             }];
-            let character_buttons: Vec<Component> = self.available_characters
+            let character_buttons: Vec<Component> = self
+                .available_characters
                 .iter()
                 .enumerate()
                 .map(|(i, &character)| {
@@ -270,37 +273,39 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     }
 
     fn components_displaying_characters_not_chosen_by_human(&self) -> Vec<Component> {
-        let index_value_pairs_of_unchosen_characters = self.previously_available_characters
-                .iter()
-                .enumerate()
-                .filter(|(_i, character)| **character != self.previously_mutually_chosen_character);
+        let index_value_pairs_of_unchosen_characters = self
+            .previously_available_characters
+            .iter()
+            .enumerate()
+            .filter(|(_i, character)| **character != self.previously_mutually_chosen_character);
 
         index_value_pairs_of_unchosen_characters
-                    .map(|(i, &character)| {
-                        vec![
-                            Component::Rect {
-                                fill_color: colors::character_color(character),
-                                shape: rect_button::background_at(i),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::Character(character),
-                                alpha: 1.0,
-                                shape: rect_button::foreground_at(i),
+            .map(|(i, &character)| {
+                vec![
+                    Component::Rect {
+                        fill_color: colors::character_color(character),
+                        shape: rect_button::background_at(i),
+                        on_click: None,
+                    },
+                    Component::Image {
+                        image_type: ImageType::Character(character),
+                        alpha: 1.0,
+                        shape: rect_button::foreground_at(i),
 
-                                on_click: None,
-                            },
-                        ]
-                    })
-                    .flatten()
-                    .collect()
+                        on_click: None,
+                    },
+                ]
+            })
+            .flatten()
+            .collect()
     }
 
     fn health_display(&self) -> Vec<Component> {
         ConstantHealthDisplay {
             human_health: 5,
-            computer_health: 5
-        }.into()
+            computer_health: 5,
+        }
+        .render()
     }
 }
 

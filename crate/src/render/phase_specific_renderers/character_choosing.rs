@@ -3,7 +3,8 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
-        heart::ConstantHealthDisplay,
+        Render,
+        health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         switch::Switch,
     },
@@ -60,6 +61,6 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
             human_health: 5,
             computer_health: 5,
         }
-        .into()
+        .render()
     }
 }

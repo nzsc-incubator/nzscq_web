@@ -3,7 +3,8 @@ use crate::{
     colors,
     paint::{Component, ImageType},
     render::{
-        heart::{ConstantHealthDisplay, FadingHealthDisplay},
+        Render,
+        health_display::{ConstantHealthDisplay, FadingHealthDisplay},
         lerp::{LerpableComponent, Lerper},
         switch::{Switch, Switch5},
     },
@@ -364,7 +365,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             human_health: self.previous_human_health(),
             computer_health: self.previous_computer_health(),
         }
-        .into()
+        .render()
     }
 
     fn fading_health_display(&self) -> FadingHealthDisplay {
@@ -381,7 +382,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             human_health: self.human_health(),
             computer_health: self.computer_health(),
         }
-        .into()
+        .render()
     }
 
     fn human_health(&self) -> u8 {
