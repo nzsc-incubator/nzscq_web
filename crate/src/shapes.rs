@@ -159,6 +159,7 @@ pub mod rect_focus {
 pub mod dequeue_circle {
     use super::{Circle, Rect};
     use crate::canvas_dimensions;
+    use crate::side::Side;
 
     const TRAPEZOID_BOTTOM: f64 = 92.0;
     const RADIUS: f64 = 100.0;
@@ -168,11 +169,12 @@ pub mod dequeue_circle {
     pub const LEFT_COLUMN_0_X: f64 = 120.0;
     pub const RIGHT_COLUMN_0_X: f64 = canvas_dimensions::WIDTH - 120.0;
     pub const ROW_0_Y: f64 = TRAPEZOID_BOTTOM + MARGIN + RADIUS;
+    pub const OFFSET: f64 = DIAMETER + MARGIN;
 
     pub fn left_background_at(row: usize, column: usize) -> Circle {
         Circle {
-            x: LEFT_COLUMN_0_X + (DIAMETER + MARGIN) * column as f64,
-            y: ROW_0_Y + (DIAMETER + MARGIN) * row as f64,
+            x: LEFT_COLUMN_0_X + (OFFSET) * column as f64,
+            y: ROW_0_Y + (OFFSET) * row as f64,
             radius: RADIUS,
         }
     }
@@ -190,8 +192,8 @@ pub mod dequeue_circle {
 
     pub fn right_background_at(row: usize, column: usize) -> Circle {
         Circle {
-            x: RIGHT_COLUMN_0_X - (DIAMETER + MARGIN) * column as f64,
-            y: ROW_0_Y + (DIAMETER + MARGIN) * row as f64,
+            x: RIGHT_COLUMN_0_X - (OFFSET) * column as f64,
+            y: ROW_0_Y + (OFFSET) * row as f64,
             radius: RADIUS,
         }
     }
@@ -204,6 +206,26 @@ pub mod dequeue_circle {
             y: bg.y - RADIUS,
             width: DIAMETER,
             height: DIAMETER,
+        }
+    }
+
+    #[derive(Debug, Clone)]
+    pub struct CirclePosition {
+        pub from: Side,
+        pub column: usize,
+        pub row: usize,
+    }
+
+    impl CirclePosition {
+        pub fn x(&self) -> f64 {
+            match self.from {
+                Side::Left => LEFT_COLUMN_0_X + OFFSET * self.column as f64,
+                Side::Right => RIGHT_COLUMN_0_X - OFFSET * self.column as f64,
+            }
+        }
+
+        pub fn y(&self) -> f64 {
+            ROW_0_Y + OFFSET * self.row as f64
         }
     }
 }

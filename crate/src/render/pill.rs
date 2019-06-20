@@ -1,30 +1,15 @@
 use crate::colors;
 use crate::paint::Component;
-use crate::shapes::{dequeue_circle, Circle, Rect, Translate};
+use crate::shapes::{dequeue_circle::{CirclePosition}, Circle, Rect, Translate};
+use super::Render;
 
 pub struct Pill {
-    pub x: f64,
-    pub y: f64,
+    pub position: CirclePosition,
+    pub height_in_rows: usize,
 }
 
 impl Pill {
-    pub fn left_at(row: usize) -> Pill {
-        Pill {
-            x: 120.0,
-            y: 213.6 + (dequeue_circle::DIAMETER + dequeue_circle::MARGIN) * row as f64,
-        }
-    }
-
-    pub fn n_rows(&self, n: usize) -> Vec<Component> {
-        match n {
-            0 => vec![],
-            1 => self.one_row(),
-            2 => self.two_rows(),
-            _ => panic!("n must be 0, 1, or 2"),
-        }
-    }
-
-    pub fn one_row(&self) -> Vec<Component> {
+    fn one_row(&self) -> Vec<Component> {
         let rect = Component::Rect {
             fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
             shape: Rect {
@@ -33,7 +18,7 @@ impl Pill {
                 width: 443.2,
                 height: 220.0,
             }
-            .translate(self.x, self.y),
+            .translate(self.x(), self.y()),
             on_click: None,
         };
 
@@ -51,14 +36,14 @@ impl Pill {
             .into_iter()
             .map(|shape| Component::Circle {
                 fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
-                shape: shape.translate(self.x, self.y),
+                shape: shape.translate(self.x(), self.y()),
                 on_click: None,
             });
 
         circles.chain(vec![rect]).collect()
     }
 
-    pub fn two_rows(&self) -> Vec<Component> {
+    fn two_rows(&self) -> Vec<Component> {
         let top_rect_shape = Rect {
             x: 0.0,
             y: -110.0,
@@ -81,7 +66,7 @@ impl Pill {
             .into_iter()
             .map(|shape| Component::Rect {
                 fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
-                shape: shape.translate(self.x, self.y),
+                shape: shape.translate(self.x(), self.y()),
 
                 on_click: None,
             });
@@ -115,10 +100,25 @@ impl Pill {
         .into_iter()
         .map(|shape| Component::Circle {
             fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
-            shape: shape.translate(self.x, self.y),
+            shape: shape.translate(self.x(), self.y()),
             on_click: None,
         });
 
         rects.chain(circles).collect()
+    }
+
+    fn x(&self) -> f64 { self.position.x() }
+
+    fn y(&self) -> f64 { self.position.y() }
+}
+
+impl Render for Pill {
+    fn render(&self) -> Vec<Component> {
+        match self.height_in_rows {
+            0 => vec![],
+            1 => self.one_row(),
+            2 => self.two_rows(),
+            _ => panic!("n must be 0, 1, or 2"),
+        }
     }
 }
