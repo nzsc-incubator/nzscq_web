@@ -1,5 +1,5 @@
 mod arrow;
-mod dequeue_background;
+mod pill;
 mod health_display;
 mod lerp;
 mod phase_specific_renderers;

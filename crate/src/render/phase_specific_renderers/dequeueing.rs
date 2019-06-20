@@ -4,9 +4,9 @@ use crate::{
     paint::{Component, ImageType},
     render::{
         arrow,
-        dequeue_background::DequeueBackground,
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
+        pill::Pill,
         switch::{Switch, Switch5},
         Render,
     },
@@ -309,7 +309,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             }
         });
 
-        let background = DequeueBackground::left_at(0).n_rows(self.human_pool_height_in_rows());
+        let pill = Pill::left_at(0).n_rows(self.human_pool_height_in_rows());
 
         let human_pool = self
             .human_pool()
@@ -358,7 +358,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                 }
             });
 
-        background.into_iter().chain(human_pool).collect()
+        pill.into_iter().chain(human_pool).collect()
     }
 
     fn human_entrance_and_exit_display(&self) -> Vec<Component> {
@@ -370,10 +370,10 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .any(|&dequeue| DequeueChoice::JustExit == dequeue);
         let row = self.human_pool_height_in_rows();
 
-        let background = DequeueBackground::left_at(self.human_pool_height_in_rows()).n_rows(1);
+        let pill = Pill::left_at(self.human_pool_height_in_rows()).n_rows(1);
 
         vec![
-            Some(background),
+            Some(pill),
             entrance.map(|entering_item| {
                 vec![
                     Component::Circle {
@@ -457,7 +457,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
     fn human_arsenal_display(&self) -> Vec<Component> {
         let row_offset = self.human_pool_height_in_rows() + 1;
 
-        let background = DequeueBackground::left_at(row_offset).n_rows(self.human_arsenal_rows());
+        let pill = Pill::left_at(row_offset).n_rows(self.human_arsenal_rows());
 
         let arsenal_items =
             self.human()
@@ -490,7 +490,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                     ]
                 });
 
-        background.into_iter().chain(arsenal_items).collect()
+        pill.into_iter().chain(arsenal_items).collect()
     }
 
     fn human_arsenal_rows(&self) -> usize {

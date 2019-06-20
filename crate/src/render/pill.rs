@@ -2,14 +2,14 @@ use crate::colors;
 use crate::paint::Component;
 use crate::shapes::{dequeue_circle, Circle, Rect, Translate};
 
-pub struct DequeueBackground {
+pub struct Pill {
     pub x: f64,
     pub y: f64,
 }
 
-impl DequeueBackground {
-    pub fn left_at(row: usize) -> DequeueBackground {
-        DequeueBackground {
+impl Pill {
+    pub fn left_at(row: usize) -> Pill {
+        Pill {
             x: 120.0,
             y: 213.6 + (dequeue_circle::DIAMETER + dequeue_circle::MARGIN) * row as f64,
         }
