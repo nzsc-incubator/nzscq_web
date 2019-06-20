@@ -22,7 +22,7 @@ pub enum Phase {
     ChooseDequeue {
         previously_available_boosters: Vec<Booster>,
         scoreboard: [DequeueingPlayer; 2],
-        available_dequeues: Vec<DequeueChoice>,
+        available_dequeues: [Vec<DequeueChoice>; 2],
     },
     ChooseAction, //TODO ↓
     GameOver,

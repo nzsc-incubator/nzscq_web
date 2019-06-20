@@ -2,9 +2,10 @@ use super::Render;
 use crate::colors::{self, Rgba};
 use crate::paint::Component;
 use crate::shapes::{
-    dequeue_circle::{CirclePosition, OFFSET},
+    dequeue_circle::{self, CirclePosition},
     Circle, Rect, Translate,
 };
+use crate::side::Side;
 
 pub struct Pill {
     pub position: CirclePosition,
@@ -127,33 +128,44 @@ impl Pill {
             colors::PILL_DISABLED_COLOR
         }
     }
+
+    fn adjusted_offset(&self) -> f64 {
+        let factor = match self.position.from {
+            Side::Left => 1.0,
+            Side::Right => -1.0,
+        };
+
+        factor * self.raw_offset()
+    }
+
+    fn raw_offset(&self) -> f64 {
+        dequeue_circle::OFFSET
+    }
+
+    fn leftmost_circle_x(&self) -> f64 {
+        match self.position.from {
+            Side::Left => 0.0,
+            Side::Right => self.adjusted_offset() * (self.width_in_columns - 1) as f64,
+        }
+    }
 }
 
 impl Render for Pill {
-    // fn render(&self) -> Vec<Component> {
-    //     match self.height_in_rows {
-    //         0 => vec![],
-    //         1 => self.one_row(),
-    //         2 => self.two_rows(),
-    //         _ => panic!("n must be 0, 1, or 2"),
-    //     }
-    // }
-
     fn render(&self) -> Vec<Component> {
         let vertical_connector = Rect {
-            x: 0.0,
+            x: self.leftmost_circle_x(),
             y: -RADIUS,
-            width: (OFFSET * (self.width_in_columns - 1) as f64),
-            height: (2.0 * RADIUS) + (OFFSET * (self.height_in_rows - 1) as f64),
+            width: (self.raw_offset() * (self.width_in_columns - 1) as f64),
+            height: (2.0 * RADIUS) + (self.raw_offset() * (self.height_in_rows - 1) as f64),
         };
         let horizontal_connector = Rect {
-            x: -RADIUS,
+            x: self.leftmost_circle_x() - RADIUS,
             y: 0.0,
-            width: (2.0 * RADIUS) + (OFFSET * (self.width_in_columns - 1) as f64),
+            width: (2.0 * RADIUS) + (self.raw_offset() * (self.width_in_columns - 1) as f64),
             height: if self.height_in_rows < 2 {
                 0.0
             } else {
-                (2.0 * RADIUS) + (OFFSET * (self.height_in_rows - 2) as f64)
+                (2.0 * RADIUS) + (self.raw_offset() * (self.height_in_rows - 2) as f64)
             },
         };
         let rects = vec![vertical_connector, horizontal_connector]
@@ -161,7 +173,6 @@ impl Render for Pill {
             .map(|shape| Component::Rect {
                 fill_color: self.color(),
                 shape: shape.translate(self.x(), self.y()),
-
                 on_click: None,
             });
 
@@ -171,18 +182,18 @@ impl Render for Pill {
             radius: RADIUS,
         };
         let top_right_circle_shape = Circle {
-            x: OFFSET * (self.width_in_columns - 1) as f64,
+            x: self.adjusted_offset() * (self.width_in_columns - 1) as f64,
             y: 0.0,
             radius: RADIUS,
         };
         let bottom_left_circle_shape = Circle {
             x: 0.0,
-            y: OFFSET * (self.height_in_rows - 1) as f64,
+            y: self.raw_offset() * (self.height_in_rows - 1) as f64,
             radius: RADIUS,
         };
         let bottom_right_circle_shape = Circle {
-            x: OFFSET * (self.width_in_columns - 1) as f64,
-            y: OFFSET * (self.height_in_rows - 1) as f64,
+            x: self.adjusted_offset() * (self.width_in_columns - 1) as f64,
+            y: self.raw_offset() * (self.height_in_rows - 1) as f64,
             radius: RADIUS,
         };
         let circles = vec![

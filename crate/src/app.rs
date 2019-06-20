@@ -252,12 +252,12 @@ impl App {
                             .dequeueing()
                             .expect("should be dequeueing"),
                     ),
-                    available_dequeues: self
-                        .game
-                        .choices()
-                        .dequeue_choices()
-                        .expect("should be able to choose dequeue")
-                        .remove(App::HUMAN),
+                    available_dequeues: helpers::vec2_to_arr2(
+                        self.game
+                            .choices()
+                            .dequeue_choices()
+                            .expect("should be able to choose dequeue"),
+                    ),
                 }
             }
             _ => panic!("outcome should be character outcome"),
