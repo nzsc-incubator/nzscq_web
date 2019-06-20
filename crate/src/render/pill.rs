@@ -1,7 +1,7 @@
+use super::Render;
 use crate::colors;
 use crate::paint::Component;
-use crate::shapes::{dequeue_circle::{CirclePosition}, Circle, Rect, Translate};
-use super::Render;
+use crate::shapes::{dequeue_circle::CirclePosition, Circle, Rect, Translate};
 
 pub struct Pill {
     pub position: CirclePosition,
@@ -11,7 +11,7 @@ pub struct Pill {
 impl Pill {
     fn one_row(&self) -> Vec<Component> {
         let rect = Component::Rect {
-            fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
+            fill_color: colors::PILL_ENABLED_COLOR,
             shape: Rect {
                 x: 0.0,
                 y: -110.0,
@@ -35,7 +35,7 @@ impl Pill {
         let circles = vec![top_left_circle_shape, top_right_circle_shape]
             .into_iter()
             .map(|shape| Component::Circle {
-                fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
+                fill_color: colors::PILL_ENABLED_COLOR,
                 shape: shape.translate(self.x(), self.y()),
                 on_click: None,
             });
@@ -65,7 +65,7 @@ impl Pill {
         let rects = vec![top_rect_shape, middle_rect_shape, bottom_rect_shape]
             .into_iter()
             .map(|shape| Component::Rect {
-                fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
+                fill_color: colors::PILL_ENABLED_COLOR,
                 shape: shape.translate(self.x(), self.y()),
 
                 on_click: None,
@@ -99,7 +99,7 @@ impl Pill {
         ]
         .into_iter()
         .map(|shape| Component::Circle {
-            fill_color: colors::DEQUEUE_BACKGROUND_COLOR,
+            fill_color: colors::PILL_ENABLED_COLOR,
             shape: shape.translate(self.x(), self.y()),
             on_click: None,
         });
@@ -107,9 +107,13 @@ impl Pill {
         rects.chain(circles).collect()
     }
 
-    fn x(&self) -> f64 { self.position.x() }
+    fn x(&self) -> f64 {
+        self.position.x()
+    }
 
-    fn y(&self) -> f64 { self.position.y() }
+    fn y(&self) -> f64 {
+        self.position.y()
+    }
 }
 
 impl Render for Pill {
