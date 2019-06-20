@@ -1,21 +1,21 @@
 use crate::colors;
 use crate::helpers::SQRT_3;
-use crate::paint::{Component, LinearPath};
+use crate::paint::{Component, Path, PathCommand};
 use crate::shapes::{
     dequeue_circle::{self, LEFT_COLUMN_0_X},
     Translate,
 };
 
 pub fn left_up_arrow_above(row: usize, column: usize) -> Component {
-    Component::LinearPath {
-        path: LinearPath {
-            points: vec![
-                (LEFT_COLUMN_0_X, ROW_0_CENTER_Y - 0.5 * ARROW_HEIGHT),
-                (
+    Component::UnclickablePath {
+        path: Path {
+            start: (LEFT_COLUMN_0_X, ROW_0_CENTER_Y - 0.5 * ARROW_HEIGHT),
+            commands: vec![
+                PathCommand::LineTo(
                     LEFT_COLUMN_0_X + 0.5 * ARROW_WIDTH,
                     ROW_0_CENTER_Y + 0.5 * ARROW_HEIGHT,
                 ),
-                (
+                PathCommand::LineTo(
                     LEFT_COLUMN_0_X - 0.5 * ARROW_WIDTH,
                     ROW_0_CENTER_Y + 0.5 * ARROW_HEIGHT,
                 ),
@@ -28,15 +28,15 @@ pub fn left_up_arrow_above(row: usize, column: usize) -> Component {
 }
 
 pub fn left_down_arrow_above(row: usize, column: usize) -> Component {
-    Component::LinearPath {
-        path: LinearPath {
-            points: vec![
-                (LEFT_COLUMN_0_X, ROW_0_CENTER_Y + 0.5 * ARROW_HEIGHT),
-                (
+    Component::UnclickablePath {
+        path: Path {
+            start: (LEFT_COLUMN_0_X, ROW_0_CENTER_Y + 0.5 * ARROW_HEIGHT),
+            commands: vec![
+                PathCommand::LineTo(
                     LEFT_COLUMN_0_X + 0.5 * ARROW_WIDTH,
                     ROW_0_CENTER_Y - 0.5 * ARROW_HEIGHT,
                 ),
-                (
+                PathCommand::LineTo(
                     LEFT_COLUMN_0_X - 0.5 * ARROW_WIDTH,
                     ROW_0_CENTER_Y - 0.5 * ARROW_HEIGHT,
                 ),

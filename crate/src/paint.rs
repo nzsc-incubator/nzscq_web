@@ -68,21 +68,11 @@ impl<'a> Painter<'a> {
                 shape,
                 ..
             } => self.paint_image(image_type, alpha, shape),
-            Component::HealthTrapezoid {
-                x,
-                y,
-                border_width,
-                border_color,
-                fill_color,
-            } => self.paint_trapezoid(x, y, border_width, border_color, fill_color),
-            Component::LinearPath {
+            Component::UnclickablePath {
                 path,
                 fill_color,
                 stroke,
-            } => {
-                self.paint_linear_path(path, fill_color, stroke);
-                Ok(())
-            }
+            } => self.paint_path(path, fill_color, stroke),
         }
     }
 
@@ -146,49 +136,21 @@ impl<'a> Painter<'a> {
         Ok(())
     }
 
-    fn paint_trapezoid(
+    fn paint_path(
         &mut self,
-        x: f64,
-        y: f64,
-        border_width: f64,
-        border_color: Rgba,
-        fill_color: Rgba,
-    ) -> Result<(), JsValue> {
-        self.ctx.translate(x, y)?;
-        self.ctx.begin_path();
-        self.ctx.move_to(80.0, 0.0);
-        self.ctx.arc_to(0.0, 0.0, 30.0, 70.0, 3.0)?;
-        self.ctx.arc_to(40.0, 75.0, 415.0, 70.0, 8.0)?;
-        self.ctx.arc_to(400.0, 75.0, 435.0, 0.0, 8.0)?;
-        self.ctx.arc_to(440.0, 0.0, 435.0, 0.0, 3.0)?;
-        self.ctx.close_path();
-        self.ctx.translate(-x, -y)?;
-
-        self.ctx
-            .set_stroke_style(&JsValue::from_str(&border_color.to_upper_hash_hex()[..]));
-        self.ctx.set_line_width(border_width);
-        self.ctx.stroke();
-
-        self.ctx
-            .set_fill_style(&JsValue::from_str(&fill_color.to_upper_hash_hex()[..]));
-        self.ctx.fill();
-
-        Ok(())
-    }
-
-    fn paint_linear_path(
-        &mut self,
-        path: LinearPath,
+        path: Path,
         fill_color: Option<Rgba>,
         stroke: Option<Stroke>,
-    ) {
-        let mut points = path.points;
-        let start_point = points.remove(0);
-
+    ) -> Result<(), JsValue> {
         self.ctx.begin_path();
-        self.ctx.move_to(start_point.0, start_point.1);
-        for point in points {
-            self.ctx.line_to(point.0, point.1);
+        self.ctx.move_to(path.start.0, path.start.1);
+        for command in path.commands {
+            match command {
+                PathCommand::LineTo(x, y) => self.ctx.line_to(x, y),
+                PathCommand::ArcTo(x1, y1, x2, y2, radius) => {
+                    self.ctx.arc_to(x1, y1, x2, y2, radius)?
+                }
+            }
         }
         self.ctx.close_path();
 
@@ -200,10 +162,12 @@ impl<'a> Painter<'a> {
 
         if let Some(stroke) = stroke {
             self.ctx
-                .set_fill_style(&JsValue::from_str(&stroke.color.to_upper_hash_hex()[..]));
+                .set_stroke_style(&JsValue::from_str(&stroke.color.to_upper_hash_hex()[..]));
             self.ctx.set_line_width(stroke.width);
             self.ctx.stroke();
         }
+
+        Ok(())
     }
 
     fn image_src(&self, image_type: &ImageType) -> &HtmlImageElement {
@@ -234,15 +198,8 @@ pub enum Component {
         shape: Rect,
         on_click: Option<Action>,
     },
-    HealthTrapezoid {
-        x: f64,
-        y: f64,
-        border_width: f64,
-        border_color: Rgba,
-        fill_color: Rgba,
-    },
-    LinearPath {
-        path: LinearPath,
+    UnclickablePath {
+        path: Path,
         fill_color: Option<Rgba>,
         stroke: Option<Stroke>,
     },
@@ -255,21 +212,89 @@ impl Component {
             Component::Rect { on_click, .. } => on_click.clone(),
             Component::Circle { on_click, .. } => on_click.clone(),
             Component::Image { on_click, .. } => on_click.clone(),
-            Component::HealthTrapezoid { .. } => None,
-            Component::LinearPath { .. } => None,
+            Component::UnclickablePath { .. } => None,
+        }
+    }
+}
+
+impl Translate for Component {
+    fn translate(&self, dx: f64, dy: f64) -> Component {
+        match &self {
+            Component::Background { .. } => self.clone(),
+            Component::Rect {
+                shape,
+                fill_color,
+                on_click,
+            } => Component::Rect {
+                shape: shape.translate(dx, dy),
+                fill_color: fill_color.clone(),
+                on_click: on_click.clone(),
+            },
+            Component::Circle {
+                shape,
+                fill_color,
+                on_click,
+            } => Component::Circle {
+                shape: shape.translate(dx, dy),
+                fill_color: fill_color.clone(),
+                on_click: on_click.clone(),
+            },
+            Component::Image {
+                shape,
+                image_type,
+                alpha,
+                on_click,
+            } => Component::Image {
+                shape: shape.translate(dx, dy),
+                image_type: *image_type,
+                alpha: *alpha,
+                on_click: on_click.clone(),
+            },
+            Component::UnclickablePath {
+                path,
+                fill_color,
+                stroke,
+            } => Component::UnclickablePath {
+                path: path.translate(dx, dy),
+                fill_color: fill_color.clone(),
+                stroke: stroke.clone(),
+            },
         }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct LinearPath {
-    pub points: Vec<(f64, f64)>,
+pub struct Path {
+    pub start: (f64, f64),
+    pub commands: Vec<PathCommand>,
 }
 
-impl Translate for LinearPath {
-    fn translate(&self, dx: f64, dy: f64) -> LinearPath {
-        LinearPath {
-            points: self.points.iter().map(|&(x, y)| (x + dx, y + dy)).collect(),
+impl Translate for Path {
+    fn translate(&self, dx: f64, dy: f64) -> Path {
+        Path {
+            start: (self.start.0 + dx, self.start.1 + dy),
+            commands: self
+                .commands
+                .iter()
+                .map(|command| command.translate(dx, dy))
+                .collect(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub enum PathCommand {
+    LineTo(f64, f64),
+    ArcTo(f64, f64, f64, f64, f64),
+}
+
+impl Translate for PathCommand {
+    fn translate(&self, dx: f64, dy: f64) -> PathCommand {
+        match self {
+            &PathCommand::LineTo(x, y) => PathCommand::LineTo(x + dx, y + dy),
+            &PathCommand::ArcTo(x1, y1, x2, y2, radius) => {
+                PathCommand::ArcTo(x1 + dx, y1 + dy, x2 + dx, y2 + dy, radius)
+            }
         }
     }
 }
@@ -280,7 +305,7 @@ pub struct Stroke {
     pub width: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ImageType {
     Character(Character),
     Booster(Booster),
@@ -290,8 +315,8 @@ pub enum ImageType {
     DeclineDequeue,
 }
 
-impl ImageType {
-    pub fn from_arsenal_item(item: ArsenalItem) -> ImageType {
+impl From<ArsenalItem> for ImageType {
+    fn from(item: ArsenalItem) -> ImageType {
         match item {
             ArsenalItem::Move(move_) => ImageType::Move(move_),
             ArsenalItem::Mirror => ImageType::Mirror,

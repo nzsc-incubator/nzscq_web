@@ -41,8 +41,7 @@ impl Touches for Component {
             Component::Rect { shape, .. } => shape.touches(canvas_coords),
             Component::Circle { shape, .. } => shape.touches(canvas_coords),
             Component::Image { shape, .. } => shape.touches(canvas_coords),
-            Component::HealthTrapezoid { .. } => false,
-            Component::LinearPath { .. } => false,
+            Component::UnclickablePath { .. } => false,
         }
     }
 }

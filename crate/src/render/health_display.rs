@@ -1,4 +1,5 @@
 use super::Render;
+use crate::paint::{Path, PathCommand, Stroke};
 
 pub struct ConstantHealthDisplay {
     pub human_health: u8,
@@ -7,34 +8,18 @@ pub struct ConstantHealthDisplay {
 
 impl Render for ConstantHealthDisplay {
     fn render(&self) -> Vec<Component> {
-        let trapezoids = vec![
-            Component::HealthTrapezoid {
-                x: 20.0,
-                y: 15.0,
-                border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
-                fill_color: colors::TRAPEZOID_FILL,
-            },
-            Component::HealthTrapezoid {
-                x: 1340.0,
-                y: 15.0,
-                border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
-                fill_color: colors::TRAPEZOID_FILL,
-            },
-        ];
         let human_hearts: Vec<Component> = (0..self.human_health as usize)
             .into_iter()
-            .map(|i| left_at(i).case(0.0).expect("should find a case"))
+            .map(|i| left_heart_at(i).case(0.0).expect("should find a case"))
             .flatten()
             .collect();
         let computer_hearts: Vec<Component> = (0..self.computer_health as usize)
             .into_iter()
-            .map(|i| right_at(i).case(0.0).expect("should find a case"))
+            .map(|i| right_heart_at(i).case(0.0).expect("should find a case"))
             .flatten()
             .collect();
 
-        vec![trapezoids, human_hearts, computer_hearts]
+        vec![HealthTrapezoids.render(), human_hearts, computer_hearts]
             .into_iter()
             .flatten()
             .collect()
@@ -51,22 +36,6 @@ pub struct FadingHealthDisplay {
 impl LerpInto<Vec<Component>> for FadingHealthDisplay {
     fn lerp_into(self, lerper: &Lerper) -> Vec<Component> {
         let sublerper = lerper.sub_lerper(0.0..colors::PORTION_OF_DURATION_SPENT_POPPING);
-        let trapezoids = vec![
-            Component::HealthTrapezoid {
-                x: 20.0,
-                y: 15.0,
-                border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
-                fill_color: colors::TRAPEZOID_FILL,
-            },
-            Component::HealthTrapezoid {
-                x: 1340.0,
-                y: 15.0,
-                border_width: colors::TRAPEZOID_BORDER_WIDTH,
-                border_color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
-                fill_color: colors::TRAPEZOID_FILL,
-            },
-        ];
         let human_hearts: Vec<Component> = (0..self.previous_human_health)
             .into_iter()
             .map(|i| {
@@ -76,7 +45,7 @@ impl LerpInto<Vec<Component>> for FadingHealthDisplay {
                     } else {
                         0.0
                     };
-                left_at(i as usize)
+                left_heart_at(i as usize)
                     .case(completion_factor)
                     .expect("should find a case")
             })
@@ -91,14 +60,14 @@ impl LerpInto<Vec<Component>> for FadingHealthDisplay {
                     } else {
                         0.0
                     };
-                right_at(i as usize)
+                right_heart_at(i as usize)
                     .case(completion_factor)
                     .expect("should find a case")
             })
             .flatten()
             .collect();
 
-        vec![trapezoids, human_hearts, computer_hearts]
+        vec![HealthTrapezoids.render(), human_hearts, computer_hearts]
             .into_iter()
             .flatten()
             .collect()
@@ -119,11 +88,11 @@ const LEFT_0_CENTER: (f64, f64) = (80.0, 50.0);
 const RIGHT_0_CENTER: (f64, f64) = (1720.0, 50.0);
 const SIZE: f64 = 80.0;
 
-fn left_at(index: usize) -> impl Switch {
+fn left_heart_at(index: usize) -> impl Switch {
     heart_from_position(HeartPosition::FromLeft(index))
 }
 
-fn right_at(index: usize) -> impl Switch {
+fn right_heart_at(index: usize) -> impl Switch {
     heart_from_position(HeartPosition::FromRight(index))
 }
 
@@ -196,4 +165,46 @@ fn scale_heart(position: &HeartPosition, scale: f64) -> Rect {
 enum HeartPosition {
     FromLeft(usize),
     FromRight(usize),
+}
+
+struct HealthTrapezoids;
+
+impl Render for HealthTrapezoids {
+    fn render(&self) -> Vec<Component> {
+        HealthTrapezoid::Left.render().into_iter().chain(HealthTrapezoid::Right.render()).collect()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum HealthTrapezoid {
+    Left,
+    Right
+}
+
+impl Render for HealthTrapezoid {
+    fn render(&self) -> Vec<Component> {
+        let dx = match self {
+            HealthTrapezoid::Left => 20.0,
+            HealthTrapezoid::Right => 1340.0,
+        };
+
+        vec![
+            Component::UnclickablePath {
+                path: Path {
+                    start: (80.0, 0.0),
+                    commands: vec![
+                        PathCommand::ArcTo(0.0, 0.0, 30.0, 70.0, 3.0),
+                        PathCommand::ArcTo(40.0, 75.0, 415.0, 70.0, 8.0),
+                        PathCommand::ArcTo(400.0, 75.0, 435.0, 0.0, 8.0),
+                        PathCommand::ArcTo(440.0, 0.0, 435.0, 0.0, 3.0),
+                    ],
+                },
+                fill_color: Some(colors::TRAPEZOID_FILL),
+                stroke: Some(Stroke {
+                    color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                    width: colors::TRAPEZOID_BORDER_WIDTH,
+                }),
+            }.translate(dx, 15.0)
+        ]
+    }
 }

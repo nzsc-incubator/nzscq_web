@@ -329,7 +329,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                             ))),
                         },
                         Component::Image {
-                            image_type: ImageType::from_arsenal_item(arsenal_item),
+                            image_type: ImageType::from(arsenal_item),
                             alpha: 1.0,
                             shape: dequeue_circle::left_foreground_at(row, column),
                             on_click: None,
@@ -344,7 +344,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                             on_click: None,
                         },
                         Component::Image {
-                            image_type: ImageType::from_arsenal_item(arsenal_item),
+                            image_type: ImageType::from(arsenal_item),
                             alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
                             shape: dequeue_circle::left_foreground_at(row, column),
                             on_click: None,
@@ -383,7 +383,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                         on_click: None,
                     },
                     Component::Image {
-                        image_type: ImageType::from_arsenal_item(entering_item),
+                        image_type: ImageType::from(entering_item),
                         alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
                         shape: dequeue_circle::left_foreground_at(row, 0),
                         on_click: None,
@@ -417,7 +417,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                             on_click: Some(Action::ChooseDequeue(DequeueChoice::JustExit)),
                         },
                         Component::Image {
-                            image_type: ImageType::from_arsenal_item(exiting_item),
+                            image_type: ImageType::from(exiting_item),
                             alpha: 1.0,
                             shape: dequeue_circle::left_foreground_at(row, 2),
                             on_click: None,
@@ -434,7 +434,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                             on_click: None,
                         },
                         Component::Image {
-                            image_type: ImageType::from_arsenal_item(exiting_item),
+                            image_type: ImageType::from(exiting_item),
                             alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
                             shape: dequeue_circle::left_foreground_at(row, 2),
                             on_click: None,
@@ -477,7 +477,7 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                             on_click: None,
                         },
                         Component::Image {
-                            image_type: ImageType::from_arsenal_item(arsenal_item),
+                            image_type: ImageType::from(arsenal_item),
                             alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
                             shape: dequeue_circle::left_foreground_at(row, column),
                             on_click: None,
