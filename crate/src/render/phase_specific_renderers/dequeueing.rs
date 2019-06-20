@@ -12,7 +12,7 @@ use crate::{
     },
     shapes::{
         dequeue_circle::{self, CirclePosition},
-        rect_button, rect_focus,
+        rect_button, rect_focus, Translate,
     },
     side::Side,
 };
@@ -255,8 +255,14 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                     color: colors::BACKGROUND,
                 }],
                 self.health_display(),
-                self.human_scoreboard_display(),
-                self.computer_scoreboard_display(),
+                self.human_scoreboard_display()
+                    .into_iter()
+                    .map(|component| component.translate(lerper.lerp(-553.2, 0.0), 0.0))
+                    .collect(),
+                self.computer_scoreboard_display()
+                    .into_iter()
+                    .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
+                    .collect(),
             ]
             .into_iter()
             .flatten()
