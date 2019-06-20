@@ -10,7 +10,10 @@ use crate::{
         switch::{Switch, Switch5},
         Render,
     },
-    shapes::{dequeue_circle::{self,CirclePosition}, rect_button, rect_focus},
+    shapes::{
+        dequeue_circle::{self, CirclePosition},
+        rect_button, rect_focus,
+    },
     side::Side,
 };
 
@@ -316,7 +319,9 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                 column: 0,
                 row: 0,
             },
+            width_in_columns: 3,
             height_in_rows: self.human_pool_height_in_rows(),
+            enabled: drain_and_exit_enabled,
         };
 
         let human_pool = self
@@ -378,17 +383,30 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .any(|&dequeue| DequeueChoice::JustExit == dequeue);
         let row = self.human_pool_height_in_rows();
 
-        let pill = Pill {
+        let background_pill = Pill {
             position: CirclePosition {
                 from: Side::Left,
                 column: 0,
                 row: self.human_pool_height_in_rows(),
             },
+            width_in_columns: 3,
             height_in_rows: 1,
+            enabled: false,
+        };
+        let decline_and_exit_pill = Pill {
+            position: CirclePosition {
+                from: Side::Left,
+                column: 1,
+                row: self.human_pool_height_in_rows(),
+            },
+            width_in_columns: 2,
+            height_in_rows: 1,
+            enabled: true,
         };
 
         vec![
-            Some(pill.render()),
+            Some(background_pill.render()),
+            Some(decline_and_exit_pill.render()),
             entrance.map(|entering_item| {
                 vec![
                     Component::Circle {
@@ -478,7 +496,9 @@ impl<'a> DequeueingPhaseRenderer<'a> {
                 column: 0,
                 row: row_offset,
             },
+            width_in_columns: 3,
             height_in_rows: self.human_arsenal_height_in_rows(),
+            enabled: false,
         };
 
         let arsenal_items =

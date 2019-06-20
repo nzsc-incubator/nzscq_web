@@ -171,14 +171,18 @@ struct HealthTrapezoids;
 
 impl Render for HealthTrapezoids {
     fn render(&self) -> Vec<Component> {
-        HealthTrapezoid::Left.render().into_iter().chain(HealthTrapezoid::Right.render()).collect()
+        HealthTrapezoid::Left
+            .render()
+            .into_iter()
+            .chain(HealthTrapezoid::Right.render())
+            .collect()
     }
 }
 
 #[derive(Debug, Clone, Copy)]
 enum HealthTrapezoid {
     Left,
-    Right
+    Right,
 }
 
 impl Render for HealthTrapezoid {
@@ -188,23 +192,22 @@ impl Render for HealthTrapezoid {
             HealthTrapezoid::Right => 1340.0,
         };
 
-        vec![
-            Component::UnclickablePath {
-                path: Path {
-                    start: (80.0, 0.0),
-                    commands: vec![
-                        PathCommand::ArcTo(0.0, 0.0, 30.0, 70.0, 3.0),
-                        PathCommand::ArcTo(40.0, 75.0, 415.0, 70.0, 8.0),
-                        PathCommand::ArcTo(400.0, 75.0, 435.0, 0.0, 8.0),
-                        PathCommand::ArcTo(440.0, 0.0, 435.0, 0.0, 3.0),
-                    ],
-                },
-                fill_color: Some(colors::TRAPEZOID_FILL),
-                stroke: Some(Stroke {
-                    color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
-                    width: colors::TRAPEZOID_BORDER_WIDTH,
-                }),
-            }.translate(dx, 15.0)
-        ]
+        vec![Component::UnclickablePath {
+            path: Path {
+                start: (80.0, 0.0),
+                commands: vec![
+                    PathCommand::ArcTo(0.0, 0.0, 30.0, 70.0, 3.0),
+                    PathCommand::ArcTo(40.0, 75.0, 415.0, 70.0, 8.0),
+                    PathCommand::ArcTo(400.0, 75.0, 435.0, 0.0, 8.0),
+                    PathCommand::ArcTo(440.0, 0.0, 435.0, 0.0, 3.0),
+                ],
+            },
+            fill_color: Some(colors::TRAPEZOID_FILL),
+            stroke: Some(Stroke {
+                color: colors::TRAPEZOID_OUTCOME_SCREEN_BORDER,
+                width: colors::TRAPEZOID_BORDER_WIDTH,
+            }),
+        }
+        .translate(dx, 15.0)]
     }
 }

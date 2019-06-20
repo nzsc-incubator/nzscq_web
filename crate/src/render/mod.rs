@@ -1,8 +1,8 @@
 mod arrow;
-mod pill;
 mod health_display;
 mod lerp;
 mod phase_specific_renderers;
+mod pill;
 mod switch;
 
 use crate::{paint::Component, phase::Phase};
