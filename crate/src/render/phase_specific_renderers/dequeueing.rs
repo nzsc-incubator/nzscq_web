@@ -18,7 +18,7 @@ use crate::{
 };
 
 use nzscq::{
-    choices::{ArsenalItem, Booster, DequeueChoice},
+    choices::{Booster, DequeueChoice},
     scoreboard::DequeueingPlayer,
 };
 
@@ -248,28 +248,6 @@ impl<'a> DequeueingPhaseRenderer<'a> {
         }
     }
 
-    fn dequeues(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        move |lerper| {
-            vec![
-                vec![Component::Background {
-                    color: colors::BACKGROUND,
-                }],
-                self.health_display(),
-                self.human_scoreboard_display()
-                    .into_iter()
-                    .map(|component| component.translate(lerper.lerp(-553.2, 0.0), 0.0))
-                    .collect(),
-                self.computer_scoreboard_display()
-                    .into_iter()
-                    .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
-                    .collect(),
-            ]
-            .into_iter()
-            .flatten()
-            .collect()
-        }
-    }
-
     fn components_displaying_boosters_not_chosen_by_human(&self) -> Vec<Component> {
         let index_value_pairs_of_unchosen_boosters = self
             .previously_available_boosters
@@ -298,583 +276,367 @@ impl<'a> DequeueingPhaseRenderer<'a> {
             .collect()
     }
 
+    fn human_booster(&self) -> Booster {
+        self.scoreboard[HUMAN].booster
+    }
+
+    fn computer_booster(&self) -> Booster {
+        self.scoreboard[COMPUTER].booster
+    }
+
+    fn dequeues(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
+        move |lerper| {
+            vec![
+                vec![Component::Background {
+                    color: colors::BACKGROUND,
+                }],
+                self.health_display(),
+                self.human_scoreboard_display()
+                    .into_iter()
+                    .map(|component| component.translate(lerper.lerp(-553.2, 0.0), 0.0))
+                    .collect(),
+                self.computer_scoreboard_display()
+                    .into_iter()
+                    .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
+                    .collect(),
+            ]
+            .into_iter()
+            .flatten()
+            .collect()
+        }
+    }
+
+
     fn human_scoreboard_display(&self) -> Vec<Component> {
         vec![
-            self.human_pool_display(),
-            self.human_entrance_and_exit_display(),
-            self.human_arsenal_display(),
-            self.human_arrows(),
+            pool_display(self.human()),
+            entrance_and_exit_display(self.human()),
+            arsenal_display(self.human()),
+            arrows(self.human()),
         ]
         .into_iter()
         .flatten()
         .collect()
-    }
-
-    fn human_pool_display(&self) -> Vec<Component> {
-        let drain_and_exit_enabled = self.human_dequeues().iter().any(|dequeue| {
-            if let DequeueChoice::DrainAndExit(_) = dequeue {
-                true
-            } else {
-                false
-            }
-        });
-
-        let pill = Pill {
-            position: CirclePosition {
-                from: Side::Left,
-                column: 0,
-                row: 0,
-            },
-            width_in_columns: 3,
-            height_in_rows: self.human_pool_height_in_rows(),
-            enabled: drain_and_exit_enabled,
-        };
-
-        let human_pool =
-            self.human()
-                .queue
-                .pool
-                .iter()
-                .enumerate()
-                .flat_map(|(i, &arsenal_item)| {
-                    let row = i / 3;
-                    let column = i % 3;
-
-                    if drain_and_exit_enabled {
-                        vec![
-                            Component::Circle {
-                                fill_color: colors::arsenal_item_color(arsenal_item),
-                                shape: dequeue_circle::left_background_at(row, column),
-                                on_click: Some(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
-                                    arsenal_item,
-                                ))),
-                            },
-                            Component::Image {
-                                image_type: ImageType::from(arsenal_item),
-                                alpha: 1.0,
-                                shape: dequeue_circle::left_foreground_at(row, column),
-                                on_click: None,
-                            },
-                        ]
-                    } else {
-                        vec![
-                            Component::Circle {
-                                fill_color: colors::arsenal_item_color(arsenal_item)
-                                    .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                                shape: dequeue_circle::left_background_at(row, column),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::from(arsenal_item),
-                                alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                                shape: dequeue_circle::left_foreground_at(row, column),
-                                on_click: None,
-                            },
-                            Component::Circle {
-                                fill_color: colors::OVERLAY,
-                                shape: dequeue_circle::left_background_at(row, column),
-                                on_click: None,
-                            },
-                        ]
-                    }
-                });
-
-        pill.render().into_iter().chain(human_pool).collect()
-    }
-
-    fn human_entrance_and_exit_display(&self) -> Vec<Component> {
-        let entrance = self.human().queue.entrance;
-        let exit = self.human().queue.exit;
-        let just_exit_enabled = self
-            .human_dequeues()
-            .iter()
-            .any(|&dequeue| DequeueChoice::JustExit == dequeue);
-        let row = self.human_pool_height_in_rows();
-
-        let background_pill = Pill {
-            position: CirclePosition {
-                from: Side::Left,
-                column: 0,
-                row: self.human_pool_height_in_rows(),
-            },
-            width_in_columns: 3,
-            height_in_rows: 1,
-            enabled: false,
-        };
-        let decline_and_exit_pill = Pill {
-            position: CirclePosition {
-                from: Side::Left,
-                column: 1,
-                row: self.human_pool_height_in_rows(),
-            },
-            width_in_columns: 2,
-            height_in_rows: 1,
-            enabled: true,
-        };
-
-        vec![
-            Some(background_pill.render()),
-            Some(decline_and_exit_pill.render()),
-            entrance.map(|entering_item| {
-                vec![
-                    Component::Circle {
-                        fill_color: colors::arsenal_item_color(entering_item)
-                            .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                        shape: dequeue_circle::left_background_at(row, 0),
-                        on_click: None,
-                    },
-                    Component::Image {
-                        image_type: ImageType::from(entering_item),
-                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                        shape: dequeue_circle::left_foreground_at(row, 0),
-                        on_click: None,
-                    },
-                    Component::Circle {
-                        fill_color: colors::OVERLAY,
-                        shape: dequeue_circle::left_background_at(row, 0),
-                        on_click: None,
-                    },
-                ]
-            }),
-            Some(vec![
-                Component::Circle {
-                    fill_color: colors::DECLINE_DEQUEUE_COLOR,
-                    shape: dequeue_circle::left_background_at(row, 1),
-                    on_click: Some(Action::ChooseDequeue(DequeueChoice::Decline)),
-                },
-                Component::Image {
-                    image_type: ImageType::DeclineDequeue,
-                    alpha: 1.0,
-                    shape: dequeue_circle::left_foreground_at(row, 1),
-                    on_click: None,
-                },
-            ]),
-            if just_exit_enabled {
-                exit.map(|exiting_item| {
-                    vec![
-                        Component::Circle {
-                            fill_color: colors::arsenal_item_color(exiting_item),
-                            shape: dequeue_circle::left_background_at(row, 2),
-                            on_click: Some(Action::ChooseDequeue(DequeueChoice::JustExit)),
-                        },
-                        Component::Image {
-                            image_type: ImageType::from(exiting_item),
-                            alpha: 1.0,
-                            shape: dequeue_circle::left_foreground_at(row, 2),
-                            on_click: None,
-                        },
-                    ]
-                })
-            } else {
-                exit.map(|exiting_item| {
-                    vec![
-                        Component::Circle {
-                            fill_color: colors::arsenal_item_color(exiting_item)
-                                .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                            shape: dequeue_circle::left_background_at(row, 2),
-                            on_click: None,
-                        },
-                        Component::Image {
-                            image_type: ImageType::from(exiting_item),
-                            alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                            shape: dequeue_circle::left_foreground_at(row, 2),
-                            on_click: None,
-                        },
-                        Component::Circle {
-                            fill_color: colors::OVERLAY,
-                            shape: dequeue_circle::left_background_at(row, 2),
-                            on_click: None,
-                        },
-                    ]
-                })
-            },
-        ]
-        .into_iter()
-        .flatten()
-        .flatten()
-        .collect()
-    }
-
-    fn human_arsenal_display(&self) -> Vec<Component> {
-        let row_offset = self.human_pool_height_in_rows() + 1;
-
-        let pill = Pill {
-            position: CirclePosition {
-                from: Side::Left,
-                column: 0,
-                row: row_offset,
-            },
-            width_in_columns: 3,
-            height_in_rows: self.human_arsenal_height_in_rows(),
-            enabled: false,
-        };
-
-        let arsenal_items =
-            self.human()
-                .arsenal
-                .iter()
-                .enumerate()
-                .flat_map(|(i, &arsenal_item)| {
-                    let row = i / 3;
-                    let column = i % 3;
-                    let row = row + row_offset;
-
-                    vec![
-                        Component::Circle {
-                            fill_color: colors::arsenal_item_color(arsenal_item)
-                                .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                            shape: dequeue_circle::left_background_at(row, column),
-                            on_click: None,
-                        },
-                        Component::Image {
-                            image_type: ImageType::from(arsenal_item),
-                            alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                            shape: dequeue_circle::left_foreground_at(row, column),
-                            on_click: None,
-                        },
-                        Component::Circle {
-                            fill_color: colors::OVERLAY,
-                            shape: dequeue_circle::left_background_at(row, column),
-                            on_click: None,
-                        },
-                    ]
-                });
-
-        pill.render().into_iter().chain(arsenal_items).collect()
-    }
-
-    fn human_arsenal_height_in_rows(&self) -> usize {
-        helpers::height_in_rows(&self.human().arsenal, 3)
-    }
-
-    fn human_arrows(&self) -> Vec<Component> {
-        let entrance_and_exit_to_pool = if self.human_pool_height_in_rows() == 0 {
-            vec![]
-        } else {
-            vec![
-                arrow::left_up_arrow_above(self.human_pool_height_in_rows(), 0),
-                arrow::left_down_arrow_above(self.human_pool_height_in_rows(), 2),
-            ]
-        };
-        let arsenal_to_entrance_and_exit = vec![
-            arrow::left_up_arrow_above(self.human_pool_height_in_rows() + 1, 0),
-            arrow::left_down_arrow_above(self.human_pool_height_in_rows() + 1, 2),
-        ];
-
-        entrance_and_exit_to_pool
-            .into_iter()
-            .chain(arsenal_to_entrance_and_exit)
-            .collect()
     }
 
     fn computer_scoreboard_display(&self) -> Vec<Component> {
         vec![
-            self.computer_pool_display(),
-            self.computer_entrance_and_exit_display(),
-            self.computer_arsenal_display(),
-            self.computer_arrows(),
+            pool_display(self.computer()),
+            entrance_and_exit_display(self.computer()),
+            arsenal_display(self.computer()),
+            arrows(self.computer()),
         ]
         .into_iter()
         .flatten()
         .collect()
-    }
-
-    fn computer_pool_display(&self) -> Vec<Component> {
-        let drain_and_exit_enabled = self.computer_dequeues().iter().any(|dequeue| {
-            if let DequeueChoice::DrainAndExit(_) = dequeue {
-                true
-            } else {
-                false
-            }
-        });
-
-        let pill = Pill {
-            position: CirclePosition {
-                from: Side::Right,
-                column: 0,
-                row: 0,
-            },
-            width_in_columns: 3,
-            height_in_rows: self.computer_pool_height_in_rows(),
-            enabled: drain_and_exit_enabled,
-        };
-
-        let computer_pool =
-            self.computer()
-                .queue
-                .pool
-                .iter()
-                .enumerate()
-                .flat_map(|(i, &arsenal_item)| {
-                    let row = i / 3;
-                    let column = i % 3;
-
-                    if drain_and_exit_enabled {
-                        vec![
-                            Component::Circle {
-                                fill_color: colors::arsenal_item_color(arsenal_item),
-                                shape: dequeue_circle::right_background_at(row, column),
-                                on_click: Some(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
-                                    arsenal_item,
-                                ))),
-                            },
-                            Component::Image {
-                                image_type: ImageType::from(arsenal_item),
-                                alpha: 1.0,
-                                shape: dequeue_circle::right_foreground_at(row, column),
-                                on_click: None,
-                            },
-                        ]
-                    } else {
-                        vec![
-                            Component::Circle {
-                                fill_color: colors::arsenal_item_color(arsenal_item)
-                                    .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                                shape: dequeue_circle::right_background_at(row, column),
-                                on_click: None,
-                            },
-                            Component::Image {
-                                image_type: ImageType::from(arsenal_item),
-                                alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                                shape: dequeue_circle::right_foreground_at(row, column),
-                                on_click: None,
-                            },
-                            Component::Circle {
-                                fill_color: colors::OVERLAY,
-                                shape: dequeue_circle::right_background_at(row, column),
-                                on_click: None,
-                            },
-                        ]
-                    }
-                });
-
-        pill.render().into_iter().chain(computer_pool).collect()
-    }
-
-    fn computer_entrance_and_exit_display(&self) -> Vec<Component> {
-        let entrance = self.computer().queue.entrance;
-        let exit = self.computer().queue.exit;
-        let just_exit_enabled = self
-            .computer_dequeues()
-            .iter()
-            .any(|&dequeue| DequeueChoice::JustExit == dequeue);
-        let row = self.computer_pool_height_in_rows();
-
-        let background_pill = Pill {
-            position: CirclePosition {
-                from: Side::Right,
-                column: 0,
-                row: self.computer_pool_height_in_rows(),
-            },
-            width_in_columns: 3,
-            height_in_rows: 1,
-            enabled: false,
-        };
-        let decline_and_exit_pill = Pill {
-            position: CirclePosition {
-                from: Side::Right,
-                column: 1,
-                row: self.computer_pool_height_in_rows(),
-            },
-            width_in_columns: 2,
-            height_in_rows: 1,
-            enabled: true,
-        };
-
-        vec![
-            Some(background_pill.render()),
-            Some(decline_and_exit_pill.render()),
-            entrance.map(|entering_item| {
-                vec![
-                    Component::Circle {
-                        fill_color: colors::arsenal_item_color(entering_item)
-                            .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                        shape: dequeue_circle::right_background_at(row, 0),
-                        on_click: None,
-                    },
-                    Component::Image {
-                        image_type: ImageType::from(entering_item),
-                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                        shape: dequeue_circle::right_foreground_at(row, 0),
-                        on_click: None,
-                    },
-                    Component::Circle {
-                        fill_color: colors::OVERLAY,
-                        shape: dequeue_circle::right_background_at(row, 0),
-                        on_click: None,
-                    },
-                ]
-            }),
-            Some(vec![
-                Component::Circle {
-                    fill_color: colors::DECLINE_DEQUEUE_COLOR,
-                    shape: dequeue_circle::right_background_at(row, 1),
-                    on_click: Some(Action::ChooseDequeue(DequeueChoice::Decline)),
-                },
-                Component::Image {
-                    image_type: ImageType::DeclineDequeue,
-                    alpha: 1.0,
-                    shape: dequeue_circle::right_foreground_at(row, 1),
-                    on_click: None,
-                },
-            ]),
-            if just_exit_enabled {
-                exit.map(|exiting_item| {
-                    vec![
-                        Component::Circle {
-                            fill_color: colors::arsenal_item_color(exiting_item),
-                            shape: dequeue_circle::right_background_at(row, 2),
-                            on_click: Some(Action::ChooseDequeue(DequeueChoice::JustExit)),
-                        },
-                        Component::Image {
-                            image_type: ImageType::from(exiting_item),
-                            alpha: 1.0,
-                            shape: dequeue_circle::right_foreground_at(row, 2),
-                            on_click: None,
-                        },
-                    ]
-                })
-            } else {
-                exit.map(|exiting_item| {
-                    vec![
-                        Component::Circle {
-                            fill_color: colors::arsenal_item_color(exiting_item)
-                                .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                            shape: dequeue_circle::right_background_at(row, 2),
-                            on_click: None,
-                        },
-                        Component::Image {
-                            image_type: ImageType::from(exiting_item),
-                            alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                            shape: dequeue_circle::right_foreground_at(row, 2),
-                            on_click: None,
-                        },
-                        Component::Circle {
-                            fill_color: colors::OVERLAY,
-                            shape: dequeue_circle::right_background_at(row, 2),
-                            on_click: None,
-                        },
-                    ]
-                })
-            },
-        ]
-        .into_iter()
-        .flatten()
-        .flatten()
-        .collect()
-    }
-
-    fn computer_arsenal_display(&self) -> Vec<Component> {
-        let row_offset = self.computer_pool_height_in_rows() + 1;
-
-        let pill = Pill {
-            position: CirclePosition {
-                from: Side::Right,
-                column: 0,
-                row: row_offset,
-            },
-            width_in_columns: 3,
-            height_in_rows: self.computer_arsenal_height_in_rows(),
-            enabled: false,
-        };
-
-        let arsenal_items =
-            self.computer()
-                .arsenal
-                .iter()
-                .enumerate()
-                .flat_map(|(i, &arsenal_item)| {
-                    let row = i / 3;
-                    let column = i % 3;
-                    let row = row + row_offset;
-
-                    vec![
-                        Component::Circle {
-                            fill_color: colors::arsenal_item_color(arsenal_item)
-                                .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
-                            shape: dequeue_circle::right_background_at(row, column),
-                            on_click: None,
-                        },
-                        Component::Image {
-                            image_type: ImageType::from(arsenal_item),
-                            alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
-                            shape: dequeue_circle::right_foreground_at(row, column),
-                            on_click: None,
-                        },
-                        Component::Circle {
-                            fill_color: colors::OVERLAY,
-                            shape: dequeue_circle::right_background_at(row, column),
-                            on_click: None,
-                        },
-                    ]
-                });
-
-        pill.render().into_iter().chain(arsenal_items).collect()
-    }
-
-    fn computer_arsenal_height_in_rows(&self) -> usize {
-        helpers::height_in_rows(&self.computer().arsenal, 3)
-    }
-
-    fn computer_arrows(&self) -> Vec<Component> {
-        let entrance_and_exit_to_pool = if self.computer_pool_height_in_rows() == 0 {
-            vec![]
-        } else {
-            vec![
-                arrow::right_up_arrow_above(self.computer_pool_height_in_rows(), 0),
-                arrow::right_down_arrow_above(self.computer_pool_height_in_rows(), 2),
-            ]
-        };
-        let arsenal_to_entrance_and_exit = vec![
-            arrow::right_up_arrow_above(self.computer_pool_height_in_rows() + 1, 0),
-            arrow::right_down_arrow_above(self.computer_pool_height_in_rows() + 1, 2),
-        ];
-
-        entrance_and_exit_to_pool
-            .into_iter()
-            .chain(arsenal_to_entrance_and_exit)
-            .collect()
-    }
-
-    fn human_dequeues(&self) -> &Vec<DequeueChoice> {
-        &self.available_dequeues[HUMAN]
-    }
-
-    fn computer_dequeues(&self) -> &Vec<DequeueChoice> {
-        &self.available_dequeues[COMPUTER]
-    }
-
-    fn human_pool_height_in_rows(&self) -> usize {
-        helpers::height_in_rows(&self.human().queue.pool, 3)
-    }
-
-    fn computer_pool_height_in_rows(&self) -> usize {
-        helpers::height_in_rows(&self.computer().queue.pool, 3)
-    }
-
-    fn human_booster(&self) -> Booster {
-        self.human().booster
-    }
-
-    fn computer_booster(&self) -> Booster {
-        self.computer().booster
     }
 
     fn health_display(&self) -> Vec<Component> {
         ConstantHealthDisplay {
-            human_health: helpers::opponent_points_to_own_health(self.computer().points),
-            computer_health: helpers::opponent_points_to_own_health(self.human().points),
+            human_health: helpers::opponent_points_to_own_health(self.computer_points()),
+            computer_health: helpers::opponent_points_to_own_health(self.human_points()),
         }
         .render()
     }
 
-    fn human(&self) -> &DequeueingPlayer {
-        &self.scoreboard[HUMAN]
+    fn human_points(&self) -> u8 {
+        self.scoreboard[HUMAN].points
     }
 
-    fn computer(&self) -> &DequeueingPlayer {
-        &self.scoreboard[COMPUTER]
+    fn computer_points(&self) -> u8 {
+        self.scoreboard[COMPUTER].points
     }
+
+    fn human(&self) -> ScoreboardRenderArgs {
+        ScoreboardRenderArgs {
+            player: &self.scoreboard[HUMAN],
+            side: Side::Left,
+            dequeues: &self.available_dequeues[HUMAN],
+        }
+    }
+
+    fn computer(&self) -> ScoreboardRenderArgs {
+        ScoreboardRenderArgs {
+            player: &self.scoreboard[HUMAN],
+            side: Side::Right,
+            dequeues: &self.available_dequeues[HUMAN],
+        }
+    }
+
+}
+
+fn pool_display(args: ScoreboardRenderArgs) -> Vec<Component> {
+    let ScoreboardRenderArgs {
+        player,
+        side,
+        dequeues,
+    } = args;
+
+    let drain_and_exit_enabled = dequeues.iter().any(|dequeue| {
+        if let DequeueChoice::DrainAndExit(_) = dequeue {
+            true
+        } else {
+            false
+        }
+    });
+
+    let pill = Pill {
+        position: CirclePosition {
+            from: side,
+            column: 0,
+            row: 0,
+        },
+        width_in_columns: 3,
+        height_in_rows: helpers::height_in_rows(&player.queue.pool, 3),
+        enabled: drain_and_exit_enabled,
+    };
+
+    let pool = player
+        .queue
+        .pool
+        .iter()
+        .enumerate()
+        .flat_map(|(i, &arsenal_item)| {
+            let row = i / 3;
+            let column = i % 3;
+
+            if drain_and_exit_enabled {
+                vec![
+                    Component::Circle {
+                        fill_color: colors::arsenal_item_color(arsenal_item),
+                        shape: dequeue_circle::background_at(side, row, column),
+                        on_click: Some(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
+                            arsenal_item,
+                        ))),
+                    },
+                    Component::Image {
+                        image_type: ImageType::from(arsenal_item),
+                        alpha: 1.0,
+                        shape: dequeue_circle::foreground_at(side, row, column),
+                        on_click: None,
+                    },
+                ]
+            } else {
+                vec![
+                    Component::Circle {
+                        fill_color: colors::arsenal_item_color(arsenal_item)
+                            .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                        shape: dequeue_circle::background_at(side, row, column),
+                        on_click: None,
+                    },
+                    Component::Image {
+                        image_type: ImageType::from(arsenal_item),
+                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                        shape: dequeue_circle::foreground_at(side, row, column),
+                        on_click: None,
+                    },
+                    Component::Circle {
+                        fill_color: colors::OVERLAY,
+                        shape: dequeue_circle::background_at(side, row, column),
+                        on_click: None,
+                    },
+                ]
+            }
+        });
+
+    pill.render().into_iter().chain(pool).collect()
+}
+
+fn entrance_and_exit_display(args: ScoreboardRenderArgs) -> Vec<Component> {
+    let ScoreboardRenderArgs {
+        player,
+        side,
+        dequeues,
+    } = args;
+
+    let entrance = player.queue.entrance;
+    let exit = player.queue.exit;
+    let just_exit_enabled = dequeues
+        .iter()
+        .any(|&dequeue| DequeueChoice::JustExit == dequeue);
+    let pool_height_in_rows = helpers::height_in_rows(&player.queue.pool, 3);
+    let row = pool_height_in_rows;
+
+    let background_pill = Pill {
+        position: CirclePosition {
+            from: side,
+            column: 0,
+            row: pool_height_in_rows,
+        },
+        width_in_columns: 3,
+        height_in_rows: 1,
+        enabled: false,
+    };
+    let decline_and_exit_pill = Pill {
+        position: CirclePosition {
+            from: side,
+            column: 1,
+            row: pool_height_in_rows,
+        },
+        width_in_columns: 2,
+        height_in_rows: 1,
+        enabled: true,
+    };
+
+    vec![
+        Some(background_pill.render()),
+        Some(decline_and_exit_pill.render()),
+        entrance.map(|entering_item| {
+            vec![
+                Component::Circle {
+                    fill_color: colors::arsenal_item_color(entering_item)
+                        .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                    shape: dequeue_circle::background_at(side, row, 0),
+                    on_click: None,
+                },
+                Component::Image {
+                    image_type: ImageType::from(entering_item),
+                    alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                    shape: dequeue_circle::foreground_at(side, row, 0),
+                    on_click: None,
+                },
+                Component::Circle {
+                    fill_color: colors::OVERLAY,
+                    shape: dequeue_circle::background_at(side, row, 0),
+                    on_click: None,
+                },
+            ]
+        }),
+        Some(vec![
+            Component::Circle {
+                fill_color: colors::DECLINE_DEQUEUE_COLOR,
+                shape: dequeue_circle::background_at(side, row, 1),
+                on_click: Some(Action::ChooseDequeue(DequeueChoice::Decline)),
+            },
+            Component::Image {
+                image_type: ImageType::DeclineDequeue,
+                alpha: 1.0,
+                shape: dequeue_circle::foreground_at(side, row, 1),
+                on_click: None,
+            },
+        ]),
+        if just_exit_enabled {
+            exit.map(|exiting_item| {
+                vec![
+                    Component::Circle {
+                        fill_color: colors::arsenal_item_color(exiting_item),
+                        shape: dequeue_circle::background_at(side, row, 2),
+                        on_click: Some(Action::ChooseDequeue(DequeueChoice::JustExit)),
+                    },
+                    Component::Image {
+                        image_type: ImageType::from(exiting_item),
+                        alpha: 1.0,
+                        shape: dequeue_circle::foreground_at(side, row, 2),
+                        on_click: None,
+                    },
+                ]
+            })
+        } else {
+            exit.map(|exiting_item| {
+                vec![
+                    Component::Circle {
+                        fill_color: colors::arsenal_item_color(exiting_item)
+                            .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                        shape: dequeue_circle::background_at(side, row, 2),
+                        on_click: None,
+                    },
+                    Component::Image {
+                        image_type: ImageType::from(exiting_item),
+                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                        shape: dequeue_circle::foreground_at(side, row, 2),
+                        on_click: None,
+                    },
+                    Component::Circle {
+                        fill_color: colors::OVERLAY,
+                        shape: dequeue_circle::background_at(side, row, 2),
+                        on_click: None,
+                    },
+                ]
+            })
+        },
+    ]
+    .into_iter()
+    .flatten()
+    .flatten()
+    .collect()
+}
+
+fn arsenal_display(args: ScoreboardRenderArgs) -> Vec<Component> {
+    let ScoreboardRenderArgs { player, side, .. } = args;
+
+    let row_offset = helpers::height_in_rows(&player.queue.pool, 3) + 1;
+
+    let pill = Pill {
+        position: CirclePosition {
+            from: side,
+            column: 0,
+            row: row_offset,
+        },
+        width_in_columns: 3,
+        height_in_rows: helpers::height_in_rows(&player.arsenal, 3),
+        enabled: false,
+    };
+
+    let arsenal_items = player
+        .arsenal
+        .iter()
+        .enumerate()
+        .flat_map(|(i, &arsenal_item)| {
+            let row = i / 3;
+            let column = i % 3;
+            let row = row + row_offset;
+
+            vec![
+                Component::Circle {
+                    fill_color: colors::arsenal_item_color(arsenal_item)
+                        .with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA),
+                    shape: dequeue_circle::background_at(side, row, column),
+                    on_click: None,
+                },
+                Component::Image {
+                    image_type: ImageType::from(arsenal_item),
+                    alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                    shape: dequeue_circle::foreground_at(side, row, column),
+                    on_click: None,
+                },
+                Component::Circle {
+                    fill_color: colors::OVERLAY,
+                    shape: dequeue_circle::background_at(side, row, column),
+                    on_click: None,
+                },
+            ]
+        });
+
+    pill.render().into_iter().chain(arsenal_items).collect()
+}
+
+fn arrows(args: ScoreboardRenderArgs) -> Vec<Component> {
+    let ScoreboardRenderArgs { player, side, .. } = args;
+
+    let pool_height_in_rows = helpers::height_in_rows(&player.queue.pool, 3);
+    let entrance_and_exit_to_pool = if pool_height_in_rows == 0 {
+        vec![]
+    } else {
+        vec![
+            arrow::up_arrow_above(side, pool_height_in_rows, 0),
+            arrow::down_arrow_above(side, pool_height_in_rows, 2),
+        ]
+    };
+    let arsenal_to_entrance_and_exit = vec![
+        arrow::up_arrow_above(side, pool_height_in_rows + 1, 0),
+        arrow::down_arrow_above(side, pool_height_in_rows + 1, 2),
+    ];
+
+    entrance_and_exit_to_pool
+        .into_iter()
+        .chain(arsenal_to_entrance_and_exit)
+        .collect()
+}
+
+struct ScoreboardRenderArgs<'a> {
+    pub player: &'a DequeueingPlayer,
+    pub side: Side,
+    pub dequeues: &'a Vec<DequeueChoice>,
 }
 
 const HUMAN: usize = 0;

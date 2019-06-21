@@ -171,7 +171,14 @@ pub mod dequeue_circle {
     pub const ROW_0_Y: f64 = TRAPEZOID_BOTTOM + MARGIN + RADIUS;
     pub const OFFSET: f64 = DIAMETER + MARGIN;
 
-    pub fn left_background_at(row: usize, column: usize) -> Circle {
+    pub fn background_at(side: Side, row: usize, column: usize) -> Circle {
+        match side {
+            Side::Left => left_background_at(row, column),
+            Side::Right => right_background_at(row, column),
+        }
+    }
+
+    fn left_background_at(row: usize, column: usize) -> Circle {
         Circle {
             x: LEFT_COLUMN_0_X + (OFFSET) * column as f64,
             y: ROW_0_Y + (OFFSET) * row as f64,
@@ -179,7 +186,22 @@ pub mod dequeue_circle {
         }
     }
 
-    pub fn left_foreground_at(row: usize, column: usize) -> Rect {
+    fn right_background_at(row: usize, column: usize) -> Circle {
+        Circle {
+            x: RIGHT_COLUMN_0_X - (OFFSET) * column as f64,
+            y: ROW_0_Y + (OFFSET) * row as f64,
+            radius: RADIUS,
+        }
+    }
+
+    pub fn foreground_at(side: Side, row: usize, column: usize) -> Rect {
+        match side {
+            Side::Left => left_foreground_at(row, column),
+            Side::Right => right_foreground_at(row, column),
+        }
+    }
+
+    fn left_foreground_at(row: usize, column: usize) -> Rect {
         let bg = left_background_at(row, column);
 
         Rect {
@@ -190,15 +212,7 @@ pub mod dequeue_circle {
         }
     }
 
-    pub fn right_background_at(row: usize, column: usize) -> Circle {
-        Circle {
-            x: RIGHT_COLUMN_0_X - (OFFSET) * column as f64,
-            y: ROW_0_Y + (OFFSET) * row as f64,
-            radius: RADIUS,
-        }
-    }
-
-    pub fn right_foreground_at(row: usize, column: usize) -> Rect {
+    fn right_foreground_at(row: usize, column: usize) -> Rect {
         let bg = right_background_at(row, column);
 
         Rect {
