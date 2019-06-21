@@ -357,9 +357,9 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
 
     fn computer(&self) -> ScoreboardRenderArgs {
         ScoreboardRenderArgs {
-            player: &self.scoreboard[HUMAN],
+            player: &self.scoreboard[COMPUTER],
             side: Side::Right,
-            dequeues: &self.available_dequeues[HUMAN],
+            dequeues: &self.available_dequeues[COMPUTER],
         }
     }
 
