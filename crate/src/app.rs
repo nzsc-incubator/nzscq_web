@@ -243,7 +243,7 @@ impl App {
         let outcome = self.game.choose(choices).expect("should have outcome");
 
         match outcome {
-            Outcome::BoosterPhaseDone(boosters) => {
+            Outcome::BoosterPhaseDone(_) => {
                 self.phase = Phase::ChooseDequeue {
                     previously_available_boosters,
                     scoreboard: helpers::vec2_to_arr2(
