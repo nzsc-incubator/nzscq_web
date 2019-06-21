@@ -8,7 +8,7 @@ mod switch;
 use crate::{paint::Component, phase::Phase};
 use phase_specific_renderers::{
     BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer, CharacterRechoosingPhaseRenderer,
-    DequeueingPhaseRenderer,
+    FirstDequeueingPhaseRenderer,
 };
 
 pub trait Render {
@@ -53,11 +53,11 @@ impl Render for (f64, &Phase) {
             }
             .render(),
 
-            Phase::ChooseDequeue {
+            Phase::ChooseFirstDequeue {
                 previously_available_boosters,
                 scoreboard,
                 available_dequeues,
-            } => DequeueingPhaseRenderer {
+            } => FirstDequeueingPhaseRenderer {
                 completion_factor,
                 previously_available_boosters,
                 scoreboard,

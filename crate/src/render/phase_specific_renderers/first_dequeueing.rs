@@ -22,14 +22,14 @@ use nzscq::{
     scoreboard::DequeueingPlayer,
 };
 
-pub struct DequeueingPhaseRenderer<'a> {
+pub struct FirstDequeueingPhaseRenderer<'a> {
     pub completion_factor: f64,
     pub previously_available_boosters: &'a Vec<Booster>,
     pub scoreboard: &'a [DequeueingPlayer; 2],
     pub available_dequeues: &'a [Vec<DequeueChoice>; 2],
 }
 
-impl<'a> DequeueingPhaseRenderer<'a> {
+impl<'a> FirstDequeueingPhaseRenderer<'a> {
     pub fn render(self) -> Vec<Component> {
         let human_entrance = self.human_entrance();
         let computer_entrance = self.computer_entrance();

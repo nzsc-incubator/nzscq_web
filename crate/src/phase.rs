@@ -19,7 +19,7 @@ pub enum Phase {
         previous_outcome: Vec<CharacterHeadstart>,
         available_boosters: Vec<Booster>,
     },
-    ChooseDequeue {
+    ChooseFirstDequeue {
         previously_available_boosters: Vec<Booster>,
         scoreboard: [DequeueingPlayer; 2],
         available_dequeues: [Vec<DequeueChoice>; 2],
@@ -34,7 +34,7 @@ impl Phase {
             Phase::ChooseCharacter { .. } => durations::CHOOSING_CHARACTERS,
             Phase::RechooseCharacter { .. } => durations::RECHOOSING_CHARACTERS,
             Phase::ChooseBooster { .. } => durations::CHOOSING_BOOSTERS,
-            Phase::ChooseDequeue { .. } => durations::CHOOSING_DEQUEUE,
+            Phase::ChooseFirstDequeue { .. } => durations::CHOOSING_FIRST_DEQUEUE,
             _ => panic!("TODO choose duration"),
         }
     }
@@ -44,5 +44,5 @@ mod durations {
     pub const CHOOSING_CHARACTERS: f64 = 0.5;
     pub const RECHOOSING_CHARACTERS: f64 = 2.0;
     pub const CHOOSING_BOOSTERS: f64 = 2.5;
-    pub const CHOOSING_DEQUEUE: f64 = 2.5;
+    pub const CHOOSING_FIRST_DEQUEUE: f64 = 2.5;
 }

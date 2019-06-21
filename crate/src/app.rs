@@ -244,7 +244,7 @@ impl App {
 
         match outcome {
             Outcome::BoosterPhaseDone(_) => {
-                self.phase = Phase::ChooseDequeue {
+                self.phase = Phase::ChooseFirstDequeue {
                     previously_available_boosters,
                     scoreboard: helpers::vec2_to_arr2(
                         self.game
