@@ -306,7 +306,6 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
         }
     }
 
-
     fn human_scoreboard_display(&self) -> Vec<Component> {
         vec![
             pool_display(self.human()),
@@ -362,7 +361,6 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             dequeues: &self.available_dequeues[COMPUTER],
         }
     }
-
 }
 
 fn pool_display(args: ScoreboardRenderArgs) -> Vec<Component> {

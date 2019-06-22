@@ -1,7 +1,7 @@
 use nzscq::{
-    choices::{Booster, Character, DequeueChoice},
+    choices::{Action, Booster, Character, DequeueChoice},
     outcomes::CharacterHeadstart,
-    scoreboard::DequeueingPlayer,
+    scoreboard::{ActionlessPlayer, DequeueingPlayer},
 };
 
 #[derive(Debug, Clone)]
@@ -24,8 +24,14 @@ pub enum Phase {
         scoreboard: [DequeueingPlayer; 2],
         available_dequeues: [Vec<DequeueChoice>; 2],
     },
-    ChooseAction, //TODO ↓
-    GameOver,
+    ChooseAction {
+        previous_scoreboard: [DequeueingPlayer; 2],
+        previously_available_dequeues: [Vec<DequeueChoice>; 2],
+        previous_outcome: [DequeueChoice; 2],
+        scoreboard: [ActionlessPlayer; 2],
+        available_actions: [Vec<Action>; 2],
+    },
+    GameOver, //TODO ↓
 }
 
 impl Phase {
@@ -35,6 +41,7 @@ impl Phase {
             Phase::RechooseCharacter { .. } => durations::RECHOOSING_CHARACTERS,
             Phase::ChooseBooster { .. } => durations::CHOOSING_BOOSTERS,
             Phase::ChooseFirstDequeue { .. } => durations::CHOOSING_FIRST_DEQUEUE,
+            Phase::ChooseAction { .. } => durations::CHOOSING_ACTION,
             _ => panic!("TODO choose duration"),
         }
     }
@@ -45,4 +52,5 @@ mod durations {
     pub const RECHOOSING_CHARACTERS: f64 = 2.0;
     pub const CHOOSING_BOOSTERS: f64 = 2.5;
     pub const CHOOSING_FIRST_DEQUEUE: f64 = 2.5;
+    pub const CHOOSING_ACTION: f64 = 2.0;
 }

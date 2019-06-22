@@ -6,3 +6,5 @@ mod booster_choosing;
 pub use booster_choosing::BoosterChoosingPhaseRenderer;
 mod first_dequeueing;
 pub use first_dequeueing::FirstDequeueingPhaseRenderer;
+mod action_choosing;
+pub use action_choosing::ActionChoosingPhaseRenderer;

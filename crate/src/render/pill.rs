@@ -148,10 +148,8 @@ impl Pill {
             Side::Right => self.adjusted_offset() * (self.width_in_columns - 1) as f64,
         }
     }
-}
 
-impl Render for Pill {
-    fn render(&self) -> Vec<Component> {
+    fn unchecked_render(&self) -> Vec<Component> {
         let vertical_connector = Rect {
             x: self.leftmost_circle_x(),
             y: -RADIUS,
@@ -213,4 +211,49 @@ impl Render for Pill {
     }
 }
 
+impl Render for Pill {
+    fn render(&self) -> Vec<Component> {
+        if self.width_in_columns == 0 || self.height_in_rows == 0 {
+            vec![]
+        } else {
+            self.unchecked_render()
+        }
+    }
+}
+
 const RADIUS: f64 = 110.0;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pill_with_zero_width_renders_empty_vec() {
+        let pill = Pill {
+            position: CirclePosition {
+                from: Side::Left,
+                column: 0,
+                row: 0,
+            },
+            width_in_columns: 0,
+            height_in_rows: 1,
+            enabled: true,
+        };
+        assert!(pill.render().is_empty());
+    }
+
+    #[test]
+    fn pill_with_zero_height_renders_empty_vec() {
+        let pill = Pill {
+            position: CirclePosition {
+                from: Side::Left,
+                column: 0,
+                row: 0,
+            },
+            width_in_columns: 3,
+            height_in_rows: 0,
+            enabled: true,
+        };
+        assert!(pill.render().is_empty());
+    }
+}

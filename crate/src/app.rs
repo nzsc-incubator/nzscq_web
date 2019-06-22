@@ -9,9 +9,10 @@ use crate::{
 
 use js_sys::{Date, Function, Math};
 use nzscq::{
-    choices::{BatchChoice, Booster, Character},
+    choices::{BatchChoice, Booster, Character, DequeueChoice},
     game::BatchChoiceGame,
     outcomes::Outcome,
+    scoreboard::DequeueingPlayer,
 };
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, HtmlElement, Window};
@@ -170,11 +171,15 @@ impl App {
     fn handle_action(&mut self, action: click::Action) {
         match action {
             click::Action::ChooseCharacter(human_character) => {
-                self.handle_character_choice(human_character);
+                self.handle_character_choice(human_character)
             }
 
             click::Action::ChooseBooster(human_booster) => {
-                self.handle_booster_choice(human_booster);
+                self.handle_booster_choice(human_booster)
+            }
+
+            click::Action::ChooseDequeue(human_dequeue) => {
+                self.handle_dequeue_choice(human_dequeue)
             }
 
             _ => panic!("Cannot handle action {:?}", action),
@@ -256,6 +261,52 @@ impl App {
                         self.game
                             .choices()
                             .dequeue_choices()
+                            .expect("should be able to choose dequeue"),
+                    ),
+                }
+            }
+            _ => panic!("outcome should be character outcome"),
+        }
+
+        self.start_animation();
+    }
+
+    fn handle_dequeue_choice(&mut self, human_dequeue: DequeueChoice) {
+        let previous_scoreboard: [DequeueingPlayer; 2] = match &self.phase {
+            Phase::ChooseFirstDequeue { scoreboard, .. } => scoreboard.clone(),
+            _ => panic!("should be on a dequeueing phase"),
+        };
+        let previously_available_dequeues = self
+            .game
+            .choices()
+            .dequeue_choices()
+            .expect("should be on a dequeuing phase");
+
+        let computer_dequeue = self
+            .computer
+            .choose_dequeue(&self.game)
+            .expect("should choose character");
+        let choices = BatchChoice::DequeueChoices(vec![human_dequeue, computer_dequeue]);
+        let outcome = self.game.choose(choices).expect("should have outcome");
+        
+        match outcome {
+            Outcome::DequeuePhaseDone(dequeues) => {
+                self.phase = Phase::ChooseAction {
+                    previous_scoreboard,
+                    previously_available_dequeues: helpers::vec2_to_arr2(
+                        previously_available_dequeues,
+                    ),
+                    previous_outcome: helpers::vec2_to_arr2(dequeues),
+                    scoreboard: helpers::vec2_to_arr2(
+                        self.game
+                            .scoreboard()
+                            .actionless()
+                            .expect("should be choosing actions"),
+                    ),
+                    available_actions: helpers::vec2_to_arr2(
+                        self.game
+                            .choices()
+                            .actions()
                             .expect("should be able to choose dequeue"),
                     ),
                 }

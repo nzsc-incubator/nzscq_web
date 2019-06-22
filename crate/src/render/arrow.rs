@@ -63,8 +63,6 @@ pub fn down_arrow_above(side: Side, row: usize, column: usize) -> Component {
     }
 }
 
-
-
 fn left_down_arrow_above(row: usize, column: usize) -> Component {
     Component::UnclickablePath {
         path: Path {
@@ -86,8 +84,6 @@ fn left_down_arrow_above(row: usize, column: usize) -> Component {
         stroke: None,
     }
 }
-
-
 
 fn right_down_arrow_above(row: usize, column: usize) -> Component {
     Component::UnclickablePath {
