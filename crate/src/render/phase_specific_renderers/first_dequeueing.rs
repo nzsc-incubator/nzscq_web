@@ -403,7 +403,7 @@ fn pool_display(args: ScoreboardRenderArgs) -> Vec<Component> {
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(arsenal_item),
                         shape: dequeue_circle::background_at(side, row, column),
-                        on_click: Some(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
+                        on_click: side.if_left(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
                             arsenal_item,
                         ))),
                     },
@@ -504,7 +504,7 @@ fn entrance_and_exit_display(args: ScoreboardRenderArgs) -> Vec<Component> {
             Component::Circle {
                 fill_color: colors::DECLINE_DEQUEUE_COLOR,
                 shape: dequeue_circle::background_at(side, row, 1),
-                on_click: Some(Action::ChooseDequeue(DequeueChoice::Decline)),
+                on_click: side.if_left(Action::ChooseDequeue(DequeueChoice::Decline)),
             },
             Component::Image {
                 image_type: ImageType::DeclineDequeue,
@@ -519,7 +519,7 @@ fn entrance_and_exit_display(args: ScoreboardRenderArgs) -> Vec<Component> {
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(exiting_item),
                         shape: dequeue_circle::background_at(side, row, 2),
-                        on_click: Some(Action::ChooseDequeue(DequeueChoice::JustExit)),
+                        on_click: side.if_left(Action::ChooseDequeue(DequeueChoice::JustExit)),
                     },
                     Component::Image {
                         image_type: ImageType::from(exiting_item),

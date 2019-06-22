@@ -348,9 +348,7 @@ fn dequeueing_pool_display_without_drainee(
                         Component::Circle {
                             fill_color: colors::arsenal_item_color(arsenal_item),
                             shape: dequeue_circle::background_at(side, row, column),
-                            on_click: Some(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
-                                arsenal_item,
-                            ))),
+                            on_click: None,
                         },
                         Component::Image {
                             image_type: ImageType::from(arsenal_item),
@@ -467,7 +465,7 @@ fn dequeueing_entrance_decline_and_exit_display_with_hidable_exit(
             Component::Circle {
                 fill_color: colors::DECLINE_DEQUEUE_COLOR,
                 shape: dequeue_circle::background_at(side, row, 1),
-                on_click: Some(Action::ChooseDequeue(DequeueChoice::Decline)),
+                on_click: None,
             },
             Component::Image {
                 image_type: ImageType::DeclineDequeue,
@@ -484,7 +482,7 @@ fn dequeueing_entrance_decline_and_exit_display_with_hidable_exit(
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(exiting_item),
                         shape: dequeue_circle::background_at(side, row, 2),
-                        on_click: Some(Action::ChooseDequeue(DequeueChoice::JustExit)),
+                        on_click: None,
                     },
                     Component::Image {
                         image_type: ImageType::from(exiting_item),
@@ -646,7 +644,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(arsenal_item),
                         shape: dequeue_circle::background_at(side, row, column),
-                        on_click: Some(Action::ChooseAction(NzscAction::Mirror(move_))),
+                        on_click: side.if_left(Action::ChooseAction(NzscAction::Mirror(move_))),
                     },
                     Component::Image {
                         image_type: ImageType::Mirror,
@@ -764,7 +762,7 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
                 Component::Circle {
                     fill_color: colors::arsenal_item_color(arsenal_item),
                     shape: dequeue_circle::background_at(side, row, column),
-                    on_click: opt_move.map(|m| Action::ChooseAction(NzscAction::Move(m))),
+                    on_click: side.if_left(()).and(opt_move).map(|m| Action::ChooseAction(NzscAction::Move(m))),
                 },
                 Component::Image {
                     image_type: ImageType::from(arsenal_item),
