@@ -1,5 +1,5 @@
 use nzscq::{
-    choices::{BatchChoices, Booster, Character, DequeueChoice},
+    choices::{Action, BatchChoices, Booster, Character, DequeueChoice},
     game::BatchChoiceGame,
 };
 
@@ -34,6 +34,15 @@ impl<T: Random> Opponent<T> {
 
     pub fn choose_dequeue(&mut self, game: &BatchChoiceGame) -> Option<DequeueChoice> {
         if let BatchChoices::DequeueChoices(mut choices) = game.choices() {
+            let computer_choices = choices.remove(Opponent::<T>::COMPUTER);
+            Some(self.rand_choice(computer_choices))
+        } else {
+            None
+        }
+    }
+
+    pub fn choose_action(&mut self, game: &BatchChoiceGame) -> Option<Action> {
+        if let BatchChoices::Actions(mut choices) = game.choices() {
             let computer_choices = choices.remove(Opponent::<T>::COMPUTER);
             Some(self.rand_choice(computer_choices))
         } else {

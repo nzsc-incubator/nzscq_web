@@ -9,10 +9,10 @@ use crate::{
 
 use js_sys::{Date, Function, Math};
 use nzscq::{
-    choices::{BatchChoice, Booster, Character, DequeueChoice},
+    choices::{Action as NzscAction, BatchChoice, Booster, Character, DequeueChoice},
     game::BatchChoiceGame,
     outcomes::Outcome,
-    scoreboard::DequeueingPlayer,
+    scoreboard::{ActionlessPlayer, DequeueingPlayer},
 };
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, HtmlElement, Window};
@@ -182,7 +182,11 @@ impl App {
                 self.handle_dequeue_choice(human_dequeue)
             }
 
-            _ => panic!("Cannot handle action {:?}", action),
+            click::Action::ChooseAction(human_action) => {
+                self.handle_action_choice(human_action)
+            }
+
+            click::Action::StopPropagation => {}
         }
     }
 
@@ -307,11 +311,60 @@ impl App {
                         self.game
                             .choices()
                             .actions()
-                            .expect("should be able to choose dequeue"),
+                            .expect("should be able to choose action"),
                     ),
                 }
             }
             _ => panic!("outcome should be dequeue outcome"),
+        }
+
+        self.start_animation();
+    }
+
+    fn handle_action_choice(&mut self, human_action: NzscAction) {
+        let previous_scoreboard: [ActionlessPlayer; 2] = match &self.phase {
+            Phase::ChooseAction { scoreboard, .. } => scoreboard.clone(),
+            _ => panic!("should be on action-choosing phase"),
+        };
+        let previously_available_actions = self
+            .game
+            .choices()
+            .actions()
+            .expect("should be on action-choosing phase");
+
+        let computer_action = self
+            .computer
+            .choose_action(&self.game)
+            .expect("should choose action");
+        let choices = BatchChoice::Actions(vec![human_action, computer_action]);
+        let outcome = self.game.choose(choices).expect("should have outcome");
+
+        match outcome {
+            Outcome::ActionPhaseDone(action_points_destroyed) => {
+                self.phase = Phase::ChooseSubsequentDequeue {
+                    previous_scoreboard,
+                    previously_available_actions: helpers::vec2_to_arr2(
+                        previously_available_actions,
+                    ),
+                    previous_outcome: helpers::vec2_to_arr2(action_points_destroyed),
+                    scoreboard: helpers::vec2_to_arr2(
+                        self.game
+                            .scoreboard()
+                            .dequeueing()
+                            .expect("should be dequeueing"),
+                    ),
+                    available_dequeues: helpers::vec2_to_arr2(
+                        self.game
+                            .choices()
+                            .dequeue_choices()
+                            .expect("should be able to choose dequeue"),
+                    ),
+                }
+            }
+
+            Outcome::GameOver(_) => panic!("TODO Handle GameOver"),
+
+            _ => panic!("outcome should be action outcome"),
         }
 
         self.start_animation();
