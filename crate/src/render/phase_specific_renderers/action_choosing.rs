@@ -12,14 +12,14 @@ use crate::{
     },
     shapes::{
         dequeue_circle::{self, CirclePosition},
-        rect_button, rect_focus, Translate,
+        dequeue_foci, rect_button, rect_focus, Translate,
     },
     side::Side,
 };
 
 use nzscq::{
     choices::{Action as NzscAction, ArsenalItem, Booster, DequeueChoice},
-    scoreboard::{ActionlessPlayer, DequeueingPlayer},
+    scoreboard::{ActionlessPlayer, DequeueingPlayer, Queue},
 };
 
 pub struct ActionChoosingPhaseRenderer<'a> {
@@ -59,13 +59,13 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 self.health_display(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
-                    self.human_dequeued_items(),
+                    self.human_dequeue_displacements(),
                 ),
                 dequeueing_scoreboard(self.dequeueing_computer_args()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
-                entering_dequeue_choice(Side::Left, self.human_dequeued_items(), &lerper),
+                entering_dequeue_choice(Side::Left, self.human_dequeue_displacements(), &lerper),
             ]
             .into_iter()
             .flatten()
@@ -73,18 +73,33 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
         }
     }
 
-    fn human_dequeued_items(&self) -> DequeuedItems {
+    fn human_dequeue_displacements(&self) -> DequeueDisplacements {
+        let previous_human = &self.previous_scoreboard[HUMAN];
+        let current_human = &self.scoreboard[HUMAN];
         let drainee = if let DequeueChoice::DrainAndExit(drainee) = self.previous_outcome[HUMAN] {
-            Some(drainee)
+            Some(ArsenalItemDisplacement {
+                item: drainee,
+                start: position_of(drainee, previous_human, Side::Left)
+                    .expect("drainee should have previous position"),
+                end: position_of(drainee, current_human, Side::Left)
+                    .expect("drainee should have current position"),
+            })
         } else {
             None
         };
-        let exiting_item = self.previous_scoreboard[HUMAN].queue.exit;
+        let exiter =
+            self.previous_scoreboard[HUMAN]
+                .queue
+                .exit
+                .map(|exiter| ArsenalItemDisplacement {
+                    item: exiter,
+                    start: position_of(exiter, previous_human, Side::Left)
+                        .expect("exiter should have previous position"),
+                    end: position_of(exiter, current_human, Side::Left)
+                        .expect("exiter should have current position"),
+                });
 
-        DequeuedItems {
-            drainee,
-            exiting_item,
-        }
+        DequeueDisplacements { drainee, exiter }
     }
 
     fn computer_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
@@ -96,17 +111,21 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 self.health_display(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
-                    self.human_dequeued_items(),
+                    self.human_dequeue_displacements(),
                 ),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_computer_args(),
-                    self.computer_dequeued_items(),
+                    self.computer_dequeue_displacements(),
                 ),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
-                stationary_dequeue_choice(Side::Left, self.human_dequeued_items()),
-                entering_dequeue_choice(Side::Right, self.computer_dequeued_items(), &lerper),
+                stationary_dequeue_choice(Side::Left, self.human_dequeue_displacements()),
+                entering_dequeue_choice(
+                    Side::Right,
+                    self.computer_dequeue_displacements(),
+                    &lerper,
+                ),
             ]
             .into_iter()
             .flatten()
@@ -114,19 +133,34 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
         }
     }
 
-    fn computer_dequeued_items(&self) -> DequeuedItems {
+    fn computer_dequeue_displacements(&self) -> DequeueDisplacements {
+        let previous_computer = &self.previous_scoreboard[COMPUTER];
+        let current_computer = &self.scoreboard[COMPUTER];
         let drainee = if let DequeueChoice::DrainAndExit(drainee) = self.previous_outcome[COMPUTER]
         {
-            Some(drainee)
+            Some(ArsenalItemDisplacement {
+                item: drainee,
+                start: position_of(drainee, previous_computer, Side::Right)
+                    .expect("drainee should have previous position"),
+                end: position_of(drainee, current_computer, Side::Right)
+                    .expect("drainee should have current position"),
+            })
         } else {
             None
         };
-        let exiting_item = self.previous_scoreboard[COMPUTER].queue.exit;
+        let exiter =
+            self.previous_scoreboard[COMPUTER]
+                .queue
+                .exit
+                .map(|exiter| ArsenalItemDisplacement {
+                    item: exiter,
+                    start: position_of(exiter, previous_computer, Side::Right)
+                        .expect("exiter should have previous position"),
+                    end: position_of(exiter, current_computer, Side::Right)
+                        .expect("exiter should have current position"),
+                });
 
-        DequeuedItems {
-            drainee,
-            exiting_item,
-        }
+        DequeueDisplacements { drainee, exiter }
     }
 
     fn pause(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
@@ -138,17 +172,17 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 self.health_display(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
-                    self.human_dequeued_items(),
+                    self.human_dequeue_displacements(),
                 ),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_computer_args(),
-                    self.computer_dequeued_items(),
+                    self.computer_dequeue_displacements(),
                 ),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
-                stationary_dequeue_choice(Side::Left, self.human_dequeued_items()),
-                stationary_dequeue_choice(Side::Right, self.computer_dequeued_items()),
+                stationary_dequeue_choice(Side::Left, self.human_dequeue_displacements()),
+                stationary_dequeue_choice(Side::Right, self.computer_dequeue_displacements()),
             ]
             .into_iter()
             .flatten()
@@ -165,17 +199,17 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 self.health_display(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
-                    self.human_dequeued_items(),
+                    self.human_dequeue_displacements(),
                 ),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_computer_args(),
-                    self.computer_dequeued_items(),
+                    self.computer_dequeue_displacements(),
                 ),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
-                exiting_dequeue_choice(Side::Left, self.human_dequeued_items(), &lerper),
-                exiting_dequeue_choice(Side::Right, self.computer_dequeued_items(), &lerper),
+                exiting_dequeue_choice(Side::Left, self.human_dequeue_displacements(), &lerper),
+                exiting_dequeue_choice(Side::Right, self.computer_dequeue_displacements(), &lerper),
             ]
             .into_iter()
             .flatten()
@@ -250,9 +284,9 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
 
 fn dequeueing_scoreboard_without_dequeued_items(
     args: DequeueingRenderArgs,
-    items: DequeuedItems,
+    displacements: DequeueDisplacements,
 ) -> Vec<Component> {
-    let DequeuedItems { drainee, .. } = items;
+    let drainee = displacements.drainee.map(|displacement| displacement.item);
 
     vec![
         dequeueing_pool_display_without_drainee(&args, drainee),
@@ -277,16 +311,197 @@ fn dequeueing_scoreboard(args: DequeueingRenderArgs) -> Vec<Component> {
     .collect()
 }
 
-fn entering_dequeue_choice(side: Side, items: DequeuedItems, lerper: &Lerper) -> Vec<Component> {
-    vec![]
+fn entering_dequeue_choice(
+    side: Side,
+    displacements: DequeueDisplacements,
+    lerper: &Lerper,
+) -> Vec<Component> {
+    vec![
+        displacements.drainee.map(|displacement| {
+            let drainee = displacement.item;
+            let position = displacement.start;
+
+            vec![
+                LerpableComponent::Circle {
+                    start_color: colors::arsenal_item_color(drainee),
+                    end_color: colors::arsenal_item_color(drainee),
+                    start_shape: dequeue_circle::background_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    end_shape: dequeue_foci::top_background(side),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::from(drainee),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: dequeue_circle::foreground_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    end_shape: dequeue_foci::top_foreground(side),
+                    on_click: None,
+                },
+            ]
+        }),
+        displacements.exiter.map(|displacement| {
+            let exiter = displacement.item;
+            let position = displacement.start;
+
+            vec![
+                LerpableComponent::Circle {
+                    start_color: colors::arsenal_item_color(exiter),
+                    end_color: colors::arsenal_item_color(exiter),
+                    start_shape: dequeue_circle::background_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    end_shape: dequeue_foci::bottom_background(side),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::from(exiter),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: dequeue_circle::foreground_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    end_shape: dequeue_foci::bottom_foreground(side),
+                    on_click: None,
+                },
+            ]
+        }),
+    ]
+    .into_iter()
+    .flatten()
+    .flatten()
+    .map(|lerpable: LerpableComponent| lerper.lerp1(lerpable))
+    .collect()
 }
 
-fn stationary_dequeue_choice(side: Side, items: DequeuedItems) -> Vec<Component> {
-    vec![]
+fn stationary_dequeue_choice(side: Side, displacements: DequeueDisplacements) -> Vec<Component> {
+    vec![
+        displacements.drainee.map(|displacement| {
+            let drainee = displacement.item;
+            let position = displacement.end;
+
+            vec![
+                Component::Circle {
+                    fill_color: colors::arsenal_item_color(drainee),
+                    shape: dequeue_foci::top_background(side),
+                    on_click: None,
+                },
+                Component::Image {
+                    image_type: ImageType::from(drainee),
+                    alpha: 1.0,
+                    shape: dequeue_foci::top_foreground(side),
+                    on_click: None,
+                },
+            ]
+        }),
+        displacements.exiter.map(|displacement| {
+            let exiter = displacement.item;
+            let position = displacement.end;
+
+            vec![
+                Component::Circle {
+                    fill_color: colors::arsenal_item_color(exiter),
+                    shape: dequeue_foci::bottom_background(side),
+                    on_click: None,
+                },
+                Component::Image {
+                    image_type: ImageType::from(exiter),
+                    alpha: 1.0,
+                    shape: dequeue_foci::bottom_foreground(side),
+                    on_click: None,
+                },
+            ]
+        }),
+    ]
+    .into_iter()
+    .flatten()
+    .flatten()
+    .collect()
 }
 
-fn exiting_dequeue_choice(side: Side, items: DequeuedItems, lerper: &Lerper) -> Vec<Component> {
-    vec![]
+fn exiting_dequeue_choice(
+    side: Side,
+    displacements: DequeueDisplacements,
+    lerper: &Lerper,
+) -> Vec<Component> {
+    vec![
+        displacements.drainee.map(|displacement| {
+            let drainee = displacement.item;
+            let position = displacement.end;
+
+            vec![
+                LerpableComponent::Circle {
+                    start_color: colors::arsenal_item_color(drainee),
+                    end_color: colors::arsenal_item_color(drainee),
+                    start_shape: dequeue_foci::top_background(side),
+                    end_shape: dequeue_circle::background_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::from(drainee),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: dequeue_foci::top_foreground(side),
+                    end_shape: dequeue_circle::foreground_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    on_click: None,
+                },
+            ]
+        }),
+        displacements.exiter.map(|displacement| {
+            let exiter = displacement.item;
+            let position = displacement.end;
+
+            vec![
+                LerpableComponent::Circle {
+                    start_color: colors::arsenal_item_color(exiter),
+                    end_color: colors::arsenal_item_color(exiter),
+                    start_shape: dequeue_foci::bottom_background(side),
+                    end_shape: dequeue_circle::background_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    on_click: None,
+                },
+                LerpableComponent::Image {
+                    image_type: ImageType::from(exiter),
+                    start_alpha: 1.0,
+                    end_alpha: 1.0,
+                    start_shape: dequeue_foci::bottom_foreground(side),
+                    end_shape: dequeue_circle::foreground_at(
+                        position.from,
+                        position.row,
+                        position.column,
+                    ),
+                    on_click: None,
+                },
+            ]
+        }),
+    ]
+    .into_iter()
+    .flatten()
+    .flatten()
+    .map(|lerpable: LerpableComponent| lerper.lerp1(lerpable))
+    .collect()
 }
 
 fn action_choosing_scoreboard(args: ActionChoosingRenderArgs) -> Vec<Component> {
@@ -762,7 +977,10 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
                 Component::Circle {
                     fill_color: colors::arsenal_item_color(arsenal_item),
                     shape: dequeue_circle::background_at(side, row, column),
-                    on_click: side.if_left(()).and(opt_move).map(|m| Action::ChooseAction(NzscAction::Move(m))),
+                    on_click: side
+                        .if_left(())
+                        .and(opt_move)
+                        .map(|m| Action::ChooseAction(NzscAction::Move(m))),
                 },
                 Component::Image {
                     image_type: ImageType::from(arsenal_item),
@@ -826,6 +1044,93 @@ fn action_choosing_arsenal_item_display(
     .collect()
 }
 
+fn position_of(item: ArsenalItem, player: &QueueArsenal, side: Side) -> Option<CirclePosition> {
+    let index = player
+        .queue()
+        .pool
+        .iter()
+        .position(|&pool_item| pool_item == item);
+    if let Some(index) = index {
+        Some(CirclePosition {
+            from: side,
+            column: index % 3,
+            row: index / 3,
+        })
+    } else {
+        position_in_mouth_or_arsenal_of(item, player, side)
+    }
+}
+
+fn position_in_mouth_or_arsenal_of(
+    item: ArsenalItem,
+    player: &QueueArsenal,
+    side: Side,
+) -> Option<CirclePosition> {
+    let pool_height = helpers::height_in_rows(&player.queue().pool, 3);
+    if Some(item) == player.queue().entrance {
+        Some(CirclePosition {
+            from: side,
+            column: 0,
+            row: pool_height,
+        })
+    } else if Some(item) == player.queue().exit {
+        Some(CirclePosition {
+            from: side,
+            column: 2,
+            row: pool_height,
+        })
+    } else {
+        position_in_arsenal_of(item, player, side)
+    }
+}
+
+fn position_in_arsenal_of(
+    item: ArsenalItem,
+    player: &QueueArsenal,
+    side: Side,
+) -> Option<CirclePosition> {
+    let index = player
+        .arsenal()
+        .iter()
+        .position(|&arsenal_item| arsenal_item == item);
+    index.map(|index| {
+        let pool_height = helpers::height_in_rows(&player.queue().pool, 3);
+        let mouth_height = 1;
+        let row_offset = pool_height + mouth_height;
+
+        CirclePosition {
+            from: side,
+            column: index % 3,
+            row: row_offset + index / 3,
+        }
+    })
+}
+
+trait QueueArsenal {
+    fn queue(&self) -> &Queue;
+    fn arsenal(&self) -> &Vec<ArsenalItem>;
+}
+
+impl QueueArsenal for DequeueingPlayer {
+    fn queue(&self) -> &Queue {
+        &self.queue
+    }
+
+    fn arsenal(&self) -> &Vec<ArsenalItem> {
+        &self.arsenal
+    }
+}
+
+impl QueueArsenal for ActionlessPlayer {
+    fn queue(&self) -> &Queue {
+        &self.queue
+    }
+
+    fn arsenal(&self) -> &Vec<ArsenalItem> {
+        &self.arsenal
+    }
+}
+
 struct DequeueingRenderArgs<'a> {
     pub player: &'a DequeueingPlayer,
     pub side: Side,
@@ -861,12 +1166,16 @@ impl<'a> ArrowRenderArgs for ActionChoosingRenderArgs<'a> {
     }
 }
 
-struct DequeuedItems {
-    pub drainee: Option<ArsenalItem>,
-    pub exiting_item: Option<ArsenalItem>,
+struct DequeueDisplacements {
+    pub drainee: Option<ArsenalItemDisplacement>,
+    pub exiter: Option<ArsenalItemDisplacement>,
+}
+
+struct ArsenalItemDisplacement {
+    pub item: ArsenalItem,
+    pub start: CirclePosition,
+    pub end: CirclePosition,
 }
 
 const HUMAN: usize = 0;
 const COMPUTER: usize = 1;
-
-// TODO disallow human to choose a computer's move

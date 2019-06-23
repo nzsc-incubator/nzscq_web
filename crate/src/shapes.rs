@@ -243,3 +243,62 @@ pub mod dequeue_circle {
         }
     }
 }
+
+pub mod dequeue_foci {
+    use super::{Circle, Rect};
+    use crate::canvas_dimensions;
+    use crate::side::Side;
+
+    const RADIUS: f64 = 240.0;
+    const VERTICAL_MARGIN: f64 = 15.0;
+    const HORIZONTAL_MARGIN_FROM_CENTER: f64 = 290.0;
+    const CENTER_X: f64 = 0.5 * canvas_dimensions::WIDTH;
+    const CENTER_Y: f64 = 0.5 * canvas_dimensions::HEIGHT;
+
+    pub fn top_background(side: Side) -> Circle {
+        Circle {
+            x: x(side),
+            y: CENTER_Y - RADIUS - VERTICAL_MARGIN,
+            radius: RADIUS,
+        }
+    }
+
+    pub fn top_foreground(side: Side) -> Rect {
+        let bg = top_background(side);
+
+        Rect {
+            x: bg.x - bg.radius,
+            y: bg.y - bg.radius,
+            width: 2.0 * bg.radius,
+            height: 2.0 * bg.radius,
+        }
+    }
+
+    pub fn bottom_background(side: Side) -> Circle {
+        Circle {
+            x: x(side),
+            y: CENTER_Y + RADIUS + VERTICAL_MARGIN,
+            radius: RADIUS,
+        }
+    }
+
+    pub fn bottom_foreground(side: Side) -> Rect {
+        let bg = bottom_background(side);
+
+        Rect {
+            x: bg.x - bg.radius,
+            y: bg.y - bg.radius,
+            width: 2.0 * bg.radius,
+            height: 2.0 * bg.radius,
+        }
+    }
+
+    fn x(side: Side) -> f64 {
+        let offset = match side {
+            Side::Left => -HORIZONTAL_MARGIN_FROM_CENTER,
+            Side::Right => HORIZONTAL_MARGIN_FROM_CENTER,
+        };
+
+        CENTER_X + offset
+    }
+}

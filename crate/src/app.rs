@@ -288,7 +288,7 @@ impl App {
             .expect("should choose character");
         let choices = BatchChoice::DequeueChoices(vec![human_dequeue, computer_dequeue]);
         let outcome = self.game.choose(choices).expect("should have outcome");
-        
+
         match outcome {
             Outcome::DequeuePhaseDone(dequeues) => {
                 self.phase = Phase::ChooseAction {
