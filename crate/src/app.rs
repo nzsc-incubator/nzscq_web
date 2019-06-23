@@ -242,7 +242,7 @@ impl App {
         let computer_booster = self
             .computer
             .choose_booster(&self.game)
-            .expect("should choose character");
+            .expect("should choose booster");
         let choices = BatchChoice::Boosters(vec![human_booster, computer_booster]);
 
         let outcome = self.game.choose(choices).expect("should have outcome");
@@ -265,7 +265,7 @@ impl App {
                     ),
                 }
             }
-            _ => panic!("outcome should be character outcome"),
+            _ => panic!("outcome should be booster outcome"),
         }
 
         self.start_animation();
@@ -285,7 +285,7 @@ impl App {
         let computer_dequeue = self
             .computer
             .choose_dequeue(&self.game)
-            .expect("should choose character");
+            .expect("should choose dequeue");
         let choices = BatchChoice::DequeueChoices(vec![human_dequeue, computer_dequeue]);
         let outcome = self.game.choose(choices).expect("should have outcome");
 
@@ -311,7 +311,7 @@ impl App {
                     ),
                 }
             }
-            _ => panic!("outcome should be character outcome"),
+            _ => panic!("outcome should be dequeue outcome"),
         }
 
         self.start_animation();
