@@ -13,7 +13,6 @@ pub const PILL_DISABLED_COLOR: Rgba = Rgba(0x72, 0x42, 0x42, 0xFF);
 pub const ARROW_COLOR: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
 
 pub const TRAPEZOID_BORDER_WIDTH: f64 = 2.0;
-pub const TRAPEZOID_BORDER: Rgba = Rgba(0x77, 0x77, 0x77, 0xFF);
 pub const TRAPEZOID_OUTCOME_SCREEN_BORDER: Rgba = Rgba(0x49, 0x49, 0x49, 0xFF);
 pub const TRAPEZOID_FILL: Rgba = BACKGROUND;
 

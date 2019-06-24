@@ -1,7 +1,7 @@
 use crate::paint::{ImageMap, ImageType};
 
 use js_sys::Function;
-use nzscq::choices::{Action, BatchChoices, Booster, Character, DequeueChoice, Move};
+use nzscq::choices::{Booster, Character, Move};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{console, HtmlImageElement};
 

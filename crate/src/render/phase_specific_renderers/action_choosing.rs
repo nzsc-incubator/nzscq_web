@@ -12,13 +12,13 @@ use crate::{
     },
     shapes::{
         dequeue_circle::{self, CirclePosition},
-        dequeue_foci, rect_button, rect_focus, Translate,
+        dequeue_foci,
     },
     side::Side,
 };
 
 use nzscq::{
-    choices::{Action as NzscAction, ArsenalItem, Booster, DequeueChoice},
+    choices::{Action as NzscAction, ArsenalItem, DequeueChoice},
     scoreboard::{ActionlessPlayer, DequeueingPlayer, Queue},
 };
 
@@ -553,11 +553,16 @@ fn dequeueing_pool_display_without_drainee(
             if Some(arsenal_item) == drainee {
                 vec![]
             } else {
-                arsenal_item_display(arsenal_item, drain_and_exit_enabled, None, CirclePosition {
-                    from: side,
-                    column: i % 3,
-                    row: i / 3,
-                })
+                arsenal_item_display(
+                    arsenal_item,
+                    drain_and_exit_enabled,
+                    None,
+                    CirclePosition {
+                        from: side,
+                        column: i % 3,
+                        row: i / 3,
+                    },
+                )
             }
         });
 
@@ -897,14 +902,18 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
                 None
             };
 
-            arsenal_item_display(arsenal_item, true, side
-                        .if_left(())
-                        .and(opt_move)
-                        .map(|m| Action::ChooseAction(NzscAction::Move(m))), CirclePosition {
-                from: side,
-                column,
-                row,
-            })
+            arsenal_item_display(
+                arsenal_item,
+                true,
+                side.if_left(())
+                    .and(opt_move)
+                    .map(|m| Action::ChooseAction(NzscAction::Move(m))),
+                CirclePosition {
+                    from: side,
+                    column,
+                    row,
+                },
+            )
         });
 
     pill.render().into_iter().chain(arsenal_items).collect()

@@ -89,7 +89,6 @@ pub mod rect_focus {
 
     const H_MARGIN: f64 = 200.0;
     const LEFT_X: f64 = H_MARGIN;
-    const RIGHT_INITIAL_X: f64 = canvas_dimensions::WIDTH;
     const RIGHT_FINAL_X: f64 = canvas_dimensions::WIDTH - H_MARGIN - WIDTH;
     const V_MARGIN: f64 = (canvas_dimensions::HEIGHT - HEIGHT) / 2.0;
     const WIDTH: f64 = 600.0;

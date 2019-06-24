@@ -3,8 +3,7 @@ use crate::{
     colors, helpers,
     paint::{Component, ImageType},
     render::{
-        arrow,
-        arsenal_item_display,
+        arrow, arsenal_item_display,
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
         lerp::{LerpableComponent, Lerper},
         pill::Pill,
@@ -14,13 +13,12 @@ use crate::{
     shapes::{
         action_focus,
         dequeue_circle::{self, CirclePosition},
-        dequeue_foci, rect_button, rect_focus, Translate,
     },
     side::Side,
 };
 
 use nzscq::{
-    choices::{Action as NzscAction, ArsenalItem, Booster, DequeueChoice},
+    choices::{Action as NzscAction, ArsenalItem, DequeueChoice},
     outcomes::ActionPointsDestroyed,
     scoreboard::{ActionlessPlayer, DequeueingPlayer, Queue},
 };
@@ -401,7 +399,7 @@ fn entering_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> V
 fn stationary_action(side: Side, visit: Option<ActionVisit>) -> Vec<Component> {
     visit
         .map(|visit| {
-            let ActionVisit { action, start, .. } = visit;
+            let ActionVisit { action, .. } = visit;
 
             match action {
                 NzscAction::Concede => panic!("optional visit should be None if Action is Concede"),
@@ -452,7 +450,7 @@ fn fading_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Vec
 
     visit
         .map(|visit| {
-            let ActionVisit { action, start, .. } = visit;
+            let ActionVisit { action, .. } = visit;
 
             match action {
                 NzscAction::Concede => panic!("optional visit should be None if Action is Concede"),
@@ -915,7 +913,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
 
                 vec![
                     Component::Circle {
-                        fill_color: colors::arsenal_item_color(arsenal_item),
+                        fill_color: colors::move_color(move_),
                         shape: dequeue_circle::background_at(side, row, column),
                         on_click: None,
                     },
@@ -926,7 +924,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
                         on_click: None,
                     },
                     Component::Image {
-                        image_type: ImageType::from(arsenal_item),
+                        image_type: ImageType::Move(move_),
                         alpha: 1.0,
                         // TODO shrink the move image
                         shape: dequeue_circle::foreground_at(side, row, column),
@@ -1038,11 +1036,6 @@ fn action_choosing_arsenal_display_without_used_item(
                 let row = i / 3;
                 let column = i % 3;
                 let row = row + row_offset;
-                let opt_move = if let ArsenalItem::Move(m) = arsenal_item {
-                    Some(m)
-                } else {
-                    None
-                };
 
                 vec![
                     Component::Circle {

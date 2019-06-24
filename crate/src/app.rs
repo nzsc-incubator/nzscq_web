@@ -15,12 +15,11 @@ use nzscq::{
     scoreboard::{ActionlessPlayer, DequeueingPlayer},
 };
 use wasm_bindgen::{prelude::*, JsCast};
-use web_sys::{CanvasRenderingContext2d, Document, HtmlCanvasElement, HtmlElement, Window};
+use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 
 #[wasm_bindgen]
 pub struct App {
     window: Window,
-    document: Document,
     body: HtmlElement,
     canvas: HtmlCanvasElement,
     ctx: CanvasRenderingContext2d,
@@ -35,7 +34,6 @@ pub struct App {
 impl App {
     const IDEAL_DIMENSIONS: (u32, u32) = (1800, 1000);
     const HUMAN: usize = 0;
-    const COMPUTER: usize = 1;
 }
 
 #[wasm_bindgen]
@@ -58,7 +56,6 @@ impl App {
 
         let mut app = App {
             window,
-            document,
             body,
             canvas,
             ctx,
