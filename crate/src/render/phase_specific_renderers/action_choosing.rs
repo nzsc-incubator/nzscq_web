@@ -87,17 +87,17 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
         } else {
             None
         };
-        let exiter =
-            self.previous_scoreboard[HUMAN]
-                .queue
-                .exit
-                .map(|exiter| ArsenalItemDisplacement {
-                    item: exiter,
-                    start: position_of(exiter, previous_human, Side::Left)
-                        .expect("exiter should have previous position"),
-                    end: position_of(exiter, current_human, Side::Left)
-                        .expect("exiter should have current position"),
-                });
+        let exiter = self.previous_scoreboard[HUMAN]
+            .queue
+            .exit
+            .filter(|_| self.previous_outcome[HUMAN] != DequeueChoice::Decline)
+            .map(|exiter| ArsenalItemDisplacement {
+                item: exiter,
+                start: position_of(exiter, previous_human, Side::Left)
+                    .expect("exiter should have previous position"),
+                end: position_of(exiter, current_human, Side::Left)
+                    .expect("exiter should have current position"),
+            });
 
         DequeueDisplacements { drainee, exiter }
     }
@@ -148,17 +148,17 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
         } else {
             None
         };
-        let exiter =
-            self.previous_scoreboard[COMPUTER]
-                .queue
-                .exit
-                .map(|exiter| ArsenalItemDisplacement {
-                    item: exiter,
-                    start: position_of(exiter, previous_computer, Side::Right)
-                        .expect("exiter should have previous position"),
-                    end: position_of(exiter, current_computer, Side::Right)
-                        .expect("exiter should have current position"),
-                });
+        let exiter = self.previous_scoreboard[COMPUTER]
+            .queue
+            .exit
+            .filter(|_| self.previous_outcome[COMPUTER] != DequeueChoice::Decline)
+            .map(|exiter| ArsenalItemDisplacement {
+                item: exiter,
+                start: position_of(exiter, previous_computer, Side::Right)
+                    .expect("exiter should have previous position"),
+                end: position_of(exiter, current_computer, Side::Right)
+                    .expect("exiter should have current position"),
+            });
 
         DequeueDisplacements { drainee, exiter }
     }
