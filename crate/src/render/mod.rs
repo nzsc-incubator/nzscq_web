@@ -1,4 +1,6 @@
 mod arrow;
+mod arsenal_item_display;
+pub use arsenal_item_display::arsenal_item_display;
 mod health_display;
 mod lerp;
 mod phase_specific_renderers;
