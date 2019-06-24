@@ -311,7 +311,7 @@ pub mod action_focus {
     const CENTER_X: f64 = 0.5 * canvas_dimensions::WIDTH;
     const CENTER_Y: f64 = 0.5 * canvas_dimensions::HEIGHT;
     const RADIUS: f64 = 360.0;
-    const EXPANDED_RADIUS: f64 = 400.0;
+    const EXPANDED_RADIUS: f64 = 500.0;
 
     pub fn background(side: Side) -> Circle {
         Circle {

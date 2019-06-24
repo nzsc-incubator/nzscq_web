@@ -6,6 +6,7 @@ pub const BACKGROUND: Rgba = Rgba(0xF1, 0xF1, 0xF1, 0xFF);
 pub const OVERLAY: Rgba = Rgba(0x33, 0x33, 0x33, 0xAA);
 pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 1.0 / (5.0 * 0.55);
 pub const PORTION_OF_DURATION_SPENT_POPPING: f64 = 0.6 / 1.1;
+pub const PORTION_OF_DURATION_DESTROYED_ITEM_SPENDS_POPPING: f64 = 0.5;
 pub const DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA: u8 = 0x80;
 pub const DECLINE_DEQUEUE_COLOR: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
 pub const PILL_ENABLED_COLOR: Rgba = Rgba(0x72, 0x72, 0x72, 0xFF);

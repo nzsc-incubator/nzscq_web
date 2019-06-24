@@ -508,126 +508,130 @@ fn fading_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Vec
 }
 
 fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Vec<Component> {
-    visit
-        .map(|visit| {
-            let ActionVisit { action, end, .. } = visit;
+    if let Some(visit) = visit {
+        let ActionVisit { action, end, .. } = visit;
+        match action {
+            NzscAction::Concede => panic!("optional visit should be None if Action is Concede"),
 
-            match action {
-                NzscAction::Concede => panic!("optional visit should be None if Action is Concede"),
+            NzscAction::Mirror(move_) => {
+                if let Some(end) = end {
+                    vec![
+                        LerpableComponent::Circle {
+                            start_color: colors::move_color(move_),
+                            end_color: colors::move_color(move_),
+                            start_shape: action_focus::background(side),
+                            end_shape: dequeue_circle::background_at(end.from, end.row, end.column),
+                            on_click: None,
+                        },
+                        LerpableComponent::Image {
+                            image_type: ImageType::Mirror,
+                            start_alpha: 1.0,
+                            end_alpha: 1.0,
+                            start_shape: action_focus::foreground(side),
+                            end_shape: dequeue_circle::foreground_at(end.from, end.row, end.column),
+                            on_click: None,
+                        },
+                        // TODO Shrink move image
+                        LerpableComponent::Image {
+                            image_type: ImageType::Move(move_),
+                            start_alpha: 1.0,
+                            end_alpha: 1.0,
+                            start_shape: action_focus::foreground(side),
+                            end_shape: dequeue_circle::foreground_at(end.from, end.row, end.column),
+                            on_click: None,
+                        },
+                    ]
+                    .into_iter()
+                    .map(|lerpable| lerper.lerp1(lerpable))
+                    .collect()
+                } else {
+                    let sublerper = lerper
+                        .sub_lerper(0.0..colors::PORTION_OF_DURATION_DESTROYED_ITEM_SPENDS_POPPING);
 
-                NzscAction::Mirror(move_) => {
-                    if let Some(end) = end {
-                        vec![
-                            LerpableComponent::Circle {
-                                start_color: colors::move_color(move_),
-                                end_color: colors::move_color(move_),
-                                start_shape: action_focus::background(side),
-                                end_shape: dequeue_circle::background_at(
-                                    end.from, end.row, end.column,
-                                ),
-                                on_click: None,
-                            },
-                            LerpableComponent::Image {
-                                image_type: ImageType::Mirror,
-                                start_alpha: 1.0,
-                                end_alpha: 1.0,
-                                start_shape: action_focus::foreground(side),
-                                end_shape: dequeue_circle::foreground_at(
-                                    end.from, end.row, end.column,
-                                ),
-                                on_click: None,
-                            },
-                            // TODO Shrink move image
-                            LerpableComponent::Image {
-                                image_type: ImageType::Move(move_),
-                                start_alpha: 1.0,
-                                end_alpha: 1.0,
-                                start_shape: action_focus::foreground(side),
-                                end_shape: dequeue_circle::foreground_at(
-                                    end.from, end.row, end.column,
-                                ),
-                                on_click: None,
-                            },
-                        ]
-                    } else {
-                        vec![
-                            LerpableComponent::Circle {
-                                start_color: colors::move_color(move_),
-                                end_color: colors::move_color(move_).with_alpha(0),
-                                start_shape: action_focus::background(side),
-                                end_shape: action_focus::expanded_background(side),
-                                on_click: None,
-                            },
-                            LerpableComponent::Image {
-                                image_type: ImageType::Mirror,
-                                start_alpha: 1.0,
-                                end_alpha: 0.0,
-                                start_shape: action_focus::foreground(side),
-                                end_shape: action_focus::expanded_foreground(side),
-                                on_click: None,
-                            },
-                            // TODO Shrink move image
-                            LerpableComponent::Image {
-                                image_type: ImageType::Move(move_),
-                                start_alpha: 1.0,
-                                end_alpha: 0.0,
-                                start_shape: action_focus::foreground(side),
-                                end_shape: action_focus::expanded_foreground(side),
-                                on_click: None,
-                            },
-                        ]
-                    }
-                }
-
-                NzscAction::Move(move_) => {
-                    if let Some(end) = end {
-                        vec![
-                            LerpableComponent::Circle {
-                                start_color: colors::move_color(move_),
-                                end_color: colors::move_color(move_),
-                                start_shape: action_focus::background(side),
-                                end_shape: dequeue_circle::background_at(
-                                    end.from, end.row, end.column,
-                                ),
-                                on_click: None,
-                            },
-                            LerpableComponent::Image {
-                                image_type: ImageType::Move(move_),
-                                start_alpha: 1.0,
-                                end_alpha: 1.0,
-                                start_shape: action_focus::foreground(side),
-                                end_shape: dequeue_circle::foreground_at(
-                                    end.from, end.row, end.column,
-                                ),
-                                on_click: None,
-                            },
-                        ]
-                    } else {
-                        vec![
-                            LerpableComponent::Circle {
-                                start_color: colors::move_color(move_),
-                                end_color: colors::move_color(move_).with_alpha(0),
-                                start_shape: action_focus::background(side),
-                                end_shape: action_focus::expanded_background(side),
-                                on_click: None,
-                            },
-                            LerpableComponent::Image {
-                                image_type: ImageType::Move(move_),
-                                start_alpha: 1.0,
-                                end_alpha: 0.0,
-                                start_shape: action_focus::foreground(side),
-                                end_shape: action_focus::expanded_foreground(side),
-                                on_click: None,
-                            },
-                        ]
-                    }
+                    vec![
+                        LerpableComponent::Circle {
+                            start_color: colors::move_color(move_),
+                            end_color: colors::move_color(move_).with_alpha(0),
+                            start_shape: action_focus::background(side),
+                            end_shape: action_focus::expanded_background(side),
+                            on_click: None,
+                        },
+                        LerpableComponent::Image {
+                            image_type: ImageType::Mirror,
+                            start_alpha: 1.0,
+                            end_alpha: 0.0,
+                            start_shape: action_focus::foreground(side),
+                            end_shape: action_focus::expanded_foreground(side),
+                            on_click: None,
+                        },
+                        // TODO Shrink move image
+                        LerpableComponent::Image {
+                            image_type: ImageType::Move(move_),
+                            start_alpha: 1.0,
+                            end_alpha: 0.0,
+                            start_shape: action_focus::foreground(side),
+                            end_shape: action_focus::expanded_foreground(side),
+                            on_click: None,
+                        },
+                    ]
+                    .into_iter()
+                    .map(|lerpable| sublerper.lerp1(lerpable))
+                    .collect()
                 }
             }
-        })
-        .into_iter()
-        .flatten()
-        .map(|lerpable: LerpableComponent| lerper.lerp1(lerpable))
-        .collect()
+
+            NzscAction::Move(move_) => {
+                if let Some(end) = end {
+                    vec![
+                        LerpableComponent::Circle {
+                            start_color: colors::move_color(move_),
+                            end_color: colors::move_color(move_),
+                            start_shape: action_focus::background(side),
+                            end_shape: dequeue_circle::background_at(end.from, end.row, end.column),
+                            on_click: None,
+                        },
+                        LerpableComponent::Image {
+                            image_type: ImageType::Move(move_),
+                            start_alpha: 1.0,
+                            end_alpha: 1.0,
+                            start_shape: action_focus::foreground(side),
+                            end_shape: dequeue_circle::foreground_at(end.from, end.row, end.column),
+                            on_click: None,
+                        },
+                    ]
+                    .into_iter()
+                    .map(|lerpable| lerper.lerp1(lerpable))
+                    .collect()
+                } else {
+                    let sublerper = lerper
+                        .sub_lerper(0.0..colors::PORTION_OF_DURATION_DESTROYED_ITEM_SPENDS_POPPING);
+
+                    vec![
+                        LerpableComponent::Circle {
+                            start_color: colors::move_color(move_),
+                            end_color: colors::move_color(move_).with_alpha(0),
+                            start_shape: action_focus::background(side),
+                            end_shape: action_focus::expanded_background(side),
+                            on_click: None,
+                        },
+                        LerpableComponent::Image {
+                            image_type: ImageType::Move(move_),
+                            start_alpha: 1.0,
+                            end_alpha: 0.0,
+                            start_shape: action_focus::foreground(side),
+                            end_shape: action_focus::expanded_foreground(side),
+                            on_click: None,
+                        },
+                    ]
+                    .into_iter()
+                    .map(|lerpable| sublerper.lerp1(lerpable))
+                    .collect()
+                }
+            }
+        }
+    } else {
+        vec![]
+    }
 }
 
 fn action_choosing_scoreboard_without_used_item(
