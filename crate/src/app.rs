@@ -276,6 +276,7 @@ impl App {
     fn handle_dequeue_choice(&mut self, human_dequeue: DequeueChoice) {
         let previous_scoreboard: [DequeueingPlayer; 2] = match &self.phase {
             Phase::ChooseFirstDequeue { scoreboard, .. } => scoreboard.clone(),
+            Phase::ChooseSubsequentDequeue { scoreboard, .. } => scoreboard.clone(),
             _ => panic!("should be on a dequeueing phase"),
         };
         let previously_available_dequeues = self

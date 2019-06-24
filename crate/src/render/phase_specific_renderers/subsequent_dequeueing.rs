@@ -586,9 +586,7 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
                                 end_color: colors::move_color(move_),
                                 start_shape: action_focus::background(side),
                                 end_shape: dequeue_circle::background_at(
-                                    end.from,
-                                    end.row,
-                                    end.column,
+                                    end.from, end.row, end.column,
                                 ),
                                 on_click: None,
                             },
@@ -598,9 +596,7 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
                                 end_alpha: 1.0,
                                 start_shape: action_focus::foreground(side),
                                 end_shape: dequeue_circle::foreground_at(
-                                    end.from,
-                                    end.row,
-                                    end.column,
+                                    end.from, end.row, end.column,
                                 ),
                                 on_click: None,
                             },
@@ -701,7 +697,9 @@ fn dequeueing_pool_display(args: &DequeueingRenderArgs) -> Vec<Component> {
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(arsenal_item),
                         shape: dequeue_circle::background_at(side, row, column),
-                        on_click: None,
+                        on_click: side.if_left(Action::ChooseDequeue(DequeueChoice::DrainAndExit(
+                            arsenal_item,
+                        ))),
                     },
                     Component::Image {
                         image_type: ImageType::from(arsenal_item),
@@ -801,7 +799,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
             Component::Circle {
                 fill_color: colors::DECLINE_DEQUEUE_COLOR,
                 shape: dequeue_circle::background_at(side, row, 1),
-                on_click: None,
+                on_click: side.if_left(Action::ChooseDequeue(DequeueChoice::Decline)),
             },
             Component::Image {
                 image_type: ImageType::DeclineDequeue,
@@ -816,7 +814,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(exiting_item),
                         shape: dequeue_circle::background_at(side, row, 2),
-                        on_click: None,
+                        on_click: side.if_left(Action::ChooseDequeue(DequeueChoice::JustExit)),
                     },
                     Component::Image {
                         image_type: ImageType::from(exiting_item),
@@ -978,7 +976,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(arsenal_item),
                         shape: dequeue_circle::background_at(side, row, column),
-                        on_click: side.if_left(Action::ChooseAction(NzscAction::Mirror(move_))),
+                        on_click: None,
                     },
                     Component::Image {
                         image_type: ImageType::Mirror,
@@ -1106,10 +1104,7 @@ fn action_choosing_arsenal_display_without_used_item(
                     Component::Circle {
                         fill_color: colors::arsenal_item_color(arsenal_item),
                         shape: dequeue_circle::background_at(side, row, column),
-                        on_click: side
-                            .if_left(())
-                            .and(opt_move)
-                            .map(|m| Action::ChooseAction(NzscAction::Move(m))),
+                        on_click: None,
                     },
                     Component::Image {
                         image_type: ImageType::from(arsenal_item),
