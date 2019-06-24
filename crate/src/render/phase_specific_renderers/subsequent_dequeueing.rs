@@ -764,7 +764,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
                 None,
                 CirclePosition {
                     from: side,
-                    column: 2,
+                    column: 0,
                     row,
                 },
             )
