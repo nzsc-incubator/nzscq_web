@@ -447,6 +447,8 @@ fn stationary_action(side: Side, visit: Option<ActionVisit>) -> Vec<Component> {
 }
 
 fn fading_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Vec<Component> {
+    let sublerper = lerper.sub_lerper(0.0..colors::PORTION_OF_DURATION_SPENT_FADING);
+
     visit
         .map(|visit| {
             let ActionVisit { action, start, .. } = visit;
@@ -502,7 +504,7 @@ fn fading_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Vec
         })
         .into_iter()
         .flatten()
-        .map(|lerpable: LerpableComponent| lerper.lerp1(lerpable))
+        .map(|lerpable: LerpableComponent| sublerper.lerp1(lerpable))
         .collect()
 }
 
