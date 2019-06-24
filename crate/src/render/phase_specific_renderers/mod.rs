@@ -8,3 +8,5 @@ mod first_dequeueing;
 pub use first_dequeueing::FirstDequeueingPhaseRenderer;
 mod action_choosing;
 pub use action_choosing::ActionChoosingPhaseRenderer;
+mod subsequent_dequeueing;
+pub use subsequent_dequeueing::SubsequentDequeueingPhaseRenderer;

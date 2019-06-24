@@ -594,7 +594,6 @@ fn dequeueing_pool_display_without_drainee(
                     ]
                 }
             }
-
         });
 
     pill.render().into_iter().chain(pool).collect()
@@ -1002,7 +1001,6 @@ fn action_choosing_arsenal_item_display(
     let CirclePosition { from, column, row } = position;
     let side = from;
     let fill_color = if enabled {
-
         colors::arsenal_item_color(item)
     } else {
         colors::arsenal_item_color(item).with_alpha(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA)

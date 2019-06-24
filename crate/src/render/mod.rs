@@ -9,6 +9,7 @@ use crate::{paint::Component, phase::Phase};
 use phase_specific_renderers::{
     ActionChoosingPhaseRenderer, BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer,
     CharacterRechoosingPhaseRenderer, FirstDequeueingPhaseRenderer,
+    SubsequentDequeueingPhaseRenderer,
 };
 
 pub trait Render {
@@ -78,7 +79,24 @@ impl Render for (f64, &Phase) {
                 previous_outcome,
                 scoreboard,
                 available_actions,
-            }.render(),
+            }
+            .render(),
+
+            Phase::ChooseSubsequentDequeue {
+                previous_scoreboard,
+                previously_available_actions,
+                previous_outcome,
+                scoreboard,
+                available_dequeues,
+            } => SubsequentDequeueingPhaseRenderer {
+                completion_factor,
+                previous_scoreboard,
+                previously_available_actions,
+                previous_outcome,
+                scoreboard,
+                available_dequeues,
+            }
+            .render(),
 
             _ => panic!("Phase renderer not implemented"),
         }

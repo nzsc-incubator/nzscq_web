@@ -182,9 +182,7 @@ impl App {
                 self.handle_dequeue_choice(human_dequeue)
             }
 
-            click::Action::ChooseAction(human_action) => {
-                self.handle_action_choice(human_action)
-            }
+            click::Action::ChooseAction(human_action) => self.handle_action_choice(human_action),
 
             click::Action::StopPropagation => {}
         }

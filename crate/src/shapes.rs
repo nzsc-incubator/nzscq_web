@@ -302,3 +302,62 @@ pub mod dequeue_foci {
         CENTER_X + offset
     }
 }
+
+pub mod action_focus {
+    use super::{Circle, Rect};
+    use crate::canvas_dimensions;
+    use crate::side::Side;
+
+    const HORIZONTAL_MARGIN_FROM_CENTER: f64 = 410.0;
+    const CENTER_X: f64 = 0.5 * canvas_dimensions::WIDTH;
+    const CENTER_Y: f64 = 0.5 * canvas_dimensions::HEIGHT;
+    const RADIUS: f64 = 360.0;
+    const EXPANDED_RADIUS: f64 = 400.0;
+
+    pub fn background(side: Side) -> Circle {
+        Circle {
+            x: x(side),
+            y: CENTER_Y,
+            radius: RADIUS,
+        }
+    }
+
+    pub fn foreground(side: Side) -> Rect {
+        let bg = background(side);
+
+        Rect {
+            x: bg.x - bg.radius,
+            y: bg.y - bg.radius,
+            width: 2.0 * bg.radius,
+            height: 2.0 * bg.radius,
+        }
+    }
+
+    pub fn expanded_background(side: Side) -> Circle {
+        Circle {
+            x: x(side),
+            y: CENTER_Y,
+            radius: EXPANDED_RADIUS,
+        }
+    }
+
+    pub fn expanded_foreground(side: Side) -> Rect {
+        let bg = expanded_background(side);
+
+        Rect {
+            x: bg.x - bg.radius,
+            y: bg.y - bg.radius,
+            width: 2.0 * bg.radius,
+            height: 2.0 * bg.radius,
+        }
+    }
+
+    fn x(side: Side) -> f64 {
+        let offset = match side {
+            Side::Left => -HORIZONTAL_MARGIN_FROM_CENTER,
+            Side::Right => HORIZONTAL_MARGIN_FROM_CENTER,
+        };
+
+        CENTER_X + offset
+    }
+}
