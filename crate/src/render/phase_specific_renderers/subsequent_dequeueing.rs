@@ -141,7 +141,6 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.fading_health_display(&lerper),
                 action_choosing_scoreboard_without_used_item(
                     self.action_choosing_human_args(),
                     self.human_action_displacement()
@@ -155,6 +154,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
+                self.fading_health_display(&lerper),
                 if self.did_computer_get_point() {
                     fading_action(Side::Left, self.human_action_displacement(), &lerper)
                 } else {
