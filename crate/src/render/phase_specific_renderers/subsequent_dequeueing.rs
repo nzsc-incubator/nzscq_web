@@ -770,10 +770,21 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
         height_in_rows: 1,
         enabled: true,
     };
+    let exit_pill = Pill {
+        position: CirclePosition {
+            from: side,
+            column: 2,
+            row: pool_height_in_rows,
+        },
+        width_in_columns: 1,
+        height_in_rows: 1,
+        enabled: just_exit_enabled,
+    };
 
     vec![
         Some(background_pill.render()),
         Some(decline_and_exit_pill.render()),
+        Some(exit_pill.render()),
         entrance.map(|entering_item| {
             vec![
                 Component::Circle {
