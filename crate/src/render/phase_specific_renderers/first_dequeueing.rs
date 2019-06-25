@@ -85,7 +85,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_booster);
 
             components
@@ -136,7 +136,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_booster);
             components.extend(components_displaying_computer_booster);
 
@@ -181,7 +181,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_booster);
             components.extend(components_displaying_computer_booster);
 
@@ -240,7 +240,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_booster);
             components.extend(components_displaying_computer_booster);
 
@@ -290,7 +290,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.health_display(),
+                self.health_displays(),
                 self.human_scoreboard_display()
                     .into_iter()
                     .map(|component| component.translate(lerper.lerp(-553.2, 0.0), 0.0))
@@ -330,12 +330,21 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
         .collect()
     }
 
-    fn health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: helpers::opponent_points_to_own_health(self.computer_points()),
-            computer_health: helpers::opponent_points_to_own_health(self.human_points()),
-        }
-        .render()
+    fn health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: helpers::opponent_points_to_own_health(self.computer_points()),
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: helpers::opponent_points_to_own_health(self.human_points()),
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 
     fn human_points(&self) -> u8 {

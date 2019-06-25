@@ -8,6 +8,7 @@ use crate::{
         Render,
     },
     shapes::{rect_button, Translate},
+    side::Side,
 };
 
 use nzscq::choices::Character;
@@ -51,15 +52,24 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
             .map(|lerpable| lerper.lerp1(lerpable))
             .collect();
         components.extend(character_buttons);
-        components.extend(self.health_display());
+        components.extend(self.health_displays());
         components
     }
 
-    fn health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: 5,
-            computer_health: 5,
-        }
-        .render()
+    fn health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: 5,
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: 5,
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 }

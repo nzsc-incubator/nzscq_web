@@ -57,7 +57,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.previous_health_display(),
+                self.previous_health_displays(),
                 action_choosing_scoreboard_without_used_item(
                     self.action_choosing_human_args(),
                     self.human_action_displacement()
@@ -96,7 +96,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.previous_health_display(),
+                self.previous_health_displays(),
                 action_choosing_scoreboard_without_used_item(
                     self.action_choosing_human_args(),
                     self.human_action_displacement()
@@ -153,7 +153,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
-                self.fading_health_display(&lerper),
+                self.fading_health_displays(&lerper),
                 if self.did_computer_get_point() {
                     fading_action(Side::Left, self.human_action_displacement(), &lerper)
                 } else {
@@ -177,7 +177,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.current_health_display(),
+                self.current_health_displays(),
                 action_choosing_scoreboard_without_used_item(
                     self.action_choosing_human_args(),
                     self.human_action_displacement()
@@ -214,7 +214,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.current_health_display(),
+                self.current_health_displays(),
                 dequeueing_scoreboard(self.dequeueing_human_args()),
                 dequeueing_scoreboard(self.dequeueing_computer_args()),
             ]
@@ -256,31 +256,72 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
         }
     }
 
-    fn previous_health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: self.previous_human_health(),
-            computer_health: self.previous_computer_health(),
-        }
-        .render()
+    fn previous_health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: self.previous_human_health(),
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: self.previous_computer_health(),
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 
-    fn fading_health_display(&self, lerper: &Lerper) -> Vec<Component> {
-        lerper.lerp1(FadingHealthDisplay {
-            previous_human_health: self.previous_human_health(),
-            previous_computer_health: self.previous_computer_health(),
-            is_human_losing_a_heart: self.did_computer_get_point(),
-            is_computer_losing_a_heart: self.did_human_get_point(),
-        })
+    fn fading_health_displays(&self, lerper: &Lerper) -> Vec<Component> {
+        let human_components = if self.did_computer_get_point() {
+            lerper.lerp1(FadingHealthDisplay {
+                side: Side::Left,
+                starting_health: self.previous_human_health(),
+            })
+        } else {
+            ConstantHealthDisplay {
+                side: Side::Left,
+                health: self.previous_human_health(),
+            }
+            .render()
+        };
+        let computer_components = if self.did_human_get_point() {
+            lerper.lerp1(FadingHealthDisplay {
+                side: Side::Right,
+                starting_health: self.previous_computer_health(),
+            })
+        } else {
+            ConstantHealthDisplay {
+                side: Side::Right,
+                health: self.previous_computer_health(),
+            }
+            .render()
+        };
+
+        vec![human_components, computer_components]
+            .into_iter()
+            .flatten()
+            .collect()
     }
 
-    fn current_health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: self.previous_human_health()
+    fn current_health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: self.previous_human_health()
                 - if self.did_computer_get_point() { 1 } else { 0 },
-            computer_health: self.previous_computer_health()
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: self.previous_computer_health()
                 - if self.did_human_get_point() { 1 } else { 0 },
-        }
-        .render()
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 
     fn previous_human_health(&self) -> u8 {

@@ -9,6 +9,7 @@ use crate::{
         Render,
     },
     shapes::{rect_button, rect_focus},
+    side::Side,
 };
 
 use nzscq::choices::Character;
@@ -76,7 +77,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_character);
 
             components
@@ -127,7 +128,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -172,7 +173,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -231,7 +232,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -267,7 +268,7 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
                 .flatten()
                 .collect();
             components.extend(character_buttons);
-            components.extend(self.health_display());
+            components.extend(self.health_displays());
             components
         }
     }
@@ -300,11 +301,20 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
             .collect()
     }
 
-    fn health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: 5,
-            computer_health: 5,
-        }
-        .render()
+    fn health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: 5,
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: 5,
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 }

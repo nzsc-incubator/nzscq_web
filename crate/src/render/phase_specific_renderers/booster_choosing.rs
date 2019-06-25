@@ -9,6 +9,7 @@ use crate::{
         Render,
     },
     shapes::{rect_button, rect_focus},
+    side::Side,
 };
 
 use nzscq::{
@@ -79,7 +80,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.previous_health_display());
+            components.extend(self.previous_health_displays());
             components.extend(components_displaying_human_character);
 
             components
@@ -130,7 +131,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.previous_health_display());
+            components.extend(self.previous_health_displays());
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -207,7 +208,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(lerper.lerp1(self.fading_health_display()));
+            components.extend(self.fading_health_displays(&lerper));
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -276,7 +277,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
             components.push(overlay);
-            components.extend(self.current_health_display());
+            components.extend(self.current_health_displays());
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -319,7 +320,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 .map(|lerpable| lerper.lerp1(lerpable))
                 .collect();
             components.extend(booster_buttons);
-            components.extend(self.current_health_display());
+            components.extend(self.current_health_displays());
             components
         }
     }
@@ -360,29 +361,70 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
         self.previous_outcome[COMPUTER].0
     }
 
-    fn previous_health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: self.previous_human_health(),
-            computer_health: self.previous_computer_health(),
-        }
-        .render()
+    fn previous_health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: 5,
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: 5,
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 
-    fn fading_health_display(&self) -> FadingHealthDisplay {
-        FadingHealthDisplay {
-            previous_human_health: self.previous_human_health(),
-            previous_computer_health: self.previous_computer_health(),
-            is_human_losing_a_heart: self.did_computer_get_point(),
-            is_computer_losing_a_heart: self.did_human_get_point(),
-        }
+    fn fading_health_displays(&self, lerper: &Lerper) -> Vec<Component> {
+        let human_components = if self.did_computer_get_point() {
+            lerper.lerp1(FadingHealthDisplay {
+                side: Side::Left,
+                starting_health: 5,
+            })
+        } else {
+            ConstantHealthDisplay {
+                side: Side::Left,
+                health: 5,
+            }
+            .render()
+        };
+        let computer_components = if self.did_human_get_point() {
+            lerper.lerp1(FadingHealthDisplay {
+                side: Side::Right,
+                starting_health: 5,
+            })
+        } else {
+            ConstantHealthDisplay {
+                side: Side::Right,
+                health: 5,
+            }
+            .render()
+        };
+
+        vec![human_components, computer_components]
+            .into_iter()
+            .flatten()
+            .collect()
     }
 
-    fn current_health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: self.human_health(),
-            computer_health: self.computer_health(),
-        }
-        .render()
+    fn current_health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: self.human_health(),
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: self.computer_health(),
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 
     fn human_health(&self) -> u8 {

@@ -1,76 +1,58 @@
 use super::Render;
 use crate::paint::{Path, PathCommand, Stroke};
+use crate::side::Side;
 
 pub struct ConstantHealthDisplay {
-    pub human_health: u8,
-    pub computer_health: u8,
+    pub side: Side,
+    pub health: u8,
 }
 
 impl Render for ConstantHealthDisplay {
     fn render(&self) -> Vec<Component> {
-        let human_hearts: Vec<Component> = (0..self.human_health as usize)
+        let hearts = (0..self.health as usize)
             .into_iter()
-            .map(|i| left_heart_at(i).case(0.0).expect("should find a case"))
-            .flatten()
-            .collect();
-        let computer_hearts: Vec<Component> = (0..self.computer_health as usize)
-            .into_iter()
-            .map(|i| right_heart_at(i).case(0.0).expect("should find a case"))
-            .flatten()
-            .collect();
+            .map(|i| {
+                heart_from_position(HeartPosition {
+                    side: self.side,
+                    index: i,
+                })
+                .case(0.0)
+                .expect("should find a case")
+            })
+            .flatten();
+        let trapezoid = HealthTrapezoid { side: self.side };
 
-        vec![HealthTrapezoids.render(), human_hearts, computer_hearts]
-            .into_iter()
-            .flatten()
-            .collect()
+        trapezoid.render().into_iter().chain(hearts).collect()
     }
 }
 
 pub struct FadingHealthDisplay {
-    pub previous_human_health: u8,
-    pub previous_computer_health: u8,
-    pub is_human_losing_a_heart: bool,
-    pub is_computer_losing_a_heart: bool,
+    pub side: Side,
+    pub starting_health: u8,
 }
 
 impl LerpInto<Vec<Component>> for FadingHealthDisplay {
     fn lerp_into(self, lerper: &Lerper) -> Vec<Component> {
         let sublerper = lerper.sub_lerper(0.0..colors::PORTION_OF_DURATION_SPENT_POPPING);
-        let human_hearts: Vec<Component> = (0..self.previous_human_health)
+        let hearts = (0..self.starting_health)
             .into_iter()
             .map(|i| {
-                let completion_factor =
-                    if i == self.previous_human_health - 1 && self.is_human_losing_a_heart {
-                        sublerper.lerp(0.0, 1.0)
-                    } else {
-                        0.0
-                    };
-                left_heart_at(i as usize)
-                    .case(completion_factor)
-                    .expect("should find a case")
+                let completion_factor = if i == self.starting_health - 1 {
+                    sublerper.lerp(0.0, 1.0)
+                } else {
+                    0.0
+                };
+                heart_from_position(HeartPosition {
+                    side: self.side,
+                    index: i as usize,
+                })
+                .case(completion_factor)
+                .expect("should find a case")
             })
-            .flatten()
-            .collect();
-        let computer_hearts: Vec<Component> = (0..self.previous_computer_health)
-            .into_iter()
-            .map(|i| {
-                let completion_factor =
-                    if i == self.previous_computer_health - 1 && self.is_computer_losing_a_heart {
-                        sublerper.lerp(0.0, 1.0)
-                    } else {
-                        0.0
-                    };
-                right_heart_at(i as usize)
-                    .case(completion_factor)
-                    .expect("should find a case")
-            })
-            .flatten()
-            .collect();
+            .flatten();
+        let trapezoid = HealthTrapezoid { side: self.side };
 
-        vec![HealthTrapezoids.render(), human_hearts, computer_hearts]
-            .into_iter()
-            .flatten()
-            .collect()
+        trapezoid.render().into_iter().chain(hearts).collect()
     }
 }
 
@@ -87,14 +69,6 @@ use crate::{
 const LEFT_0_CENTER: (f64, f64) = (80.0, 50.0);
 const RIGHT_0_CENTER: (f64, f64) = (1720.0, 50.0);
 const SIZE: f64 = 80.0;
-
-fn left_heart_at(index: usize) -> impl Switch {
-    heart_from_position(HeartPosition::FromLeft(index))
-}
-
-fn right_heart_at(index: usize) -> impl Switch {
-    heart_from_position(HeartPosition::FromRight(index))
-}
 
 fn heart_from_position(position: HeartPosition) -> impl Switch {
     Switch4(
@@ -142,54 +116,41 @@ fn heart_from_position(position: HeartPosition) -> impl Switch {
 }
 
 fn scale_heart(position: &HeartPosition, scale: f64) -> Rect {
-    match position {
-        HeartPosition::FromLeft(index) => Into::<Rect>::into(CenteredRect {
+    match position.side {
+        Side::Left => Into::<Rect>::into(CenteredRect {
             x: LEFT_0_CENTER.0,
             y: LEFT_0_CENTER.1,
             width: scale * SIZE,
             height: scale * SIZE,
         })
-        .translate(*index as f64 * SIZE, 0.0),
+        .translate(position.index as f64 * SIZE, 0.0),
 
-        HeartPosition::FromRight(index) => Into::<Rect>::into(CenteredRect {
+        Side::Right => Into::<Rect>::into(CenteredRect {
             x: RIGHT_0_CENTER.0,
             y: RIGHT_0_CENTER.1,
             width: scale * SIZE,
             height: scale * SIZE,
         })
-        .translate(*index as f64 * -SIZE, 0.0),
+        .translate(position.index as f64 * -SIZE, 0.0),
     }
 }
 
 #[derive(Debug, Clone, Copy)]
-enum HeartPosition {
-    FromLeft(usize),
-    FromRight(usize),
-}
-
-struct HealthTrapezoids;
-
-impl Render for HealthTrapezoids {
-    fn render(&self) -> Vec<Component> {
-        HealthTrapezoid::Left
-            .render()
-            .into_iter()
-            .chain(HealthTrapezoid::Right.render())
-            .collect()
-    }
+struct HeartPosition {
+    side: Side,
+    index: usize,
 }
 
 #[derive(Debug, Clone, Copy)]
-enum HealthTrapezoid {
-    Left,
-    Right,
+struct HealthTrapezoid {
+    side: Side,
 }
 
 impl Render for HealthTrapezoid {
     fn render(&self) -> Vec<Component> {
-        let dx = match self {
-            HealthTrapezoid::Left => 20.0,
-            HealthTrapezoid::Right => 1340.0,
+        let dx = match self.side {
+            Side::Left => 20.0,
+            Side::Right => 1340.0,
         };
 
         vec![Component::UnclickablePath {

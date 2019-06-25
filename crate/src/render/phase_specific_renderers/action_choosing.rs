@@ -56,7 +56,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.health_display(),
+                self.health_displays(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
                     self.human_dequeue_displacements(),
@@ -108,7 +108,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.health_display(),
+                self.health_displays(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
                     self.human_dequeue_displacements(),
@@ -169,7 +169,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.health_display(),
+                self.health_displays(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
                     self.human_dequeue_displacements(),
@@ -196,7 +196,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.health_display(),
+                self.health_displays(),
                 dequeueing_scoreboard_without_dequeued_items(
                     self.dequeueing_human_args(),
                     self.human_dequeue_displacements(),
@@ -223,7 +223,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 vec![Component::Background {
                     color: colors::BACKGROUND,
                 }],
-                self.health_display(),
+                self.health_displays(),
                 action_choosing_scoreboard(self.actionless_human_args()),
                 action_choosing_scoreboard(self.actionless_computer_args()),
             ]
@@ -265,12 +265,21 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
         }
     }
 
-    fn health_display(&self) -> Vec<Component> {
-        ConstantHealthDisplay {
-            human_health: helpers::opponent_points_to_own_health(self.computer_points()),
-            computer_health: helpers::opponent_points_to_own_health(self.human_points()),
-        }
-        .render()
+    fn health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: helpers::opponent_points_to_own_health(self.computer_points()),
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: helpers::opponent_points_to_own_health(self.human_points()),
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render())
+            .flatten()
+            .collect()
     }
 
     fn human_points(&self) -> u8 {
