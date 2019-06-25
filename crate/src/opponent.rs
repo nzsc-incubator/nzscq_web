@@ -54,7 +54,7 @@ impl<T: Random> Opponent<T> {
         let len = choices.len() as f64;
         let index = len * self.prng.random();
 
-        choices.remove(0 as usize)
+        choices.remove(index as usize)
     }
 }
 
