@@ -13,7 +13,6 @@ use crate::{
     shapes::{
         action_focus,
         dequeue_circle::{self, CirclePosition},
-        Circle, Rect,
     },
     side::Side,
 };

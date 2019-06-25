@@ -469,14 +469,6 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
     fn did_human_get_point(&self) -> bool {
         self.previous_outcome[HUMAN].1 > 0
     }
-
-    fn previous_human_health(&self) -> u8 {
-        5
-    }
-
-    fn previous_computer_health(&self) -> u8 {
-        5
-    }
 }
 
 const HUMAN: usize = 0;
