@@ -10,7 +10,7 @@ mod switch;
 use crate::{paint::Component, phase::Phase};
 use phase_specific_renderers::{
     ActionChoosingPhaseRenderer, BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer,
-    CharacterRechoosingPhaseRenderer, FirstDequeueingPhaseRenderer,
+    CharacterRechoosingPhaseRenderer, FirstDequeueingPhaseRenderer, GameOverPhaseRenderer,
     SubsequentDequeueingPhaseRenderer,
 };
 
@@ -100,7 +100,18 @@ impl Render for (f64, &Phase) {
             }
             .render(),
 
-            _ => panic!("Phase renderer not implemented"),
+            Phase::GameOver {
+        previous_scoreboard,
+        previously_available_actions,
+        previous_outcome,
+        scoreboard,
+    } => GameOverPhaseRenderer {
+        completion_factor,
+        previous_scoreboard,
+        previously_available_actions,
+        previous_outcome,
+        scoreboard,
+    }.render()
         }
     }
 }

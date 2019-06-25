@@ -181,6 +181,8 @@ impl App {
 
             click::Action::ChooseAction(human_action) => self.handle_action_choice(human_action),
 
+            click::Action::NavigateHome => panic!("TODO Handle NavigateHome"),
+
             click::Action::StopPropagation => {}
         }
     }
@@ -322,11 +324,11 @@ impl App {
             Phase::ChooseAction { scoreboard, .. } => scoreboard.clone(),
             _ => panic!("should be on action-choosing phase"),
         };
-        let previously_available_actions = self
+        let previously_available_actions = helpers::vec2_to_arr2(self
             .game
             .choices()
             .actions()
-            .expect("should be on action-choosing phase");
+            .expect("should be on action-choosing phase"));
 
         let computer_action = self
             .computer
@@ -339,9 +341,7 @@ impl App {
             Outcome::ActionPhaseDone(action_points_destroyed) => {
                 self.phase = Phase::ChooseSubsequentDequeue {
                     previous_scoreboard,
-                    previously_available_actions: helpers::vec2_to_arr2(
-                        previously_available_actions,
-                    ),
+                    previously_available_actions,
                     previous_outcome: helpers::vec2_to_arr2(action_points_destroyed),
                     scoreboard: helpers::vec2_to_arr2(
                         self.game
@@ -358,7 +358,14 @@ impl App {
                 }
             }
 
-            Outcome::GameOver(_) => panic!("TODO Handle GameOver"),
+            Outcome::GameOver(action_points_destroyed) => {
+                self.phase = Phase::GameOver {
+                    previous_scoreboard,
+                    previously_available_actions,
+                    previous_outcome: helpers::vec2_to_arr2(action_points_destroyed),
+                    scoreboard: helpers::vec2_to_arr2(self.game.scoreboard().final_().expect("game should be over")),
+                }
+            },
 
             _ => panic!("outcome should be action outcome"),
         }

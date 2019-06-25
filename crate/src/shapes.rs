@@ -360,3 +360,24 @@ pub mod action_focus {
         CENTER_X + offset
     }
 }
+
+pub mod home_button {
+    use super::{Circle, Translate};
+    use crate::canvas_dimensions;
+
+    const RADIUS: f64 = 120.0;
+    const CENTER_X: f64 = 0.5 * canvas_dimensions::WIDTH;
+    const CENTER_Y: f64 = 0.5 * canvas_dimensions::HEIGHT;
+
+    pub fn start() -> Circle {
+        end().translate(0.0, RADIUS + CENTER_Y)
+    }
+
+    pub fn end() -> Circle {
+        Circle {
+            x: CENTER_X,
+            y: CENTER_Y,
+            radius: RADIUS,
+        }
+    }
+}

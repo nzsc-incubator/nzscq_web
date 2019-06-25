@@ -10,3 +10,5 @@ mod action_choosing;
 pub use action_choosing::ActionChoosingPhaseRenderer;
 mod subsequent_dequeueing;
 pub use subsequent_dequeueing::SubsequentDequeueingPhaseRenderer;
+mod game_over;
+pub use game_over::GameOverPhaseRenderer;
