@@ -1,10 +1,10 @@
 use crate::{
-    click::Action,
     colors, helpers,
     paint::{Component, ImageType},
     render::{
         arrow, arsenal_item_display,
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
+        home_button,
         lerp::{LerpableComponent, Lerper},
         pill::Pill,
         switch::{Switch, Switch5},
@@ -13,7 +13,7 @@ use crate::{
     shapes::{
         action_focus,
         dequeue_circle::{self, CirclePosition},
-        home_button,
+        Circle, Rect,
     },
     side::Side,
 };
@@ -353,12 +353,14 @@ impl<'a> GameOverPhaseRenderer<'a> {
             ConstantHealthDisplay {
                 side: Side::Right,
                 health: 0,
-            }.render()
+            }
+            .render()
         } else {
             ConstantHealthDisplay {
                 side: Side::Left,
                 health: 0,
-            }.render()
+            }
+            .render()
         }
     }
 
@@ -373,7 +375,8 @@ impl<'a> GameOverPhaseRenderer<'a> {
                 side: Side::Right,
                 health: helpers::opponent_points_to_own_health(self.scoreboard[HUMAN].points),
             }
-        }.render()
+        }
+        .render()
     }
 
     fn previous_human_health(&self) -> u8 {
@@ -412,7 +415,9 @@ fn action_choosing_scoreboard_without_used_item<T: QueueArsenal>(
     .collect()
 }
 
-fn action_choosing_scoreboard<T: QueueArsenal>(args: ActionChoosingRenderArgs<T>) -> Vec<Component> {
+fn action_choosing_scoreboard<T: QueueArsenal>(
+    args: ActionChoosingRenderArgs<T>,
+) -> Vec<Component> {
     vec![
         action_choosing_pool_display(&args),
         action_choosing_entrance_and_exit_display(&args),
@@ -424,7 +429,9 @@ fn action_choosing_scoreboard<T: QueueArsenal>(args: ActionChoosingRenderArgs<T>
     .collect()
 }
 
-fn action_choosing_pool_display<T: QueueArsenal>(args: &ActionChoosingRenderArgs<T>) -> Vec<Component> {
+fn action_choosing_pool_display<T: QueueArsenal>(
+    args: &ActionChoosingRenderArgs<T>,
+) -> Vec<Component> {
     let ActionChoosingRenderArgs {
         player,
         side,
@@ -505,7 +512,9 @@ fn action_choosing_pool_display<T: QueueArsenal>(args: &ActionChoosingRenderArgs
     pill.render().into_iter().chain(pool).collect()
 }
 
-fn action_choosing_entrance_and_exit_display<T: QueueArsenal>(args: &ActionChoosingRenderArgs<T>) -> Vec<Component> {
+fn action_choosing_entrance_and_exit_display<T: QueueArsenal>(
+    args: &ActionChoosingRenderArgs<T>,
+) -> Vec<Component> {
     let ActionChoosingRenderArgs { player, side, .. } = args;
     let side = *side;
 
@@ -558,7 +567,9 @@ fn action_choosing_entrance_and_exit_display<T: QueueArsenal>(args: &ActionChoos
     .collect()
 }
 
-fn action_choosing_arsenal_display<T: QueueArsenal>(args: &ActionChoosingRenderArgs<T>) -> Vec<Component> {
+fn action_choosing_arsenal_display<T: QueueArsenal>(
+    args: &ActionChoosingRenderArgs<T>,
+) -> Vec<Component> {
     action_choosing_arsenal_display_without_used_item(args, None)
 }
 
@@ -637,7 +648,11 @@ fn arrows<T: ArrowRenderArgs>(args: &T) -> Vec<Component> {
         .collect()
 }
 
-fn position_of<T: QueueArsenal>(item: ArsenalItem, player: &T, side: Side) -> Option<CirclePosition> {
+fn position_of<T: QueueArsenal>(
+    item: ArsenalItem,
+    player: &T,
+    side: Side,
+) -> Option<CirclePosition> {
     let index = player
         .queue()
         .pool
@@ -1015,19 +1030,6 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
     } else {
         vec![]
     }
-}
-
-fn home_button(lerper: &Lerper) -> Vec<Component> {
-    // TODO design better home button
-    vec![
-        lerper.lerp1(LerpableComponent::Circle {
-            start_color: colors::HOME_BUTTON,
-            end_color: colors::HOME_BUTTON,
-            start_shape: home_button::start(),
-            end_shape: home_button::end(),
-            on_click: Some(Action::NavigateHome),
-        })
-    ]
 }
 
 trait QueueArsenal: Sized {

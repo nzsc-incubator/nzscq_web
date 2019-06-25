@@ -324,11 +324,12 @@ impl App {
             Phase::ChooseAction { scoreboard, .. } => scoreboard.clone(),
             _ => panic!("should be on action-choosing phase"),
         };
-        let previously_available_actions = helpers::vec2_to_arr2(self
-            .game
-            .choices()
-            .actions()
-            .expect("should be on action-choosing phase"));
+        let previously_available_actions = helpers::vec2_to_arr2(
+            self.game
+                .choices()
+                .actions()
+                .expect("should be on action-choosing phase"),
+        );
 
         let computer_action = self
             .computer
@@ -363,9 +364,14 @@ impl App {
                     previous_scoreboard,
                     previously_available_actions,
                     previous_outcome: helpers::vec2_to_arr2(action_points_destroyed),
-                    scoreboard: helpers::vec2_to_arr2(self.game.scoreboard().final_().expect("game should be over")),
+                    scoreboard: helpers::vec2_to_arr2(
+                        self.game
+                            .scoreboard()
+                            .final_()
+                            .expect("game should be over"),
+                    ),
                 }
-            },
+            }
 
             _ => panic!("outcome should be action outcome"),
         }

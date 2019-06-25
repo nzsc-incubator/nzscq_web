@@ -32,24 +32,33 @@ pub struct Circle {
 }
 
 pub trait Translate {
-    fn translate(&self, x: f64, y: f64) -> Self;
+    fn translate(&self, dx: f64, dy: f64) -> Self;
+}
+
+impl<T: Translate + Clone> Translate for Vec<T> {
+    fn translate(&self, dx: f64, dy: f64) -> Vec<T> {
+        self.iter()
+            .cloned()
+            .map(|item| item.translate(dx, dy))
+            .collect()
+    }
 }
 
 impl Translate for Rect {
-    fn translate(&self, x: f64, y: f64) -> Rect {
+    fn translate(&self, dx: f64, dy: f64) -> Rect {
         Rect {
-            x: self.x + x,
-            y: self.y + y,
+            x: self.x + dx,
+            y: self.y + dy,
             ..*self
         }
     }
 }
 
 impl Translate for Circle {
-    fn translate(&self, x: f64, y: f64) -> Circle {
+    fn translate(&self, dx: f64, dy: f64) -> Circle {
         Circle {
-            x: self.x + x,
-            y: self.y + y,
+            x: self.x + dx,
+            y: self.y + dy,
             ..*self
         }
     }
@@ -358,26 +367,5 @@ pub mod action_focus {
         };
 
         CENTER_X + offset
-    }
-}
-
-pub mod home_button {
-    use super::{Circle, Translate};
-    use crate::canvas_dimensions;
-
-    const RADIUS: f64 = 120.0;
-    const CENTER_X: f64 = 0.5 * canvas_dimensions::WIDTH;
-    const CENTER_Y: f64 = 0.5 * canvas_dimensions::HEIGHT;
-
-    pub fn start() -> Circle {
-        end().translate(0.0, RADIUS + CENTER_Y)
-    }
-
-    pub fn end() -> Circle {
-        Circle {
-            x: CENTER_X,
-            y: CENTER_Y,
-            radius: RADIUS,
-        }
     }
 }

@@ -29,7 +29,7 @@ pub enum Action {
     ChooseAction(choices::Action),
 
     NavigateHome,
-    
+
     StopPropagation,
 }
 

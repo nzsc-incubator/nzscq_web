@@ -2,6 +2,8 @@ mod arrow;
 mod arsenal_item_display;
 pub use arsenal_item_display::arsenal_item_display;
 mod health_display;
+mod home_button;
+pub use home_button::home_button;
 mod lerp;
 mod phase_specific_renderers;
 mod pill;
@@ -101,17 +103,18 @@ impl Render for (f64, &Phase) {
             .render(),
 
             Phase::GameOver {
-        previous_scoreboard,
-        previously_available_actions,
-        previous_outcome,
-        scoreboard,
-    } => GameOverPhaseRenderer {
-        completion_factor,
-        previous_scoreboard,
-        previously_available_actions,
-        previous_outcome,
-        scoreboard,
-    }.render()
+                previous_scoreboard,
+                previously_available_actions,
+                previous_outcome,
+                scoreboard,
+            } => GameOverPhaseRenderer {
+                completion_factor,
+                previous_scoreboard,
+                previously_available_actions,
+                previous_outcome,
+                scoreboard,
+            }
+            .render(),
         }
     }
 }
