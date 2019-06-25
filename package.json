@@ -1,9 +1,8 @@
 {
-  "author": "Nick Fitzgerald <nfitzgerald@mozilla.com>",
-  "name": "create-rust-webpack",
-  "version": "0.2.0",
-  "repository": "https://github.com/rustwasm/rust-webpack-template",
-  "license": "(MIT OR Apache-2.0)",
+  "author": "Kyle Lin <kylejlin.us@gmail.com>",
+  "name": "nzscq_web",
+  "version": "0.1.0",
+  "repository": "https://github.com/nzsc-incubator/nzscq_web",
   "scripts": {
     "start": "webpack-dev-server -d",
     "build": "webpack",
