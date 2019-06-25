@@ -150,10 +150,11 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                     self.computer_action_displacement()
                         .and_then(|displacement| displacement.action.into()),
                 ),
+                self.fade_case_non_fading_health_displays(),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
-                self.fading_health_displays(&lerper),
+                self.fade_case_fading_health_displays(&lerper),
                 if self.did_computer_get_point() {
                     fading_action(Side::Left, self.human_action_displacement(), &lerper)
                 } else {
@@ -273,12 +274,33 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
             .collect()
     }
 
-    fn fading_health_displays(&self, lerper: &Lerper) -> Vec<Component> {
+    fn fade_case_fading_health_displays(&self, lerper: &Lerper) -> Vec<Component> {
         let human_components = if self.did_computer_get_point() {
             lerper.lerp1(FadingHealthDisplay {
                 side: Side::Left,
                 starting_health: self.previous_human_health(),
             })
+        } else {
+            vec![]
+        };
+        let computer_components = if self.did_human_get_point() {
+            lerper.lerp1(FadingHealthDisplay {
+                side: Side::Right,
+                starting_health: self.previous_computer_health(),
+            })
+        } else {
+            vec![]
+        };
+
+        vec![human_components, computer_components]
+            .into_iter()
+            .flatten()
+            .collect()
+    }
+
+    fn fade_case_non_fading_health_displays(&self) -> Vec<Component> {
+        let human_components = if self.did_computer_get_point() {
+            vec![]
         } else {
             ConstantHealthDisplay {
                 side: Side::Left,
@@ -287,10 +309,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
             .render()
         };
         let computer_components = if self.did_human_get_point() {
-            lerper.lerp1(FadingHealthDisplay {
-                side: Side::Right,
-                starting_health: self.previous_computer_health(),
-            })
+            vec![]
         } else {
             ConstantHealthDisplay {
                 side: Side::Right,

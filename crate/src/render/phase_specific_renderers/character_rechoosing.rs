@@ -76,8 +76,8 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_character);
 
             components
@@ -127,8 +127,8 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -172,8 +172,8 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
             ];
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -231,8 +231,8 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 

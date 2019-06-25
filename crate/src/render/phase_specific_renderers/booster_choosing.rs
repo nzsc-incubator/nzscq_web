@@ -79,8 +79,8 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.previous_health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_character);
 
             components
@@ -130,8 +130,8 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.previous_health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -207,8 +207,9 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             };
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
+            components.extend(self.fade_case_non_fading_health_displays());
             components.push(overlay);
-            components.extend(self.fading_health_displays(&lerper));
+            components.extend(self.fade_case_fading_health_displays(&lerper));
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -276,8 +277,8 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 };
 
             components.extend(self.components_displaying_characters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.current_health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_character);
             components.extend(components_displaying_computer_character);
 
@@ -378,12 +379,33 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             .collect()
     }
 
-    fn fading_health_displays(&self, lerper: &Lerper) -> Vec<Component> {
+    fn fade_case_fading_health_displays(&self, lerper: &Lerper) -> Vec<Component> {
         let human_components = if self.did_computer_get_point() {
             lerper.lerp1(FadingHealthDisplay {
                 side: Side::Left,
                 starting_health: 5,
             })
+        } else {
+            vec![]
+        };
+        let computer_components = if self.did_human_get_point() {
+            lerper.lerp1(FadingHealthDisplay {
+                side: Side::Right,
+                starting_health: 5,
+            })
+        } else {
+            vec![]
+        };
+
+        vec![human_components, computer_components]
+            .into_iter()
+            .flatten()
+            .collect()
+    }
+
+    fn fade_case_non_fading_health_displays(&self) -> Vec<Component> {
+        let human_components = if self.did_computer_get_point() {
+            vec![]
         } else {
             ConstantHealthDisplay {
                 side: Side::Left,
@@ -392,10 +414,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
             .render()
         };
         let computer_components = if self.did_human_get_point() {
-            lerper.lerp1(FadingHealthDisplay {
-                side: Side::Right,
-                starting_health: 5,
-            })
+            vec![]
         } else {
             ConstantHealthDisplay {
                 side: Side::Right,

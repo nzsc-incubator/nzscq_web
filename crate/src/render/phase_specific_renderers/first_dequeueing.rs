@@ -84,8 +84,8 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_booster);
 
             components
@@ -135,8 +135,8 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_booster);
             components.extend(components_displaying_computer_booster);
 
@@ -180,8 +180,8 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             ];
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_booster);
             components.extend(components_displaying_computer_booster);
 
@@ -239,8 +239,8 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             .collect();
 
             components.extend(self.components_displaying_boosters_not_chosen_by_human());
-            components.push(overlay);
             components.extend(self.health_displays());
+            components.push(overlay);
             components.extend(components_displaying_human_booster);
             components.extend(components_displaying_computer_booster);
 
