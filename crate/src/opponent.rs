@@ -25,7 +25,11 @@ impl<T: Random> Opponent<T> {
 
     pub fn choose_booster(&mut self, game: &BatchChoiceGame) -> Option<Booster> {
         if let BatchChoices::Boosters(mut choices) = game.choices() {
-            let computer_choices = choices.remove(Opponent::<T>::COMPUTER);
+            let computer_choices: Vec<Booster> = choices
+                .remove(Opponent::<T>::COMPUTER)
+                .into_iter()
+                .filter(|&booster| booster != Booster::None)
+                .collect();
             Some(self.rand_choice(computer_choices))
         } else {
             None
@@ -34,7 +38,7 @@ impl<T: Random> Opponent<T> {
 
     pub fn choose_dequeue(&mut self, game: &BatchChoiceGame) -> Option<DequeueChoice> {
         if let BatchChoices::DequeueChoices(mut choices) = game.choices() {
-            let computer_choices = choices.remove(Opponent::<T>::COMPUTER);
+            let computer_choices = prefer_drain_and_exit(choices.remove(Opponent::<T>::COMPUTER));
             Some(self.rand_choice(computer_choices))
         } else {
             None
@@ -56,6 +60,28 @@ impl<T: Random> Opponent<T> {
 
         choices.remove(index as usize)
     }
+}
+
+fn prefer_drain_and_exit(choices: Vec<DequeueChoice>) -> Vec<DequeueChoice> {
+    if choices.iter().any(is_drain_and_exit) {
+        choices.into_iter().filter(is_drain_and_exit).collect()
+    } else if choices.iter().any(is_just_exit) {
+        choices.into_iter().filter(is_just_exit).collect()
+    } else {
+        choices
+    }
+}
+
+fn is_drain_and_exit(choice: &DequeueChoice) -> bool {
+    if let DequeueChoice::DrainAndExit(_) = choice {
+        true
+    } else {
+        false
+    }
+}
+
+fn is_just_exit(&choice: &DequeueChoice) -> bool {
+    choice == DequeueChoice::JustExit
 }
 
 pub trait Random {
