@@ -181,7 +181,7 @@ impl App {
 
             click::Action::ChooseAction(human_action) => self.handle_action_choice(human_action),
 
-            click::Action::NavigateHome => panic!("TODO Handle NavigateHome"),
+            click::Action::NavigateHome => self.restart_game(),
 
             click::Action::StopPropagation => {}
         }
@@ -376,6 +376,17 @@ impl App {
             _ => panic!("outcome should be action outcome"),
         }
 
+        self.start_animation();
+    }
+
+    fn restart_game(&mut self) {
+        let game = BatchChoiceGame::default();
+        let initial_human_choices = game.choices().characters().unwrap().remove(App::HUMAN);
+        let phase = Phase::ChooseCharacter {
+            available_characters: initial_human_choices,
+        };
+        self.game = game;
+        self.phase = phase;
         self.start_animation();
     }
 
