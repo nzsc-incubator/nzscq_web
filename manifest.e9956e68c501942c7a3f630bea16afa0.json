@@ -1,0 +1,42 @@
+{
+  "icons": [
+    {
+      "src": "icon_512x512.78807fde5a2cf5d4bca5077d964d209d.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_384x384.a9c1359b05c60173ef54318307798bf6.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_256x256.8b705ec8f55a8c48a13d61043a648745.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_128x128.8f90790ca3904b44389e4e5928480279.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_96x96.c8a61e9ffb14652cdb558a5824a024ae.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "icon_192x192.67098abd9cdc3b165c4d5912560e09f4.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "name": "NZSCQ",
+  "short_name": "NZSCQ",
+  "orientation": "landscape",
+  "display": "standalone",
+  "start_url": "./index.html",
+  "description": "NZSCQ on the web.",
+  "theme_color": "#000000",
+  "background_color": "#f1f1f1"
+}
