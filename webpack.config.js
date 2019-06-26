@@ -1,4 +1,8 @@
+const webpack = require("webpack");
 const path = require("path");
+const package = require(path.resolve(__dirname, "package.json"));
+
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const dist = path.resolve(__dirname, "dist");
@@ -22,6 +26,17 @@ module.exports = {
     ]
   },
   plugins: [
+    new CopyWebpackPlugin([
+      {
+        from: path.resolve(__dirname, "public"),
+        to: path.resolve(__dirname, "dist")
+      }
+    ]),
+
+    new webpack.DefinePlugin({
+      PUBLIC_URL: JSON.stringify(withoutTrailingSlash(package.homepage))
+    }),
+
     new HtmlWebpackPlugin({
       template: "index.html"
     }),
@@ -33,3 +48,13 @@ module.exports = {
     })
   ]
 };
+
+function withoutTrailingSlash(url) {
+  if (typeof url !== "string") {
+    throw new TypeError("URL must be string.");
+  } else if (url.slice(-1) === "/") {
+    return url.slice(0, -1);
+  } else {
+    return url;
+  }
+}
