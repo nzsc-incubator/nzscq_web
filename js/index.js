@@ -26,3 +26,7 @@ Promise.all([import("../crate/pkg"), loadImageGetter()]).then(
     }
   }
 );
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/service-worker.js");
+}

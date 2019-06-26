@@ -2,7 +2,10 @@ const webpack = require("webpack");
 const path = require("path");
 const package = require(path.resolve(__dirname, "package.json"));
 
+const PUBLIC_PATH = package.homepage;
+
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const SwPrecacheWebpackPlugin = require("sw-precache-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const dist = path.resolve(__dirname, "dist");
@@ -34,12 +37,14 @@ module.exports = {
     ]),
 
     new webpack.DefinePlugin({
-      PUBLIC_URL: JSON.stringify(withoutTrailingSlash(package.homepage))
+      PUBLIC_URL: JSON.stringify(withoutTrailingSlash(PUBLIC_PATH))
     }),
 
     new HtmlWebpackPlugin({
-      template: "index.html"
+      template: "public/index.html"
     }),
+
+    new SwPrecacheWebpackPlugin(),
 
     new WasmPackPlugin({
       crateDirectory: path.resolve(__dirname, "crate")
