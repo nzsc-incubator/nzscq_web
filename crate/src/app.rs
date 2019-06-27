@@ -9,12 +9,7 @@ use crate::{
 };
 
 use js_sys::{Date, Function, Math};
-use nzscq::{
-    choices::{Action as NzscAction, BatchChoice, Booster, Character, DequeueChoice},
-    game::BatchChoiceGame,
-    outcomes::Outcome,
-    scoreboard::{ActionlessPlayer, DequeueingPlayer},
-};
+use nzscq::game::BatchChoiceGame;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 
@@ -51,9 +46,6 @@ impl App {
             .unwrap()
             .dyn_into::<CanvasRenderingContext2d>()?;
         let image_map = helpers::image_map_from_function(get_image)?;
-        let game = BatchChoiceGame::default();
-        let computer = Opponent::<JsPrng>::new(JsPrng);
-        let initial_human_choices = game.choices().characters().unwrap().remove(App::HUMAN);
 
         let mut app = App {
             window,
