@@ -4,6 +4,8 @@ pub use arsenal_item_display::arsenal_item_display;
 mod health_display;
 mod home_button;
 pub use home_button::home_button;
+mod homescreen;
+pub use homescreen::homescreen;
 mod lerp;
 mod phase_specific_renderers;
 mod pill;

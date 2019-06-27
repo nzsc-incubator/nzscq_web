@@ -313,6 +313,9 @@ pub enum ImageType {
     Mirror,
     Heart,
     DeclineDequeue,
+    Homescreen,
+    SinglePlayerButton,
+    MultiPlayerButton,
 }
 
 impl From<ArsenalItem> for ImageType {

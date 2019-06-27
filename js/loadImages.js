@@ -31,6 +31,10 @@ import NoBooster from "./images/NoBooster.png";
 import Heart from "./images/Heart.png";
 import Mirror from "./images/Mirror.png";
 
+import Homescreen from "./images/Homescreen.png";
+import SinglePlayerButton from "./images/SinglePlayerButton.png";
+import MultiPlayerButton from "./images/MultiPlayerButton.png";
+
 import "./shims";
 
 const srcs = {
@@ -65,7 +69,11 @@ const srcs = {
 
   NoBooster,
   Heart,
-  Mirror
+  Mirror,
+
+  Homescreen,
+  SinglePlayerButton,
+  MultiPlayerButton
 };
 
 function loadImages() {

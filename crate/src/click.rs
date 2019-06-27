@@ -23,6 +23,8 @@ pub fn action_triggered_by_click_at(
 
 #[derive(Debug, Clone)]
 pub enum Action {
+    StartSinglePlayerGame,
+
     ChooseCharacter(Character),
     ChooseBooster(Booster),
     ChooseDequeue(DequeueChoice),

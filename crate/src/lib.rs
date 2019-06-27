@@ -10,6 +10,7 @@ mod phase;
 mod render;
 mod shapes;
 mod side;
+mod state;
 
 use app::App;
 

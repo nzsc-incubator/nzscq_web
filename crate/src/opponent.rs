@@ -7,6 +7,20 @@ pub struct Opponent<T: Random> {
     prng: T,
 }
 
+impl<T: std::fmt::Debug + Random> std::fmt::Debug for Opponent<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Opponent {{ prng: {:?} }}", self.prng)
+    }
+}
+
+impl<T: Clone + Random> Clone for Opponent<T> {
+    fn clone(&self) -> Opponent<T> {
+        Opponent {
+            prng: self.prng.clone(),
+        }
+    }
+}
+
 impl<T: Random> Opponent<T> {
     const COMPUTER: usize = 1;
 

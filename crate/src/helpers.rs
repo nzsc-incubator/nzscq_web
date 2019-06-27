@@ -62,6 +62,22 @@ pub fn image_map_from_function(get_move_images: Function) -> Result<ImageMap, Js
         image.dyn_into::<HtmlImageElement>()?,
     );
 
+    let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("Homescreen"))?;
+    map.insert(
+        ImageType::Homescreen,
+        image.dyn_into::<HtmlImageElement>()?,
+    );
+    let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("SinglePlayerButton"))?;
+    map.insert(
+        ImageType::SinglePlayerButton,
+        image.dyn_into::<HtmlImageElement>()?,
+    );
+    let image = get_move_images.call1(&JsValue::NULL, &JsValue::from_str("MultiPlayerButton"))?;
+    map.insert(
+        ImageType::MultiPlayerButton,
+        image.dyn_into::<HtmlImageElement>()?,
+    );
+
     Ok(map)
 }
 
