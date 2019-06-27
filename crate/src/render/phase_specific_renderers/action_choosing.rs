@@ -18,7 +18,7 @@ use crate::{
 };
 
 use nzscq::{
-    choices::{Action as NzscAction, ArsenalItem, DequeueChoice},
+    choices::{Action as NzscAction, ArsenalItem, Booster, DequeueChoice},
     scoreboard::{ActionlessPlayer, DequeueingPlayer, Queue},
 };
 
@@ -893,10 +893,9 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
             row: row_offset,
         },
         width_in_columns: 3,
-        height_in_rows: helpers::height_in_rows(&player.arsenal, 3),
+        height_in_rows: helpers::height_in_rows(&player.arsenal, 3).max(1),
         enabled: true,
     };
-
     let arsenal_items = player
         .arsenal
         .iter()
@@ -925,7 +924,31 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
             )
         });
 
-    pill.render().into_iter().chain(arsenal_items).collect()
+    if player.arsenal.is_empty()
+        || (player.arsenal == vec![ArsenalItem::Mirror] && player.queue.pool.is_empty())
+    {
+        let concede_button = vec![
+            Component::Circle {
+                fill_color: colors::booster_color(Booster::None),
+                shape: dequeue_circle::background_at(side, row_offset, player.arsenal.len()),
+                on_click: Some(Action::ChooseAction(NzscAction::Concede)),
+            },
+            Component::Image {
+                image_type: ImageType::Booster(Booster::None),
+                alpha: 1.0,
+                shape: dequeue_circle::foreground_at(side, row_offset, player.arsenal.len()),
+                on_click: None,
+            },
+        ];
+
+        pill.render()
+            .into_iter()
+            .chain(arsenal_items)
+            .chain(concede_button)
+            .collect()
+    } else {
+        pill.render().into_iter().chain(arsenal_items).collect()
+    }
 }
 
 fn position_of(item: ArsenalItem, player: &QueueArsenal, side: Side) -> Option<CirclePosition> {
