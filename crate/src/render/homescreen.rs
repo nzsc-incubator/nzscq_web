@@ -41,5 +41,16 @@ pub fn homescreen() -> Vec<Component> {
             },
             on_click: None,
         },
+        Component::Image {
+            image_type: ImageType::SettingsButton,
+            alpha: 1.0,
+            shape: Rect {
+                x: 30.0,
+                y: 30.0,
+                width: 80.0,
+                height: 80.0,
+            },
+            on_click: Some(Action::NavigateToSettingsScreen),
+        },
     ]
 }

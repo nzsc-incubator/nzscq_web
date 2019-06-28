@@ -62,6 +62,7 @@ impl ImageMapBuilder {
         self.insert(ImageType::Homescreen, "Homescreen")?;
         self.insert(ImageType::SinglePlayerButton, "SinglePlayerButton")?;
         self.insert(ImageType::MultiPlayerButton, "MultiPlayerButton")?;
+        self.insert(ImageType::SettingsButton, "SettingsButton")?;
 
         Ok(ImageMap(self.map))
     }

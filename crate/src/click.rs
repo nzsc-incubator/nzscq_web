@@ -24,6 +24,7 @@ pub fn action_triggered_by_click_at(
 #[derive(Debug, Clone)]
 pub enum Action {
     StartSinglePlayerGame,
+    NavigateToSettingsScreen,
 
     ChooseCharacter(Character),
     ChooseBooster(Booster),

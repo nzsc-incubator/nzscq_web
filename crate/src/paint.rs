@@ -317,6 +317,7 @@ pub enum ImageType {
     Homescreen,
     SinglePlayerButton,
     MultiPlayerButton,
+    SettingsButton,
 }
 
 impl From<ArsenalItem> for ImageType {

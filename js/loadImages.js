@@ -34,6 +34,7 @@ import Mirror from "./images/Mirror.png";
 import Homescreen from "./images/Homescreen.png";
 import SinglePlayerButton from "./images/SinglePlayerButton.png";
 import MultiPlayerButton from "./images/MultiPlayerButton.png";
+import SettingsButton from "./images/SettingsButton.png";
 
 import "./shims";
 
@@ -73,7 +74,8 @@ const srcs = {
 
   Homescreen,
   SinglePlayerButton,
-  MultiPlayerButton
+  MultiPlayerButton,
+  SettingsButton
 };
 
 function loadImages() {
