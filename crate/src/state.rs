@@ -205,16 +205,6 @@ impl SinglePlayerState {
             _ => panic!("outcome should be action outcome"),
         }
     }
-
-    pub fn restart_game(&mut self) {
-        let game = BatchChoiceGame::default();
-        let initial_human_choices = game.choices().characters().unwrap().remove(HUMAN);
-        let phase = Phase::ChooseCharacter {
-            available_characters: initial_human_choices,
-        };
-        self.game = game;
-        self.phase = phase;
-    }
 }
 
 const HUMAN: usize = 0;

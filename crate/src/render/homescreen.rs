@@ -19,7 +19,6 @@ pub fn homescreen() -> Vec<Component> {
             },
             on_click: None,
         },
-
         Component::Image {
             image_type: ImageType::SinglePlayerButton,
             alpha: 1.0,

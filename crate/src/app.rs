@@ -13,6 +13,7 @@ use nzscq::game::BatchChoiceGame;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 
+use std::convert::TryInto;
 use std::mem;
 
 #[wasm_bindgen]
@@ -45,14 +46,13 @@ impl App {
             .get_context("2d")?
             .unwrap()
             .dyn_into::<CanvasRenderingContext2d>()?;
-        let image_map = helpers::image_map_from_function(get_image)?;
 
         let mut app = App {
             window,
             body,
             canvas,
             ctx,
-            image_map,
+            image_map: get_image.try_into().expect("should be able to create image map from js image getter"),
             state: State::Homescreen,
             animation_start_secs: helpers::millis_to_secs(Date::now()),
             has_drawn_past_completion: false,
