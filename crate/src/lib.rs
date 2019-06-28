@@ -3,6 +3,7 @@ mod canvas_dimensions;
 mod click;
 mod colors;
 mod helpers;
+mod image_map;
 mod letterbox;
 mod opponent;
 mod paint;

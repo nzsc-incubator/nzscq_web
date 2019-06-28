@@ -1,8 +1,6 @@
-
 use nzscq::choices::{Booster, Character, Move};
-use wasm_bindgen::{JsValue};
-use web_sys::{console};
-
+use wasm_bindgen::JsValue;
+use web_sys::console;
 
 pub fn log<T: std::fmt::Debug>(message: &T) {
     let message = format!("{:?}", message);
@@ -26,7 +24,9 @@ pub fn character_logo_move(c: Character) -> Move {
 pub fn booster_logo_move_string(b: Booster) -> String {
     let logo_move = booster_logo_move(b);
 
-    logo_move.map(|m| m.to_string()).unwrap_or("NoBooster".to_string())
+    logo_move
+        .map(|m| m.to_string())
+        .unwrap_or("NoBooster".to_string())
 }
 
 pub fn booster_logo_move(b: Booster) -> Option<Move> {

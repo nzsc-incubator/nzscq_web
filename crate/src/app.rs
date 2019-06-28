@@ -1,8 +1,9 @@
 use crate::{
     click, helpers,
+    image_map::ImageMap,
     letterbox::Letterbox,
     opponent::{Opponent, Random},
-    paint::{Component, ImageMap, Painter},
+    paint::{Component, Painter},
     phase::Phase,
     render::{self, Render},
     state::{SinglePlayerState, State},
@@ -52,7 +53,9 @@ impl App {
             body,
             canvas,
             ctx,
-            image_map: get_image.try_into().expect("should be able to create image map from js image getter"),
+            image_map: get_image
+                .try_into()
+                .expect("should be able to create image map from js image getter"),
             state: State::Homescreen,
             animation_start_secs: helpers::millis_to_secs(Date::now()),
             has_drawn_past_completion: false,
