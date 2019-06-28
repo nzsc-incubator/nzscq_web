@@ -1,3 +1,5 @@
+use crate::transform::{Scale, Translate};
+
 #[derive(Debug, Clone)]
 pub struct Rect {
     pub x: f64,
@@ -31,19 +33,6 @@ pub struct Circle {
     pub radius: f64,
 }
 
-pub trait Translate {
-    fn translate(&self, dx: f64, dy: f64) -> Self;
-}
-
-impl<T: Translate + Clone> Translate for Vec<T> {
-    fn translate(&self, dx: f64, dy: f64) -> Vec<T> {
-        self.iter()
-            .cloned()
-            .map(|item| item.translate(dx, dy))
-            .collect()
-    }
-}
-
 impl Translate for Rect {
     fn translate(&self, dx: f64, dy: f64) -> Rect {
         Rect {
@@ -54,12 +43,33 @@ impl Translate for Rect {
     }
 }
 
+impl Scale for Rect {
+    fn scale(&self, scale: f64) -> Rect {
+        Rect {
+            x: self.x * scale,
+            y: self.y * scale,
+            width: self.width * scale,
+            height: self.height * scale,
+        }
+    }
+}
+
 impl Translate for Circle {
     fn translate(&self, dx: f64, dy: f64) -> Circle {
         Circle {
             x: self.x + dx,
             y: self.y + dy,
             ..*self
+        }
+    }
+}
+
+impl Scale for Circle {
+    fn scale(&self, scale: f64) -> Circle {
+        Circle {
+            x: self.x * scale,
+            y: self.y * scale,
+            radius: self.radius * scale,
         }
     }
 }

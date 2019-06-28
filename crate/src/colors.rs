@@ -15,6 +15,7 @@ pub const ARROW_COLOR: Rgba = Rgba(0x11, 0x11, 0x11, 0xFF);
 pub const HOME_BUTTON_BACKGROUND: Rgba = Rgba(0x00, 0x88, 0xBB, 0xFF);
 pub const HOME_BUTTON_FOREGROUND: Rgba = Rgba(0xEE, 0xEE, 0xEE, 0xFF);
 pub const HOME_SCREEN_BACKGROUND: Rgba = Rgba(0x23, 0x12, 0x01, 0xFF);
+pub const SETTINGS_SCREEN_BACKGROUND: Rgba = HOME_SCREEN_BACKGROUND;
 
 pub const TRAPEZOID_BORDER_WIDTH: f64 = 2.0;
 pub const TRAPEZOID_OUTCOME_SCREEN_BORDER: Rgba = Rgba(0x49, 0x49, 0x49, 0xFF);

@@ -4,12 +4,15 @@ pub use arsenal_item_display::arsenal_item_display;
 mod health_display;
 mod home_button;
 pub use home_button::home_button;
-mod homescreen;
-pub use homescreen::homescreen;
 mod lerp;
 mod phase_specific_renderers;
 mod pill;
 mod switch;
+
+mod home_screen;
+pub use home_screen::home_screen;
+mod settings_screen;
+pub use settings_screen::settings_screen;
 
 use crate::{paint::Component, phase::Phase};
 use phase_specific_renderers::{

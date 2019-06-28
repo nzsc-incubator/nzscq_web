@@ -3,9 +3,10 @@ use crate::colors::{self, Rgba};
 use crate::paint::Component;
 use crate::shapes::{
     dequeue_circle::{self, CirclePosition},
-    Circle, Rect, Translate,
+    Circle, Rect,
 };
 use crate::side::Side;
+use crate::transform::Translate;
 
 pub struct Pill {
     pub position: CirclePosition,

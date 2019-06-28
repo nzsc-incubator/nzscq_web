@@ -56,7 +56,7 @@ impl App {
             image_map: get_image
                 .try_into()
                 .expect("should be able to create image map from js image getter"),
-            state: State::Homescreen,
+            state: State::HomeScreen,
             animation_start_secs: helpers::millis_to_secs(Date::now()),
             has_drawn_past_completion: false,
         };
@@ -159,7 +159,7 @@ impl App {
 
     fn handle_action(&mut self, action: click::Action) {
         match &mut self.state {
-            State::Homescreen => match action {
+            State::HomeScreen => match action {
                 click::Action::StartSinglePlayerGame => {
                     let game = BatchChoiceGame::default();
                     let computer = Opponent::<JsPrng>::new(JsPrng);
@@ -178,11 +178,20 @@ impl App {
                     );
                 }
 
+                click::Action::NavigateToSettingsScreen => self.state = State::SettingsScreen,
+
                 action => panic!(
                     "Action {:?} should never be emitted when state == Homescreen",
                     action
                 ),
             },
+
+            State::SettingsScreen => match action {
+                click::Action::NavigateHome => self.state = State::HomeScreen,
+                click::Action::SetComputerDifficulty(difficulty) => panic!("TODO set difficulty"),
+
+                action => panic!("Action {:?} should never be emitted when state == SettingsScreen"),
+            }
 
             State::SinglePlayer(state) => match action {
                 click::Action::ChooseCharacter(human_character) => {
@@ -202,10 +211,8 @@ impl App {
                 }
 
                 click::Action::NavigateHome => {
-                    self.state = State::Homescreen;
+                    self.state = State::HomeScreen;
                 }
-
-                click::Action::StopPropagation => {}
 
                 action => panic!(
                     "Action {:?} should never be emitted when state == SinglePlayer",
@@ -247,7 +254,8 @@ impl App {
 
     fn render(&self) -> Vec<Component> {
         match &self.state {
-            State::Homescreen => render::homescreen(),
+            State::HomeScreen => render::home_screen(),
+            State::SettingsScreen => render::settings_screen(),
             State::SinglePlayer(state) => (
                 self.completion_factor()
                     .expect("should have completion factor when state == SinglePlayer"),
@@ -259,7 +267,8 @@ impl App {
 
     fn completion_factor(&self) -> Option<f64> {
         match &self.state {
-            State::Homescreen => None,
+            State::HomeScreen => None,
+            State::SettingsScreen => None,
             State::SinglePlayer(state) => Some({
                 let current_time = helpers::millis_to_secs(Date::now());
                 let time_after_start = current_time - self.animation_start_secs;

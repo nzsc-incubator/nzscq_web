@@ -287,7 +287,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
     }
 
     fn boosters(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        use crate::shapes::Translate;
+        use crate::transform::Translate;
 
         move |lerper| {
             let mut components = vec![Component::Background {

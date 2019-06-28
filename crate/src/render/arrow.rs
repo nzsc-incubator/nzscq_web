@@ -3,9 +3,9 @@ use crate::helpers::SQRT_3;
 use crate::paint::{Component, Path, PathCommand};
 use crate::shapes::{
     dequeue_circle::{self, LEFT_COLUMN_0_X, RIGHT_COLUMN_0_X},
-    Translate,
 };
 use crate::side::Side;
+use crate::transform::Translate;
 
 pub fn up_arrow_above(side: Side, row: usize, column: usize) -> Component {
     match side {

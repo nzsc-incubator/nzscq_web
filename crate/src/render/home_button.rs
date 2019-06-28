@@ -3,7 +3,8 @@ use crate::click::Action;
 use crate::colors;
 use crate::paint::{Component, Path, PathCommand};
 use crate::render::lerp::Lerper;
-use crate::shapes::{Circle, Rect, Translate};
+use crate::shapes::{Circle, Rect};
+use crate::transform::Translate;
 
 pub fn home_button(lerper: &Lerper) -> Vec<Component> {
     vec![

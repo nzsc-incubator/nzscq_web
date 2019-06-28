@@ -2,6 +2,17 @@ use super::Render;
 use crate::paint::{Path, PathCommand, Stroke};
 use crate::side::Side;
 
+use crate::{
+    colors,
+    paint::{Component, ImageType},
+    render::{
+        lerp::{LerpInto, LerpableComponent, Lerper},
+        switch::{Switch, Switch4},
+    },
+    shapes::{CenteredRect, Rect},
+    transform::Translate,
+};
+
 pub struct ConstantHealthDisplay {
     pub side: Side,
     pub health: u8,
@@ -55,16 +66,6 @@ impl LerpInto<Vec<Component>> for FadingHealthDisplay {
         trapezoid.render().into_iter().chain(hearts).collect()
     }
 }
-
-use crate::{
-    colors,
-    paint::{Component, ImageType},
-    render::{
-        lerp::{LerpInto, LerpableComponent, Lerper},
-        switch::{Switch, Switch4},
-    },
-    shapes::{CenteredRect, Rect, Translate},
-};
 
 const LEFT_0_CENTER: (f64, f64) = (80.0, 50.0);
 const RIGHT_0_CENTER: (f64, f64) = (1720.0, 50.0);

@@ -3,7 +3,7 @@ use crate::colors;
 use crate::paint::{Component, ImageType};
 use crate::shapes::Rect;
 
-pub fn homescreen() -> Vec<Component> {
+pub fn home_screen() -> Vec<Component> {
     vec![
         Component::Background {
             color: colors::HOME_SCREEN_BACKGROUND,

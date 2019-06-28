@@ -12,6 +12,7 @@ mod render;
 mod shapes;
 mod side;
 mod state;
+mod transform;
 
 use app::App;
 

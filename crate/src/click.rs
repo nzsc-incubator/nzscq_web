@@ -1,4 +1,5 @@
 use crate::{
+    opponent::Difficulty,
     paint::Component,
     shapes::{Circle, Rect},
 };
@@ -31,6 +32,7 @@ pub enum Action {
     ChooseDequeue(DequeueChoice),
     ChooseAction(choices::Action),
 
+    SetComputerDifficulty(Difficulty),
     NavigateHome,
 
     StopPropagation,

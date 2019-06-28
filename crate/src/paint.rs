@@ -2,7 +2,8 @@ use crate::{
     click::Action,
     colors::Rgba,
     image_map::ImageMap,
-    shapes::{Circle, Rect, Translate},
+    shapes::{Circle, Rect},
+    transform::{Scale, Translate},
 };
 
 use nzscq::choices::{ArsenalItem, Booster, Character, Move};
@@ -264,6 +265,52 @@ impl Translate for Component {
     }
 }
 
+impl Scale for Component {
+    fn scale(&self, scale: f64) -> Component {
+        match &self {
+            Component::Background { .. } => self.clone(),
+            Component::Rect {
+                shape,
+                fill_color,
+                on_click,
+            } => Component::Rect {
+                shape: shape.scale(scale),
+                fill_color: fill_color.clone(),
+                on_click: on_click.clone(),
+            },
+            Component::Circle {
+                shape,
+                fill_color,
+                on_click,
+            } => Component::Circle {
+                shape: shape.scale(scale),
+                fill_color: fill_color.clone(),
+                on_click: on_click.clone(),
+            },
+            Component::Image {
+                shape,
+                image_type,
+                alpha,
+                on_click,
+            } => Component::Image {
+                shape: shape.scale(scale),
+                image_type: *image_type,
+                alpha: *alpha,
+                on_click: on_click.clone(),
+            },
+            Component::UnclickablePath {
+                path,
+                fill_color,
+                stroke,
+            } => Component::UnclickablePath {
+                path: path.scale(scale),
+                fill_color: fill_color.clone(),
+                stroke: stroke.clone(),
+            },
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Path {
     pub start: (f64, f64),
@@ -283,6 +330,19 @@ impl Translate for Path {
     }
 }
 
+impl Scale for Path {
+    fn scale(&self, scale: f64) -> Path {
+        Path {
+            start: (self.start.0 * scale, self.start.1 * scale),
+            commands: self
+                .commands
+                .iter()
+                .map(|command| command.scale(scale))
+                .collect(),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum PathCommand {
     LineTo(f64, f64),
@@ -295,6 +355,17 @@ impl Translate for PathCommand {
             &PathCommand::LineTo(x, y) => PathCommand::LineTo(x + dx, y + dy),
             &PathCommand::ArcTo(x1, y1, x2, y2, radius) => {
                 PathCommand::ArcTo(x1 + dx, y1 + dy, x2 + dx, y2 + dy, radius)
+            }
+        }
+    }
+}
+
+impl Scale for PathCommand {
+    fn scale(&self, scale: f64) -> PathCommand {
+        match self {
+            &PathCommand::LineTo(x, y) => PathCommand::LineTo(x * scale, y * scale),
+            &PathCommand::ArcTo(x1, y1, x2, y2, radius) => {
+                PathCommand::ArcTo(x1 * scale, y1 * scale, x2 * scale, y2 * scale, radius * scale)
             }
         }
     }

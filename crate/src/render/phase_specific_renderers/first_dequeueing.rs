@@ -12,9 +12,10 @@ use crate::{
     },
     shapes::{
         dequeue_circle::{self, CirclePosition},
-        rect_button, rect_focus, Translate,
+        rect_button, rect_focus,
     },
     side::Side,
+    transform::Translate,
 };
 
 use nzscq::{

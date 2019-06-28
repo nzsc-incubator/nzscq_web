@@ -7,8 +7,9 @@ use crate::{
         lerp::{LerpableComponent, Lerper},
         Render,
     },
-    shapes::{rect_button, Translate},
+    shapes::{rect_button},
     side::Side,
+    transform::Translate,
 };
 
 use nzscq::choices::Character;

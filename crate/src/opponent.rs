@@ -101,3 +101,10 @@ fn is_just_exit(&choice: &DequeueChoice) -> bool {
 pub trait Random {
     fn random(&mut self) -> f64;
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Difficulty {
+    Stupid,
+    Easy,
+    Medium,
+}
