@@ -243,14 +243,14 @@ pub mod dequeue_circle {
 
     #[derive(Debug, Clone)]
     pub struct CirclePosition {
-        pub from: Side,
+        pub side: Side,
         pub column: usize,
         pub row: usize,
     }
 
     impl CirclePosition {
         pub fn x(&self) -> f64 {
-            match self.from {
+            match self.side {
                 Side::Left => LEFT_COLUMN_0_X + OFFSET * self.column as f64,
                 Side::Right => RIGHT_COLUMN_0_X - OFFSET * self.column as f64,
             }

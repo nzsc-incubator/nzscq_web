@@ -12,7 +12,7 @@ use nzscq::scoreboard::{ActionlessPlayer, DequeueingPlayer};
 pub enum State {
     HomeScreen,
     SettingsScreen,
-    SinglePlayer(SinglePlayerState),
+    SinglePlayer(Box<SinglePlayerState>),
 }
 
 #[derive(Debug, Clone)]

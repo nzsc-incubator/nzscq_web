@@ -389,7 +389,7 @@ fn entering_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> V
                             start_color: colors::move_color(move_),
                             end_color: colors::move_color(move_),
                             start_shape: dequeue_circle::background_at(
-                                start.from,
+                                start.side,
                                 start.row,
                                 start.column,
                             ),
@@ -401,7 +401,7 @@ fn entering_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> V
                             start_alpha: 1.0,
                             end_alpha: 1.0,
                             start_shape: dequeue_circle::foreground_at(
-                                start.from,
+                                start.side,
                                 start.row,
                                 start.column,
                             ),
@@ -414,7 +414,7 @@ fn entering_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> V
                             start_alpha: 1.0,
                             end_alpha: 1.0,
                             start_shape: dequeue_circle::foreground_at(
-                                start.from,
+                                start.side,
                                 start.row,
                                 start.column,
                             ),
@@ -428,7 +428,7 @@ fn entering_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> V
                         start_color: colors::move_color(move_),
                         end_color: colors::move_color(move_),
                         start_shape: dequeue_circle::background_at(
-                            start.from,
+                            start.side,
                             start.row,
                             start.column,
                         ),
@@ -440,7 +440,7 @@ fn entering_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> V
                         start_alpha: 1.0,
                         end_alpha: 1.0,
                         start_shape: dequeue_circle::foreground_at(
-                            start.from,
+                            start.side,
                             start.row,
                             start.column,
                         ),
@@ -580,7 +580,7 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
                             start_color: colors::move_color(move_),
                             end_color: colors::move_color(move_),
                             start_shape: action_focus::background(side),
-                            end_shape: dequeue_circle::background_at(end.from, end.row, end.column),
+                            end_shape: dequeue_circle::background_at(end.side, end.row, end.column),
                             on_click: None,
                         },
                         LerpableComponent::Image {
@@ -588,7 +588,7 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
                             start_alpha: 1.0,
                             end_alpha: 1.0,
                             start_shape: action_focus::foreground(side),
-                            end_shape: dequeue_circle::foreground_at(end.from, end.row, end.column),
+                            end_shape: dequeue_circle::foreground_at(end.side, end.row, end.column),
                             on_click: None,
                         },
                         // TODO Shrink move image
@@ -597,7 +597,7 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
                             start_alpha: 1.0,
                             end_alpha: 1.0,
                             start_shape: action_focus::foreground(side),
-                            end_shape: dequeue_circle::foreground_at(end.from, end.row, end.column),
+                            end_shape: dequeue_circle::foreground_at(end.side, end.row, end.column),
                             on_click: None,
                         },
                     ]
@@ -647,7 +647,7 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
                             start_color: colors::move_color(move_),
                             end_color: colors::move_color(move_),
                             start_shape: action_focus::background(side),
-                            end_shape: dequeue_circle::background_at(end.from, end.row, end.column),
+                            end_shape: dequeue_circle::background_at(end.side, end.row, end.column),
                             on_click: None,
                         },
                         LerpableComponent::Image {
@@ -655,7 +655,7 @@ fn exiting_action(side: Side, visit: Option<ActionVisit>, lerper: &Lerper) -> Ve
                             start_alpha: 1.0,
                             end_alpha: 1.0,
                             start_shape: action_focus::foreground(side),
-                            end_shape: dequeue_circle::foreground_at(end.from, end.row, end.column),
+                            end_shape: dequeue_circle::foreground_at(end.side, end.row, end.column),
                             on_click: None,
                         },
                     ]
@@ -739,7 +739,7 @@ fn dequeueing_pool_display(args: &DequeueingRenderArgs) -> Vec<Component> {
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: 0,
         },
@@ -761,7 +761,7 @@ fn dequeueing_pool_display(args: &DequeueingRenderArgs) -> Vec<Component> {
                     arsenal_item,
                 ))),
                 CirclePosition {
-                    from: side,
+                    side,
                     column: i % 3,
                     row: i / 3,
                 },
@@ -789,7 +789,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
 
     let background_pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: pool_height_in_rows,
         },
@@ -799,7 +799,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
     };
     let decline_and_exit_pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 1,
             row: pool_height_in_rows,
         },
@@ -809,7 +809,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
     };
     let exit_pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 2,
             row: pool_height_in_rows,
         },
@@ -828,7 +828,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column: 0,
                     row,
                 },
@@ -853,7 +853,7 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
                 just_exit_enabled,
                 side.if_left(Action::ChooseDequeue(DequeueChoice::JustExit)),
                 CirclePosition {
-                    from: side,
+                    side,
                     column: 2,
                     row,
                 },
@@ -874,7 +874,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: row_offset,
         },
@@ -897,7 +897,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column,
                     row,
                 },
@@ -949,7 +949,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: 0,
         },
@@ -1001,7 +1001,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
                     false,
                     None,
                     CirclePosition {
-                        from: side,
+                        side,
                         column,
                         row,
                     },
@@ -1023,7 +1023,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: pool_height_in_rows,
         },
@@ -1040,7 +1040,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column: 0,
                     row,
                 },
@@ -1052,7 +1052,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column: 2,
                     row,
                 },
@@ -1080,7 +1080,7 @@ fn action_choosing_arsenal_display_without_used_item(
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: row_offset,
         },
@@ -1128,7 +1128,7 @@ fn position_of(item: ArsenalItem, player: &QueueArsenal, side: Side) -> Option<C
         .position(|&pool_item| pool_item == item);
     if let Some(index) = index {
         Some(CirclePosition {
-            from: side,
+            side,
             column: index % 3,
             row: index / 3,
         })
@@ -1145,13 +1145,13 @@ fn position_in_mouth_or_arsenal_of(
     let pool_height = helpers::height_in_rows(&player.queue().pool, 3);
     if Some(item) == player.queue().entrance {
         Some(CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: pool_height,
         })
     } else if Some(item) == player.queue().exit {
         Some(CirclePosition {
-            from: side,
+            side,
             column: 2,
             row: pool_height,
         })
@@ -1175,7 +1175,7 @@ fn position_in_arsenal_of(
         let row_offset = pool_height + mouth_height;
 
         CirclePosition {
-            from: side,
+            side,
             column: index % 3,
             row: row_offset + index / 3,
         }

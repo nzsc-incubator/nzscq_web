@@ -8,7 +8,7 @@ use nzscq::choices::{self, Booster, Character, DequeueChoice};
 
 pub fn action_triggered_by_click_at(
     canvas_coords: (f64, f64),
-    components: &Vec<Component>,
+    components: &[Component],
 ) -> Option<Action> {
     let front_to_back = components.iter().rev();
 

@@ -1,3 +1,5 @@
+#![warn(clippy::all)]
+
 mod app;
 mod canvas_dimensions;
 mod click;

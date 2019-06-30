@@ -335,7 +335,7 @@ fn entering_dequeue_choice(
                     start_color: colors::arsenal_item_color(drainee),
                     end_color: colors::arsenal_item_color(drainee),
                     start_shape: dequeue_circle::background_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -347,7 +347,7 @@ fn entering_dequeue_choice(
                     start_alpha: 1.0,
                     end_alpha: 1.0,
                     start_shape: dequeue_circle::foreground_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -365,7 +365,7 @@ fn entering_dequeue_choice(
                     start_color: colors::arsenal_item_color(exiter),
                     end_color: colors::arsenal_item_color(exiter),
                     start_shape: dequeue_circle::background_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -377,7 +377,7 @@ fn entering_dequeue_choice(
                     start_alpha: 1.0,
                     end_alpha: 1.0,
                     start_shape: dequeue_circle::foreground_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -453,7 +453,7 @@ fn exiting_dequeue_choice(
                     end_color: colors::arsenal_item_color(drainee),
                     start_shape: dequeue_foci::top_background(side),
                     end_shape: dequeue_circle::background_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -465,7 +465,7 @@ fn exiting_dequeue_choice(
                     end_alpha: 1.0,
                     start_shape: dequeue_foci::top_foreground(side),
                     end_shape: dequeue_circle::foreground_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -483,7 +483,7 @@ fn exiting_dequeue_choice(
                     end_color: colors::arsenal_item_color(exiter),
                     start_shape: dequeue_foci::bottom_background(side),
                     end_shape: dequeue_circle::background_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -495,7 +495,7 @@ fn exiting_dequeue_choice(
                     end_alpha: 1.0,
                     start_shape: dequeue_foci::bottom_foreground(side),
                     end_shape: dequeue_circle::foreground_at(
-                        position.from,
+                        position.side,
                         position.row,
                         position.column,
                     ),
@@ -544,7 +544,7 @@ fn dequeueing_pool_display_without_drainee(
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: 0,
         },
@@ -567,7 +567,7 @@ fn dequeueing_pool_display_without_drainee(
                     drain_and_exit_enabled,
                     None,
                     CirclePosition {
-                        from: side,
+                        side,
                         column: i % 3,
                         row: i / 3,
                     },
@@ -611,7 +611,7 @@ fn dequeueing_entrance_decline_and_exit_display_with_hidable_exit(
 
     let background_pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: pool_height_in_rows,
         },
@@ -621,7 +621,7 @@ fn dequeueing_entrance_decline_and_exit_display_with_hidable_exit(
     };
     let decline_and_exit_pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 1,
             row: pool_height_in_rows,
         },
@@ -639,7 +639,7 @@ fn dequeueing_entrance_decline_and_exit_display_with_hidable_exit(
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column: 0,
                     row,
                 },
@@ -667,7 +667,7 @@ fn dequeueing_entrance_decline_and_exit_display_with_hidable_exit(
                     just_exit_enabled,
                     None,
                     CirclePosition {
-                        from: side,
+                        side,
                         column: 2,
                         row,
                     },
@@ -689,7 +689,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: row_offset,
         },
@@ -712,7 +712,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column,
                     row,
                 },
@@ -764,7 +764,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: 0,
         },
@@ -816,7 +816,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
                     false,
                     None,
                     CirclePosition {
-                        from: side,
+                        side,
                         column,
                         row,
                     },
@@ -838,7 +838,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: pool_height_in_rows,
         },
@@ -855,7 +855,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column: 0,
                     row,
                 },
@@ -867,7 +867,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
                 false,
                 None,
                 CirclePosition {
-                    from: side,
+                    side,
                     column: 2,
                     row,
                 },
@@ -888,7 +888,7 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: row_offset,
         },
@@ -917,7 +917,7 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
                     .and(opt_move)
                     .map(|m| Action::ChooseAction(NzscAction::Move(m))),
                 CirclePosition {
-                    from: side,
+                    side,
                     column,
                     row,
                 },
@@ -959,7 +959,7 @@ fn position_of(item: ArsenalItem, player: &QueueArsenal, side: Side) -> Option<C
         .position(|&pool_item| pool_item == item);
     if let Some(index) = index {
         Some(CirclePosition {
-            from: side,
+            side,
             column: index % 3,
             row: index / 3,
         })
@@ -976,13 +976,13 @@ fn position_in_mouth_or_arsenal_of(
     let pool_height = helpers::height_in_rows(&player.queue().pool, 3);
     if Some(item) == player.queue().entrance {
         Some(CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: pool_height,
         })
     } else if Some(item) == player.queue().exit {
         Some(CirclePosition {
-            from: side,
+            side,
             column: 2,
             row: pool_height,
         })
@@ -1006,7 +1006,7 @@ fn position_in_arsenal_of(
         let row_offset = pool_height + mouth_height;
 
         CirclePosition {
-            from: side,
+            side,
             column: index % 3,
             row: row_offset + index / 3,
         }

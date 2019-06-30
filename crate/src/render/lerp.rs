@@ -5,6 +5,8 @@ use crate::{
     shapes::{Circle, Rect},
 };
 
+use std::f64;
+
 pub struct Lerper(f64);
 
 impl Lerper {
@@ -63,7 +65,7 @@ impl LerpInto<u8> for (u8, u8) {
     fn lerp_into(self, lerper: &Lerper) -> u8 {
         let (start, end) = self;
 
-        lerper.lerp(start as f64, end as f64) as u8
+        lerper.lerp(f64::from(start), f64::from(end)) as u8
     }
 }
 

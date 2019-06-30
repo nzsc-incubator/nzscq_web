@@ -15,6 +15,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 
 use std::convert::TryInto;
+use std::f64;
 use std::mem;
 
 #[wasm_bindgen]
@@ -88,9 +89,9 @@ impl App {
 
     pub fn resize(&mut self) -> Result<(), JsValue> {
         let (actual_width, actual_height) = self.dimensions()?;
-        let (actual_width, actual_height) = (actual_width as f64, actual_height as f64);
+        let (actual_width, actual_height) = (f64::from(actual_width), f64::from(actual_height));
         let (ideal_width, ideal_height) = self.ideal_dimensions();
-        let (ideal_width, ideal_height) = (ideal_width as f64, ideal_height as f64);
+        let (ideal_width, ideal_height) = (f64::from(ideal_width), f64::from(ideal_height));
 
         let style = self.canvas.style();
 
@@ -121,13 +122,13 @@ impl App {
     fn aspect(&self) -> Result<f64, JsValue> {
         let (width, height) = self.dimensions()?;
 
-        Ok(width as f64 / height as f64)
+        Ok(f64::from(width) / f64::from(height))
     }
 
     fn ideal_aspect(&self) -> f64 {
         let (width, height) = self.ideal_dimensions();
 
-        width as f64 / height as f64
+        f64::from(width) / f64::from(height)
     }
 
     pub fn on_click(&mut self, client_x: u32, client_y: u32) -> Result<(), JsValue> {
@@ -143,7 +144,7 @@ impl App {
 
     fn canvas_coords(&self, client_coords: (u32, u32)) -> Result<(f64, f64), JsValue> {
         let (x, y) = client_coords;
-        let (mut x, mut y) = (x as f64, y as f64);
+        let (mut x, mut y) = (f64::from(x), f64::from(y));
         let letterbox = self.letterbox()?;
         x -= letterbox.left;
         y -= letterbox.top;
@@ -168,13 +169,13 @@ impl App {
 
                     mem::replace(
                         &mut self.state,
-                        State::SinglePlayer(SinglePlayerState {
+                        State::SinglePlayer(Box::new(SinglePlayerState {
                             game,
                             computer,
                             phase: Phase::ChooseCharacter {
                                 available_characters: initial_human_choices,
                             },
-                        }),
+                        })),
                     );
                 }
 
@@ -188,10 +189,13 @@ impl App {
 
             State::SettingsScreen => match action {
                 click::Action::NavigateHome => self.state = State::HomeScreen,
-                click::Action::SetComputerDifficulty(difficulty) => panic!("TODO set difficulty"),
+                click::Action::SetComputerDifficulty(_difficulty) => panic!("TODO set difficulty"),
 
-                action => panic!("Action {:?} should never be emitted when state == SettingsScreen"),
-            }
+                action => panic!(
+                    "Action {:?} should never be emitted when state == SettingsScreen",
+                    action
+                ),
+            },
 
             State::SinglePlayer(state) => match action {
                 click::Action::ChooseCharacter(human_character) => {
@@ -232,13 +236,11 @@ impl App {
     pub fn draw_if_needed(&mut self) -> Result<(), JsValue> {
         if self.completion_factor().unwrap_or(1.0) < 1.0 {
             self.draw()
+        } else if self.has_drawn_past_completion {
+            Ok(())
         } else {
-            if self.has_drawn_past_completion {
-                Ok(())
-            } else {
-                self.has_drawn_past_completion = true;
-                self.draw()
-            }
+            self.has_drawn_past_completion = true;
+            self.draw()
         }
     }
 
@@ -273,9 +275,8 @@ impl App {
                 let current_time = helpers::millis_to_secs(Date::now());
                 let time_after_start = current_time - self.animation_start_secs;
                 let completion_factor = time_after_start / state.phase.duration_secs();
-                let completion_factor = completion_factor.min(1.0);
 
-                completion_factor
+                completion_factor.min(1.0)
             }),
         }
     }

@@ -1,3 +1,5 @@
+use std::f64;
+
 pub struct Letterbox {
     pub left: f64,
     pub top: f64,
@@ -7,9 +9,9 @@ pub struct Letterbox {
 impl Letterbox {
     pub fn new(ideal_dimensions: (u32, u32), actual_dimensions: (u32, u32)) -> Letterbox {
         let (ideal_width, ideal_height) = ideal_dimensions;
-        let (ideal_width, ideal_height) = (ideal_width as f64, ideal_height as f64);
+        let (ideal_width, ideal_height) = (f64::from(ideal_width), f64::from(ideal_height));
         let (actual_width, actual_height) = actual_dimensions;
-        let (actual_width, actual_height) = (actual_width as f64, actual_height as f64);
+        let (actual_width, actual_height) = (f64::from(actual_width), f64::from(actual_height));
 
         let ideal_aspect = Letterbox::aspect((ideal_width, ideal_height));
         let actual_aspect = Letterbox::aspect((actual_width, actual_height));

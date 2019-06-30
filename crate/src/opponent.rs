@@ -86,6 +86,7 @@ fn prefer_drain_and_exit(choices: Vec<DequeueChoice>) -> Vec<DequeueChoice> {
     }
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_drain_and_exit(choice: &DequeueChoice) -> bool {
     if let DequeueChoice::DrainAndExit(_) = choice {
         true
@@ -94,6 +95,7 @@ fn is_drain_and_exit(choice: &DequeueChoice) -> bool {
     }
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
 fn is_just_exit(&choice: &DequeueChoice) -> bool {
     choice == DequeueChoice::JustExit
 }

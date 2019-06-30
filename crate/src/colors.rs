@@ -2,6 +2,8 @@ use crate::helpers;
 
 use nzscq::choices::{ArsenalItem, Booster, Character, Move};
 
+use std::f64;
+
 pub const BACKGROUND: Rgba = Rgba(0xF1, 0xF1, 0xF1, 0xFF);
 pub const OVERLAY: Rgba = Rgba(0x33, 0x33, 0x33, 0xAA);
 pub const PORTION_OF_DURATION_SPENT_FADING: f64 = 1.0 / (5.0 * 0.55);
@@ -121,8 +123,8 @@ impl Rgba {
 
 impl Into<(Rgb, f64)> for Rgba {
     fn into(self) -> (Rgb, f64) {
-        let color = Rgb(self.0 as f64, self.1 as f64, self.2 as f64);
-        let alpha = self.3 as f64 / 255.0;
+        let color = Rgb(f64::from(self.0), f64::from(self.1), f64::from(self.2));
+        let alpha = f64::from(self.3) / 255.0;
 
         (color, alpha)
     }

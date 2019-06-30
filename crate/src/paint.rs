@@ -11,6 +11,8 @@ use nzscq::choices::{ArsenalItem, Booster, Character, Move};
 use wasm_bindgen::JsValue;
 use web_sys::{CanvasRenderingContext2d, CssStyleDeclaration, HtmlImageElement};
 
+use std::f64;
+
 pub struct Painter<'a> {
     ctx: &'a CanvasRenderingContext2d,
     body_style: &'a CssStyleDeclaration,
@@ -88,7 +90,8 @@ impl<'a> Painter<'a> {
         let (width, height) = self.ideal_dimensions;
         self.ctx
             .set_fill_style(&JsValue::from_str(&color.to_upper_hash_hex()[..]));
-        self.ctx.fill_rect(0.0, 0.0, width as f64, height as f64);
+        self.ctx
+            .fill_rect(0.0, 0.0, f64::from(width), f64::from(height));
     }
 
     fn paint_rect(&mut self, color: Rgba, shape: Rect) {
@@ -122,7 +125,7 @@ impl<'a> Painter<'a> {
         alpha: f64,
         shape: Rect,
     ) -> Result<(), JsValue> {
-        let src = self.image_src(&image_type);
+        let src = self.image_src(image_type);
         let Rect {
             x,
             y,
@@ -172,9 +175,9 @@ impl<'a> Painter<'a> {
         Ok(())
     }
 
-    fn image_src(&self, image_type: &ImageType) -> &HtmlImageElement {
+    fn image_src(&self, image_type: ImageType) -> &HtmlImageElement {
         self.image_map
-            .get(&image_type)
+            .get(image_type)
             .expect(&format!("should have image for {:?}", image_type)[..])
     }
 }
@@ -352,9 +355,9 @@ pub enum PathCommand {
 impl Translate for PathCommand {
     fn translate(&self, dx: f64, dy: f64) -> PathCommand {
         match self {
-            &PathCommand::LineTo(x, y) => PathCommand::LineTo(x + dx, y + dy),
-            &PathCommand::ArcTo(x1, y1, x2, y2, radius) => {
-                PathCommand::ArcTo(x1 + dx, y1 + dy, x2 + dx, y2 + dy, radius)
+            PathCommand::LineTo(x, y) => PathCommand::LineTo(x + dx, y + dy),
+            PathCommand::ArcTo(x1, y1, x2, y2, radius) => {
+                PathCommand::ArcTo(x1 + dx, y1 + dy, x2 + dx, y2 + dy, *radius)
             }
         }
     }
@@ -363,10 +366,14 @@ impl Translate for PathCommand {
 impl Scale for PathCommand {
     fn scale(&self, scale: f64) -> PathCommand {
         match self {
-            &PathCommand::LineTo(x, y) => PathCommand::LineTo(x * scale, y * scale),
-            &PathCommand::ArcTo(x1, y1, x2, y2, radius) => {
-                PathCommand::ArcTo(x1 * scale, y1 * scale, x2 * scale, y2 * scale, radius * scale)
-            }
+            PathCommand::LineTo(x, y) => PathCommand::LineTo(x * scale, y * scale),
+            PathCommand::ArcTo(x1, y1, x2, y2, radius) => PathCommand::ArcTo(
+                x1 * scale,
+                y1 * scale,
+                x2 * scale,
+                y2 * scale,
+                radius * scale,
+            ),
         }
     }
 }

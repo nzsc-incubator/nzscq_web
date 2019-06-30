@@ -13,8 +13,8 @@ use std::convert::TryFrom;
 pub struct ImageMap(HashMap<ImageType, HtmlImageElement>);
 
 impl ImageMap {
-    pub fn get(&self, key: &ImageType) -> Option<&HtmlImageElement> {
-        self.0.get(key)
+    pub fn get(&self, key: ImageType) -> Option<&HtmlImageElement> {
+        self.0.get(&key)
     }
 }
 

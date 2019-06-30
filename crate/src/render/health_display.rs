@@ -21,7 +21,6 @@ pub struct ConstantHealthDisplay {
 impl Render for ConstantHealthDisplay {
     fn render(&self) -> Vec<Component> {
         let hearts = (0..self.health as usize)
-            .into_iter()
             .map(|i| {
                 heart_from_position(HeartPosition {
                     side: self.side,
@@ -46,7 +45,6 @@ impl LerpInto<Vec<Component>> for FadingHealthDisplay {
     fn lerp_into(self, lerper: &Lerper) -> Vec<Component> {
         let sublerper = lerper.sub_lerper(0.0..colors::PORTION_OF_DURATION_SPENT_POPPING);
         let hearts = (0..self.starting_health)
-            .into_iter()
             .map(|i| {
                 let completion_factor = if i == self.starting_health - 1 {
                     sublerper.lerp(0.0, 1.0)

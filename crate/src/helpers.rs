@@ -26,7 +26,7 @@ pub fn booster_logo_move_string(b: Booster) -> String {
 
     logo_move
         .map(|m| m.to_string())
-        .unwrap_or("NoBooster".to_string())
+        .unwrap_or_else(|| "NoBooster".to_string())
 }
 
 pub fn booster_logo_move(b: Booster) -> Option<Move> {
@@ -59,4 +59,4 @@ pub fn height_in_rows<T>(items: &[T], columns: usize) -> usize {
     (items.len() + columns - 1) / columns
 }
 
-pub const SQRT_3: f64 = 1.7320508075688772;
+pub const SQRT_3: f64 = 1.732_050_807_568_877_2;

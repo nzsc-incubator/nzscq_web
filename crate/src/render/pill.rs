@@ -94,7 +94,7 @@ impl Pill {
     }
 
     fn adjusted_offset(&self) -> f64 {
-        let factor = match self.position.from {
+        let factor = match self.position.side {
             Side::Left => 1.0,
             Side::Right => -1.0,
         };
@@ -107,7 +107,7 @@ impl Pill {
     }
 
     fn leftmost_circle_x(&self) -> f64 {
-        match self.position.from {
+        match self.position.side {
             Side::Left => 0.0,
             Side::Right => self.adjusted_offset() * (self.width_in_columns - 1) as f64,
         }
@@ -134,7 +134,7 @@ mod tests {
     fn pill_with_zero_width_renders_empty_vec() {
         let pill = Pill {
             position: CirclePosition {
-                from: Side::Left,
+                side: Side::Left,
                 column: 0,
                 row: 0,
             },
@@ -149,7 +149,7 @@ mod tests {
     fn pill_with_zero_height_renders_empty_vec() {
         let pill = Pill {
             position: CirclePosition {
-                from: Side::Left,
+                side: Side::Left,
                 column: 0,
                 row: 0,
             },

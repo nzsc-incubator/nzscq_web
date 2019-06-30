@@ -12,8 +12,8 @@ pub fn arsenal_item_display(
     position: CirclePosition,
 ) -> Vec<Component> {
     let on_click = if enabled { on_click_if_enabled } else { None };
-    let CirclePosition { from, column, row } = position;
-    let side = from;
+    let CirclePosition { side, column, row } = position;
+    let side = side;
     let fill_color = if enabled {
         colors::arsenal_item_color(item)
     } else {
@@ -22,7 +22,7 @@ pub fn arsenal_item_display(
     let image_alpha = if enabled {
         1.0
     } else {
-        colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0
+        f64::from(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA) / 255.0
     };
 
     vec![
@@ -39,9 +39,7 @@ pub fn arsenal_item_display(
                 on_click: None,
             },
         ],
-        if enabled {
-            vec![]
-        } else if item == ArsenalItem::Mirror {
+        if enabled || item == ArsenalItem::Mirror {
             vec![]
         } else {
             vec![Component::Circle {

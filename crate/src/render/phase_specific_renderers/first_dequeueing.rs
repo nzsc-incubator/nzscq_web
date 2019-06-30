@@ -23,6 +23,8 @@ use nzscq::{
     scoreboard::DequeueingPlayer,
 };
 
+use std::f64;
+
 pub struct FirstDequeueingPhaseRenderer<'a> {
     pub completion_factor: f64,
     pub previously_available_boosters: &'a Vec<Booster>,
@@ -390,7 +392,7 @@ fn pool_display(args: ScoreboardRenderArgs) -> Vec<Component> {
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: 0,
         },
@@ -434,7 +436,7 @@ fn pool_display(args: ScoreboardRenderArgs) -> Vec<Component> {
                     },
                     Component::Image {
                         image_type: ImageType::from(arsenal_item),
-                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                        alpha: f64::from(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA) / 255.0,
                         shape: dequeue_circle::foreground_at(side, row, column),
                         on_click: None,
                     },
@@ -467,7 +469,7 @@ fn entrance_and_exit_display(args: ScoreboardRenderArgs) -> Vec<Component> {
 
     let background_pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: pool_height_in_rows,
         },
@@ -477,7 +479,7 @@ fn entrance_and_exit_display(args: ScoreboardRenderArgs) -> Vec<Component> {
     };
     let decline_and_exit_pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 1,
             row: pool_height_in_rows,
         },
@@ -499,7 +501,7 @@ fn entrance_and_exit_display(args: ScoreboardRenderArgs) -> Vec<Component> {
                 },
                 Component::Image {
                     image_type: ImageType::from(entering_item),
-                    alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                    alpha: f64::from(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA) / 255.0,
                     shape: dequeue_circle::foreground_at(side, row, 0),
                     on_click: None,
                 },
@@ -550,7 +552,7 @@ fn entrance_and_exit_display(args: ScoreboardRenderArgs) -> Vec<Component> {
                     },
                     Component::Image {
                         image_type: ImageType::from(exiting_item),
-                        alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                        alpha: f64::from(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA) / 255.0,
                         shape: dequeue_circle::foreground_at(side, row, 2),
                         on_click: None,
                     },
@@ -576,7 +578,7 @@ fn arsenal_display(args: ScoreboardRenderArgs) -> Vec<Component> {
 
     let pill = Pill {
         position: CirclePosition {
-            from: side,
+            side,
             column: 0,
             row: row_offset,
         },
@@ -603,7 +605,7 @@ fn arsenal_display(args: ScoreboardRenderArgs) -> Vec<Component> {
                 },
                 Component::Image {
                     image_type: ImageType::from(arsenal_item),
-                    alpha: colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA as f64 / 255.0,
+                    alpha: f64::from(colors::DISABLED_DEQUEUE_ARSENAL_ITEM_ALPHA) / 255.0,
                     shape: dequeue_circle::foreground_at(side, row, column),
                     on_click: None,
                 },
