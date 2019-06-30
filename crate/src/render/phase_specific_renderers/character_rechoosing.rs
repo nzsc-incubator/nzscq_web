@@ -2,6 +2,7 @@ use crate::{
     click::Action,
     colors,
     paint::{Component, ImageType},
+    phase::RechooseCharacterPhase,
     render::{
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
@@ -15,13 +16,22 @@ use crate::{
 use nzscq::choices::Character;
 
 pub struct CharacterRechoosingPhaseRenderer<'a> {
-    pub completion_factor: f64,
-    pub previously_available_characters: &'a Vec<Character>,
-    pub previously_mutually_chosen_character: Character,
-    pub available_characters: &'a Vec<Character>,
+    completion_factor: f64,
+    previously_available_characters: &'a Vec<Character>,
+    previously_mutually_chosen_character: Character,
+    available_characters: &'a Vec<Character>,
 }
 
 impl<'a> CharacterRechoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a RechooseCharacterPhase, completion_factor: f64) -> CharacterRechoosingPhaseRenderer<'a> {
+        CharacterRechoosingPhaseRenderer {
+            completion_factor,
+            previously_available_characters: &phase.previously_available_characters,
+            previously_mutually_chosen_character: phase.previously_mutually_chosen_character,
+            available_characters: &phase.available_characters,
+        }
+    }
+
     pub fn render(self) -> Vec<Component> {
         let human_entrance = self.human_entrance();
         let computer_entrance = self.computer_entrance();

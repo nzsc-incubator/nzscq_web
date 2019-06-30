@@ -2,6 +2,7 @@ use crate::{
     click::Action,
     colors, helpers,
     paint::{Component, ImageType},
+    phase::ChooseActionPhase,
     render::{
         arrow, arsenal_item_display,
         health_display::ConstantHealthDisplay,
@@ -23,15 +24,26 @@ use nzscq::{
 };
 
 pub struct ActionChoosingPhaseRenderer<'a> {
-    pub completion_factor: f64,
-    pub previous_scoreboard: &'a [DequeueingPlayer; 2],
-    pub previously_available_dequeues: &'a [Vec<DequeueChoice>; 2],
-    pub previous_outcome: &'a [DequeueChoice; 2],
-    pub scoreboard: &'a [ActionlessPlayer; 2],
-    pub available_actions: &'a [Vec<NzscAction>; 2],
+    completion_factor: f64,
+    previous_scoreboard: &'a [DequeueingPlayer; 2],
+    previously_available_dequeues: &'a [Vec<DequeueChoice>; 2],
+    previous_outcome: &'a [DequeueChoice; 2],
+    scoreboard: &'a [ActionlessPlayer; 2],
+    available_actions: &'a [Vec<NzscAction>; 2],
 }
 
 impl<'a> ActionChoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseActionPhase, completion_factor: f64) -> ActionChoosingPhaseRenderer<'a> {
+        ActionChoosingPhaseRenderer {
+            completion_factor,
+            previous_scoreboard: &phase.previous_scoreboard,
+            previously_available_dequeues: &phase.previously_available_dequeues,
+            previous_outcome: &phase.previous_outcome,
+            scoreboard: &phase.scoreboard,
+            available_actions: &phase.available_actions,
+        }
+    }
+
     pub fn render(self) -> Vec<Component> {
         let human_entrance = self.human_entrance();
         let computer_entrance = self.computer_entrance();

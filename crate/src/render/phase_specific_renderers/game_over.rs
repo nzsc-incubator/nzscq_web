@@ -1,6 +1,7 @@
 use crate::{
     colors, helpers,
     paint::{Component, ImageType},
+    phase::GameOverPhase,
     render::{
         arrow, arsenal_item_display,
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
@@ -24,14 +25,24 @@ use nzscq::{
 };
 
 pub struct GameOverPhaseRenderer<'a> {
-    pub completion_factor: f64,
-    pub previous_scoreboard: &'a [ActionlessPlayer; 2],
-    pub previously_available_actions: &'a [Vec<NzscAction>; 2],
-    pub previous_outcome: &'a [ActionPointsDestroyed; 2],
-    pub scoreboard: &'a [FinishedPlayer; 2],
+    completion_factor: f64,
+    previous_scoreboard: &'a [ActionlessPlayer; 2],
+    previously_available_actions: &'a [Vec<NzscAction>; 2],
+    previous_outcome: &'a [ActionPointsDestroyed; 2],
+    scoreboard: &'a [FinishedPlayer; 2],
 }
 
 impl<'a> GameOverPhaseRenderer<'a> {
+    pub fn new(phase: &'a GameOverPhase, completion_factor: f64) -> GameOverPhaseRenderer<'a> {
+        GameOverPhaseRenderer {
+            completion_factor,
+            previous_scoreboard: &phase.previous_scoreboard,
+            previously_available_actions: &phase.previously_available_actions,
+            previous_outcome: &phase.previous_outcome,
+            scoreboard: &phase.scoreboard,
+        }
+    }
+
     pub fn render(self) -> Vec<Component> {
         let human_entrance = self.human_entrance();
         let computer_entrance = self.computer_entrance();
@@ -499,11 +510,7 @@ fn action_choosing_pool_display<T: QueueArsenal>(
                     arsenal_item,
                     false,
                     None,
-                    CirclePosition {
-                        side,
-                        column,
-                        row,
-                    },
+                    CirclePosition { side, column, row },
                 )
             }
         });

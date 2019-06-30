@@ -2,6 +2,7 @@ use crate::{
     click::Action,
     colors,
     paint::{Component, ImageType},
+    phase::ChooseBoosterPhase,
     render::{
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
         lerp::{LerpableComponent, Lerper},
@@ -18,13 +19,22 @@ use nzscq::{
 };
 
 pub struct BoosterChoosingPhaseRenderer<'a> {
-    pub completion_factor: f64,
-    pub previously_available_characters: &'a Vec<Character>,
-    pub previous_outcome: &'a Vec<CharacterHeadstart>,
-    pub available_boosters: &'a Vec<Booster>,
+    completion_factor: f64,
+    previously_available_characters: &'a Vec<Character>,
+    previous_outcome: &'a Vec<CharacterHeadstart>,
+    available_boosters: &'a Vec<Booster>,
 }
 
 impl<'a> BoosterChoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseBoosterPhase, completion_factor: f64) -> BoosterChoosingPhaseRenderer<'a> {
+        BoosterChoosingPhaseRenderer {
+            completion_factor,
+            previously_available_characters: &phase.previously_available_characters,
+            previous_outcome: &phase.previous_outcome,
+            available_boosters: &phase.available_boosters,
+        }
+    }
+
     pub fn render(self) -> Vec<Component> {
         let human_entrance = self.human_entrance();
         let computer_entrance = self.computer_entrance();

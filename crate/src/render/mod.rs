@@ -31,94 +31,25 @@ impl Render for (f64, &Phase) {
         let completion_factor = *completion_factor;
 
         match phase {
-            Phase::ChooseCharacter {
-                available_characters,
-            } => CharacterChoosingPhaseRenderer {
-                completion_factor,
-                available_characters,
-            }
+            Phase::ChooseCharacter(phase) => CharacterChoosingPhaseRenderer ::new(phase, completion_factor)
             .render(),
 
-            Phase::RechooseCharacter {
-                previously_available_characters,
-                previously_mutually_chosen_character,
-                available_characters,
-            } => CharacterRechoosingPhaseRenderer {
-                completion_factor,
-                previously_available_characters,
-                previously_mutually_chosen_character: *previously_mutually_chosen_character,
-                available_characters,
-            }
+            Phase::RechooseCharacter(phase) => CharacterRechoosingPhaseRenderer ::new(phase, completion_factor)
             .render(),
 
-            Phase::ChooseBooster {
-                previously_available_characters,
-                previous_outcome,
-                available_boosters,
-            } => BoosterChoosingPhaseRenderer {
-                completion_factor,
-                previously_available_characters,
-                previous_outcome,
-                available_boosters,
-            }
+            Phase::ChooseBooster(phase) => BoosterChoosingPhaseRenderer ::new(phase, completion_factor)
             .render(),
 
-            Phase::ChooseFirstDequeue {
-                previously_available_boosters,
-                scoreboard,
-                available_dequeues,
-            } => FirstDequeueingPhaseRenderer {
-                completion_factor,
-                previously_available_boosters,
-                scoreboard,
-                available_dequeues,
-            }
+            Phase::ChooseFirstDequeue(phase) => FirstDequeueingPhaseRenderer ::new(phase, completion_factor)
             .render(),
 
-            Phase::ChooseAction {
-                previous_scoreboard,
-                previously_available_dequeues,
-                previous_outcome,
-                scoreboard,
-                available_actions,
-            } => ActionChoosingPhaseRenderer {
-                completion_factor,
-                previous_scoreboard,
-                previously_available_dequeues,
-                previous_outcome,
-                scoreboard,
-                available_actions,
-            }
+            Phase::ChooseAction(phase) => ActionChoosingPhaseRenderer ::new(phase, completion_factor)
             .render(),
 
-            Phase::ChooseSubsequentDequeue {
-                previous_scoreboard,
-                previously_available_actions,
-                previous_outcome,
-                scoreboard,
-                available_dequeues,
-            } => SubsequentDequeueingPhaseRenderer {
-                completion_factor,
-                previous_scoreboard,
-                previously_available_actions,
-                previous_outcome,
-                scoreboard,
-                available_dequeues,
-            }
+            Phase::ChooseSubsequentDequeue(phase) => SubsequentDequeueingPhaseRenderer ::new(phase, completion_factor)
             .render(),
 
-            Phase::GameOver {
-                previous_scoreboard,
-                previously_available_actions,
-                previous_outcome,
-                scoreboard,
-            } => GameOverPhaseRenderer {
-                completion_factor,
-                previous_scoreboard,
-                previously_available_actions,
-                previous_outcome,
-                scoreboard,
-            }
+            Phase::GameOver(phase) => GameOverPhaseRenderer ::new(phase, completion_factor)
             .render(),
         }
     }

@@ -4,7 +4,7 @@ use crate::{
     letterbox::Letterbox,
     opponent::{Opponent, Random},
     paint::{Component, Painter},
-    phase::Phase,
+    phase::{ChooseCharacterPhase, Phase},
     render::{self, Render},
     state::{SinglePlayerState, State},
 };
@@ -172,9 +172,9 @@ impl App {
                         State::SinglePlayer(Box::new(SinglePlayerState {
                             game,
                             computer,
-                            phase: Phase::ChooseCharacter {
+                            phase: Phase::ChooseCharacter(ChooseCharacterPhase{
                                 available_characters: initial_human_choices,
-                            },
+                            }),
                         })),
                     );
                 }

@@ -2,12 +2,13 @@ use crate::{
     click::Action,
     colors,
     paint::{Component, ImageType},
+    phase::{ChooseCharacterPhase},
     render::{
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
         Render,
     },
-    shapes::{rect_button},
+    shapes::rect_button,
     side::Side,
     transform::Translate,
 };
@@ -15,11 +16,18 @@ use crate::{
 use nzscq::choices::Character;
 
 pub struct CharacterChoosingPhaseRenderer<'a> {
-    pub completion_factor: f64,
-    pub available_characters: &'a Vec<Character>,
+    completion_factor: f64,
+    available_characters: &'a Vec<Character>,
 }
 
 impl<'a> CharacterChoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseCharacterPhase, completion_factor: f64) -> CharacterChoosingPhaseRenderer<'a> {
+        CharacterChoosingPhaseRenderer {
+            completion_factor,
+            available_characters: &phase.available_characters,
+        }
+    }
+
     pub fn render(self) -> Vec<Component> {
         let lerper = Lerper::from_completion_factor(self.completion_factor);
         let mut components = vec![Component::Background {

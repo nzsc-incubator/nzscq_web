@@ -2,6 +2,7 @@ use crate::{
     click::Action,
     colors, helpers,
     paint::{Component, ImageType},
+    phase::ChooseSubsequentDequeuePhase,
     render::{
         arrow, arsenal_item_display,
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
@@ -24,15 +25,26 @@ use nzscq::{
 };
 
 pub struct SubsequentDequeueingPhaseRenderer<'a> {
-    pub completion_factor: f64,
-    pub previous_scoreboard: &'a [ActionlessPlayer; 2],
-    pub previously_available_actions: &'a [Vec<NzscAction>; 2],
-    pub previous_outcome: &'a [ActionPointsDestroyed; 2],
-    pub scoreboard: &'a [DequeueingPlayer; 2],
-    pub available_dequeues: &'a [Vec<DequeueChoice>; 2],
+    completion_factor: f64,
+    previous_scoreboard: &'a [ActionlessPlayer; 2],
+    previously_available_actions: &'a [Vec<NzscAction>; 2],
+    previous_outcome: &'a [ActionPointsDestroyed; 2],
+    scoreboard: &'a [DequeueingPlayer; 2],
+    available_dequeues: &'a [Vec<DequeueChoice>; 2],
 }
 
 impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseSubsequentDequeuePhase, completion_factor: f64) -> SubsequentDequeueingPhaseRenderer<'a> {
+        SubsequentDequeueingPhaseRenderer {
+            completion_factor,
+            previous_scoreboard: &phase.previous_scoreboard,
+            previously_available_actions: &phase.previously_available_actions,
+            previous_outcome: &phase.previous_outcome,
+            scoreboard: &phase.scoreboard,
+            available_dequeues: &phase.available_dequeues,
+        }
+    }
+
     pub fn render(self) -> Vec<Component> {
         let human_entrance = self.human_entrance();
         let computer_entrance = self.computer_entrance();
@@ -896,11 +908,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
                 arsenal_item,
                 false,
                 None,
-                CirclePosition {
-                    side,
-                    column,
-                    row,
-                },
+                CirclePosition { side, column, row },
             )
         });
 
@@ -1000,11 +1008,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
                     arsenal_item,
                     false,
                     None,
-                    CirclePosition {
-                        side,
-                        column,
-                        row,
-                    },
+                    CirclePosition { side, column, row },
                 )
             }
         });

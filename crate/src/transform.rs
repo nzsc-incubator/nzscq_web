@@ -14,12 +14,9 @@ impl<T: Translate + Clone> Translate for Vec<T> {
 pub trait Scale {
     fn scale(&self, scale: f64) -> Self;
 }
-    
+
 impl<T: Scale + Clone> Scale for Vec<T> {
     fn scale(&self, scale: f64) -> Vec<T> {
-        self.iter()
-            .cloned()
-            .map(|item| item.scale(scale))
-            .collect()
+        self.iter().cloned().map(|item| item.scale(scale)).collect()
     }
 }

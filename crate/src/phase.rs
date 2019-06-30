@@ -6,44 +6,13 @@ use nzscq::{
 
 #[derive(Debug, Clone)]
 pub enum Phase {
-    ChooseCharacter {
-        available_characters: Vec<Character>,
-    },
-    RechooseCharacter {
-        previously_available_characters: Vec<Character>,
-        previously_mutually_chosen_character: Character,
-        available_characters: Vec<Character>,
-    },
-    ChooseBooster {
-        previously_available_characters: Vec<Character>,
-        previous_outcome: Vec<CharacterHeadstart>,
-        available_boosters: Vec<Booster>,
-    },
-    ChooseFirstDequeue {
-        previously_available_boosters: Vec<Booster>,
-        scoreboard: [DequeueingPlayer; 2],
-        available_dequeues: [Vec<DequeueChoice>; 2],
-    },
-    ChooseAction {
-        previous_scoreboard: [DequeueingPlayer; 2],
-        previously_available_dequeues: [Vec<DequeueChoice>; 2],
-        previous_outcome: [DequeueChoice; 2],
-        scoreboard: [ActionlessPlayer; 2],
-        available_actions: [Vec<Action>; 2],
-    },
-    ChooseSubsequentDequeue {
-        previous_scoreboard: [ActionlessPlayer; 2],
-        previously_available_actions: [Vec<Action>; 2],
-        previous_outcome: [ActionPointsDestroyed; 2],
-        scoreboard: [DequeueingPlayer; 2],
-        available_dequeues: [Vec<DequeueChoice>; 2],
-    },
-    GameOver {
-        previous_scoreboard: [ActionlessPlayer; 2],
-        previously_available_actions: [Vec<Action>; 2],
-        previous_outcome: [ActionPointsDestroyed; 2],
-        scoreboard: [FinishedPlayer; 2],
-    },
+    ChooseCharacter(ChooseCharacterPhase),
+    RechooseCharacter(RechooseCharacterPhase),
+    ChooseBooster(ChooseBoosterPhase),
+    ChooseFirstDequeue(ChooseFirstDequeuePhase),
+    ChooseAction(ChooseActionPhase),
+    ChooseSubsequentDequeue(ChooseSubsequentDequeuePhase),
+    GameOver(GameOverPhase),
 }
 
 impl Phase {
@@ -58,6 +27,58 @@ impl Phase {
             Phase::GameOver { .. } => durations::GAME_OVER,
         }
     }
+}
+
+#[derive(Debug, Clone)]
+pub struct ChooseCharacterPhase {
+    pub available_characters: Vec<Character>,
+}
+
+#[derive(Debug, Clone)]
+pub struct RechooseCharacterPhase {
+    pub previously_available_characters: Vec<Character>,
+    pub previously_mutually_chosen_character: Character,
+    pub available_characters: Vec<Character>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ChooseBoosterPhase {
+    pub previously_available_characters: Vec<Character>,
+    pub previous_outcome: Vec<CharacterHeadstart>,
+    pub available_boosters: Vec<Booster>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ChooseFirstDequeuePhase {
+    pub previously_available_boosters: Vec<Booster>,
+    pub scoreboard: [DequeueingPlayer; 2],
+    pub available_dequeues: [Vec<DequeueChoice>; 2],
+}
+
+#[derive(Debug, Clone)]
+pub struct ChooseActionPhase {
+    pub previous_scoreboard: [DequeueingPlayer; 2],
+    pub previously_available_dequeues: [Vec<DequeueChoice>; 2],
+    pub previous_outcome: [DequeueChoice; 2],
+    pub scoreboard: [ActionlessPlayer; 2],
+    pub available_actions: [Vec<Action>; 2],
+}
+
+#[derive(Debug, Clone)]
+pub struct ChooseSubsequentDequeuePhase {
+    pub previous_scoreboard: [ActionlessPlayer; 2],
+    pub previously_available_actions: [Vec<Action>; 2],
+    pub previous_outcome: [ActionPointsDestroyed; 2],
+    pub scoreboard: [DequeueingPlayer; 2],
+    pub available_dequeues: [Vec<DequeueChoice>; 2],
+}
+
+#[derive(Debug, Clone)]
+pub struct GameOverPhase {
+    pub previous_scoreboard: [ActionlessPlayer; 2],
+    pub previously_available_actions: [Vec<Action>; 2],
+    pub previous_outcome: [ActionPointsDestroyed; 2],
+    pub scoreboard: [FinishedPlayer; 2],
 }
 
 mod durations {

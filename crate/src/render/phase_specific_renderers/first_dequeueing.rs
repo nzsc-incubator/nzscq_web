@@ -2,6 +2,7 @@ use crate::{
     click::Action,
     colors, helpers,
     paint::{Component, ImageType},
+    phase::ChooseFirstDequeuePhase,
     render::{
         arrow,
         health_display::ConstantHealthDisplay,
@@ -26,13 +27,22 @@ use nzscq::{
 use std::f64;
 
 pub struct FirstDequeueingPhaseRenderer<'a> {
-    pub completion_factor: f64,
-    pub previously_available_boosters: &'a Vec<Booster>,
-    pub scoreboard: &'a [DequeueingPlayer; 2],
-    pub available_dequeues: &'a [Vec<DequeueChoice>; 2],
+    completion_factor: f64,
+    previously_available_boosters: &'a Vec<Booster>,
+    scoreboard: &'a [DequeueingPlayer; 2],
+    available_dequeues: &'a [Vec<DequeueChoice>; 2],
 }
 
 impl<'a> FirstDequeueingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseFirstDequeuePhase, completion_factor: f64) -> FirstDequeueingPhaseRenderer<'a> {
+        FirstDequeueingPhaseRenderer {
+            completion_factor,
+            previously_available_boosters: &phase.previously_available_boosters,
+            scoreboard: &phase.scoreboard,
+            available_dequeues: &phase.available_dequeues,
+        }
+    }
+
     pub fn render(self) -> Vec<Component> {
         let human_entrance = self.human_entrance();
         let computer_entrance = self.computer_entrance();
