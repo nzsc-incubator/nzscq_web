@@ -4,6 +4,7 @@ mod app;
 mod canvas_dimensions;
 mod click;
 mod colors;
+mod context;
 mod helpers;
 mod image_map;
 mod letterbox;

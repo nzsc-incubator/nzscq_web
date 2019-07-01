@@ -31,26 +31,31 @@ impl Render for (f64, &Phase) {
         let completion_factor = *completion_factor;
 
         match phase {
-            Phase::ChooseCharacter(phase) => CharacterChoosingPhaseRenderer ::new(phase, completion_factor)
-            .render(),
+            Phase::ChooseCharacter(phase) => {
+                CharacterChoosingPhaseRenderer::new(phase, completion_factor).render()
+            }
 
-            Phase::RechooseCharacter(phase) => CharacterRechoosingPhaseRenderer ::new(phase, completion_factor)
-            .render(),
+            Phase::RechooseCharacter(phase) => {
+                CharacterRechoosingPhaseRenderer::new(phase, completion_factor).render()
+            }
 
-            Phase::ChooseBooster(phase) => BoosterChoosingPhaseRenderer ::new(phase, completion_factor)
-            .render(),
+            Phase::ChooseBooster(phase) => {
+                BoosterChoosingPhaseRenderer::new(phase, completion_factor).render()
+            }
 
-            Phase::ChooseFirstDequeue(phase) => FirstDequeueingPhaseRenderer ::new(phase, completion_factor)
-            .render(),
+            Phase::ChooseFirstDequeue(phase) => {
+                FirstDequeueingPhaseRenderer::new(phase, completion_factor).render()
+            }
 
-            Phase::ChooseAction(phase) => ActionChoosingPhaseRenderer ::new(phase, completion_factor)
-            .render(),
+            Phase::ChooseAction(phase) => {
+                ActionChoosingPhaseRenderer::new(phase, completion_factor).render()
+            }
 
-            Phase::ChooseSubsequentDequeue(phase) => SubsequentDequeueingPhaseRenderer ::new(phase, completion_factor)
-            .render(),
+            Phase::ChooseSubsequentDequeue(phase) => {
+                SubsequentDequeueingPhaseRenderer::new(phase, completion_factor).render()
+            }
 
-            Phase::GameOver(phase) => GameOverPhaseRenderer ::new(phase, completion_factor)
-            .render(),
+            Phase::GameOver(phase) => GameOverPhaseRenderer::new(phase, completion_factor).render(),
         }
     }
 }

@@ -1,8 +1,10 @@
 use crate::{
-    click, helpers,
+    click,
+    context::Context,
+    helpers,
     image_map::ImageMap,
     letterbox::Letterbox,
-    opponent::{Opponent, Random},
+    opponent::{Difficulty, Opponent, Random},
     paint::{Component, Painter},
     phase::{ChooseCharacterPhase, Phase},
     render::{self, Render},
@@ -25,6 +27,7 @@ pub struct App {
     canvas: HtmlCanvasElement,
     ctx: CanvasRenderingContext2d,
     image_map: ImageMap,
+    context: Context,
     state: State,
     animation_start_secs: f64,
     has_drawn_past_completion: bool,
@@ -57,6 +60,9 @@ impl App {
             image_map: get_image
                 .try_into()
                 .expect("should be able to create image map from js image getter"),
+            context: Context {
+                computer_difficulty: Difficulty::Stupid,
+            },
             state: State::HomeScreen,
             animation_start_secs: helpers::millis_to_secs(Date::now()),
             has_drawn_past_completion: false,
@@ -172,7 +178,7 @@ impl App {
                         State::SinglePlayer(Box::new(SinglePlayerState {
                             game,
                             computer,
-                            phase: Phase::ChooseCharacter(ChooseCharacterPhase{
+                            phase: Phase::ChooseCharacter(ChooseCharacterPhase {
                                 available_characters: initial_human_choices,
                             }),
                         })),
@@ -189,7 +195,9 @@ impl App {
 
             State::SettingsScreen => match action {
                 click::Action::NavigateHome => self.state = State::HomeScreen,
-                click::Action::SetComputerDifficulty(_difficulty) => panic!("TODO set difficulty"),
+                click::Action::SetComputerDifficulty(difficulty) => {
+                    self.context.computer_difficulty = difficulty
+                }
 
                 action => panic!(
                     "Action {:?} should never be emitted when state == SettingsScreen",
@@ -257,7 +265,7 @@ impl App {
     fn render(&self) -> Vec<Component> {
         match &self.state {
             State::HomeScreen => render::home_screen(),
-            State::SettingsScreen => render::settings_screen(),
+            State::SettingsScreen => render::settings_screen(&self.context),
             State::SinglePlayer(state) => (
                 self.completion_factor()
                     .expect("should have completion factor when state == SinglePlayer"),

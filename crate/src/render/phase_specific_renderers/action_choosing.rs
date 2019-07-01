@@ -33,7 +33,10 @@ pub struct ActionChoosingPhaseRenderer<'a> {
 }
 
 impl<'a> ActionChoosingPhaseRenderer<'a> {
-    pub fn new(phase: &'a ChooseActionPhase, completion_factor: f64) -> ActionChoosingPhaseRenderer<'a> {
+    pub fn new(
+        phase: &'a ChooseActionPhase,
+        completion_factor: f64,
+    ) -> ActionChoosingPhaseRenderer<'a> {
         ActionChoosingPhaseRenderer {
             completion_factor,
             previous_scoreboard: &phase.previous_scoreboard,
@@ -723,11 +726,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
                 arsenal_item,
                 false,
                 None,
-                CirclePosition {
-                    side,
-                    column,
-                    row,
-                },
+                CirclePosition { side, column, row },
             )
         });
 
@@ -827,11 +826,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
                     arsenal_item,
                     false,
                     None,
-                    CirclePosition {
-                        side,
-                        column,
-                        row,
-                    },
+                    CirclePosition { side, column, row },
                 )
             }
         });
@@ -928,11 +923,7 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
                 side.if_left(())
                     .and(opt_move)
                     .map(|m| Action::ChooseAction(NzscAction::Move(m))),
-                CirclePosition {
-                    side,
-                    column,
-                    row,
-                },
+                CirclePosition { side, column, row },
             )
         });
 

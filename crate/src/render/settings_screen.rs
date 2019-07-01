@@ -1,6 +1,7 @@
 use crate::canvas_dimensions;
 use crate::click::Action;
 use crate::colors;
+use crate::context::Context;
 use crate::opponent::Difficulty;
 use crate::paint::{Component, ImageType};
 use crate::render::{self, lerp::Lerper};
@@ -10,8 +11,9 @@ use crate::transform::{Scale, Translate};
 use std::convert::TryFrom;
 use std::f64;
 
-pub fn settings_screen() -> Vec<Component> {
-    let difficulty = Difficulty::Easy;
+pub fn settings_screen(context: &Context) -> Vec<Component> {
+    let difficulty = context.computer_difficulty;
+
     vec![
         vec![Component::Background {
             color: colors::SETTINGS_SCREEN_BACKGROUND,

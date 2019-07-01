@@ -2,7 +2,7 @@ use crate::{
     click::Action,
     colors,
     paint::{Component, ImageType},
-    phase::{ChooseCharacterPhase},
+    phase::ChooseCharacterPhase,
     render::{
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
@@ -21,7 +21,10 @@ pub struct CharacterChoosingPhaseRenderer<'a> {
 }
 
 impl<'a> CharacterChoosingPhaseRenderer<'a> {
-    pub fn new(phase: &'a ChooseCharacterPhase, completion_factor: f64) -> CharacterChoosingPhaseRenderer<'a> {
+    pub fn new(
+        phase: &'a ChooseCharacterPhase,
+        completion_factor: f64,
+    ) -> CharacterChoosingPhaseRenderer<'a> {
         CharacterChoosingPhaseRenderer {
             completion_factor,
             available_characters: &phase.available_characters,

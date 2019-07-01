@@ -26,7 +26,10 @@ pub struct BoosterChoosingPhaseRenderer<'a> {
 }
 
 impl<'a> BoosterChoosingPhaseRenderer<'a> {
-    pub fn new(phase: &'a ChooseBoosterPhase, completion_factor: f64) -> BoosterChoosingPhaseRenderer<'a> {
+    pub fn new(
+        phase: &'a ChooseBoosterPhase,
+        completion_factor: f64,
+    ) -> BoosterChoosingPhaseRenderer<'a> {
         BoosterChoosingPhaseRenderer {
             completion_factor,
             previously_available_characters: &phase.previously_available_characters,

@@ -34,7 +34,10 @@ pub struct FirstDequeueingPhaseRenderer<'a> {
 }
 
 impl<'a> FirstDequeueingPhaseRenderer<'a> {
-    pub fn new(phase: &'a ChooseFirstDequeuePhase, completion_factor: f64) -> FirstDequeueingPhaseRenderer<'a> {
+    pub fn new(
+        phase: &'a ChooseFirstDequeuePhase,
+        completion_factor: f64,
+    ) -> FirstDequeueingPhaseRenderer<'a> {
         FirstDequeueingPhaseRenderer {
             completion_factor,
             previously_available_boosters: &phase.previously_available_boosters,

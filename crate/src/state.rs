@@ -1,7 +1,10 @@
 use crate::app::JsPrng;
 use crate::helpers;
 use crate::opponent::{Difficulty, Opponent};
-use crate::phase::{ChooseActionPhase, ChooseBoosterPhase, ChooseFirstDequeuePhase, ChooseSubsequentDequeuePhase, GameOverPhase, Phase, RechooseCharacterPhase};
+use crate::phase::{
+    ChooseActionPhase, ChooseBoosterPhase, ChooseFirstDequeuePhase, ChooseSubsequentDequeuePhase,
+    GameOverPhase, Phase, RechooseCharacterPhase,
+};
 
 use nzscq::choices::{Action as NzscAction, BatchChoice, Booster, Character, DequeueChoice};
 use nzscq::game::BatchChoiceGame;
@@ -40,7 +43,7 @@ impl SinglePlayerState {
 
         match outcome {
             Outcome::CharacterPhaseDone(character_headstarts) => {
-                self.phase = Phase::ChooseBooster( ChooseBoosterPhase{
+                self.phase = Phase::ChooseBooster(ChooseBoosterPhase {
                     previously_available_characters,
                     previous_outcome: character_headstarts,
                     available_boosters: self
@@ -52,7 +55,7 @@ impl SinglePlayerState {
                 });
             }
             Outcome::CharacterPhaseRechoose(characters) => {
-                self.phase = Phase::RechooseCharacter (RechooseCharacterPhase{
+                self.phase = Phase::RechooseCharacter(RechooseCharacterPhase {
                     previously_available_characters,
                     previously_mutually_chosen_character: characters[0],
                     available_characters: self
@@ -84,7 +87,7 @@ impl SinglePlayerState {
 
         match outcome {
             Outcome::BoosterPhaseDone(_) => {
-                self.phase = Phase::ChooseFirstDequeue(ChooseFirstDequeuePhase{
+                self.phase = Phase::ChooseFirstDequeue(ChooseFirstDequeuePhase {
                     previously_available_boosters,
                     scoreboard: helpers::vec2_to_arr2(
                         self.game
@@ -106,8 +109,12 @@ impl SinglePlayerState {
 
     pub fn handle_dequeue_choice(&mut self, human_dequeue: DequeueChoice) {
         let previous_scoreboard: [DequeueingPlayer; 2] = match &self.phase {
-            Phase::ChooseFirstDequeue(ChooseFirstDequeuePhase{ scoreboard, .. }) => scoreboard.clone(),
-            Phase::ChooseSubsequentDequeue(ChooseSubsequentDequeuePhase{ scoreboard, .. }) => scoreboard.clone(),
+            Phase::ChooseFirstDequeue(ChooseFirstDequeuePhase { scoreboard, .. }) => {
+                scoreboard.clone()
+            }
+            Phase::ChooseSubsequentDequeue(ChooseSubsequentDequeuePhase { scoreboard, .. }) => {
+                scoreboard.clone()
+            }
             _ => panic!("should be on a dequeueing phase"),
         };
         let previously_available_dequeues = self
@@ -125,7 +132,7 @@ impl SinglePlayerState {
 
         match outcome {
             Outcome::DequeuePhaseDone(dequeues) => {
-                self.phase = Phase::ChooseAction(ChooseActionPhase{
+                self.phase = Phase::ChooseAction(ChooseActionPhase {
                     previous_scoreboard,
                     previously_available_dequeues: helpers::vec2_to_arr2(
                         previously_available_dequeues,
@@ -151,7 +158,7 @@ impl SinglePlayerState {
 
     pub fn handle_action_choice(&mut self, human_action: NzscAction) {
         let previous_scoreboard: [ActionlessPlayer; 2] = match &self.phase {
-            Phase::ChooseAction(ChooseActionPhase{ scoreboard, .. }) => scoreboard.clone(),
+            Phase::ChooseAction(ChooseActionPhase { scoreboard, .. }) => scoreboard.clone(),
             _ => panic!("should be on action-choosing phase"),
         };
         let previously_available_actions = helpers::vec2_to_arr2(
@@ -170,7 +177,7 @@ impl SinglePlayerState {
 
         match outcome {
             Outcome::ActionPhaseDone(action_points_destroyed) => {
-                self.phase = Phase::ChooseSubsequentDequeue(ChooseSubsequentDequeuePhase{
+                self.phase = Phase::ChooseSubsequentDequeue(ChooseSubsequentDequeuePhase {
                     previous_scoreboard,
                     previously_available_actions,
                     previous_outcome: helpers::vec2_to_arr2(action_points_destroyed),
@@ -190,7 +197,7 @@ impl SinglePlayerState {
             }
 
             Outcome::GameOver(action_points_destroyed) => {
-                self.phase = Phase::GameOver(GameOverPhase{
+                self.phase = Phase::GameOver(GameOverPhase {
                     previous_scoreboard,
                     previously_available_actions,
                     previous_outcome: helpers::vec2_to_arr2(action_points_destroyed),
