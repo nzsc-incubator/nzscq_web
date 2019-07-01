@@ -2,6 +2,7 @@ use crate::{
     click::Action,
     colors::Rgba,
     image_map::ImageMap,
+    opponent::Difficulty,
     shapes::{Circle, Rect},
     transform::{Scale, Translate},
 };
@@ -396,6 +397,9 @@ pub enum ImageType {
     SinglePlayerButton,
     MultiPlayerButton,
     SettingsButton,
+    Star,
+    EmptyStar,
+    ComputerDifficulty(Difficulty),
 }
 
 impl From<ArsenalItem> for ImageType {

@@ -1,10 +1,17 @@
 use crate::canvas_dimensions;
+use crate::click::Action;
 use crate::colors;
+use crate::opponent::Difficulty;
 use crate::paint::{Component, ImageType};
 use crate::render::{self, lerp::Lerper};
+use crate::shapes::Rect;
 use crate::transform::{Scale, Translate};
 
+use std::convert::TryFrom;
+use std::f64;
+
 pub fn settings_screen() -> Vec<Component> {
+    let difficulty = Difficulty::Easy;
     vec![
         vec![Component::Background {
             color: colors::SETTINGS_SCREEN_BACKGROUND,
@@ -16,6 +23,37 @@ pub fn settings_screen() -> Vec<Component> {
             )
             .scale(TARGET_RADIUS / ORIGINAL_RADIUS)
             .translate(MARGIN + TARGET_RADIUS, MARGIN + TARGET_RADIUS),
+        vec![Component::Image {
+            image_type: ImageType::ComputerDifficulty(difficulty),
+            alpha: 1.0,
+            shape: Rect {
+                x: 160.0,
+                y: -50.0,
+                width: 776.0,
+                height: 240.0,
+            },
+            on_click: None,
+        }],
+        (0..3)
+            .map(|i| Component::Image {
+                image_type: if i > difficulty as u8 {
+                    ImageType::EmptyStar
+                } else {
+                    ImageType::Star
+                },
+                alpha: 1.0,
+                shape: Rect {
+                    x: (160.0 + 776.0) + 100.0 * f64::from(i),
+                    y: 25.0,
+                    width: 80.0,
+                    height: 80.0,
+                },
+                on_click: Some(Action::SetComputerDifficulty(
+                    Difficulty::try_from(i)
+                        .expect("a u8 in 0..3 should be able to convert to a Difficulty"),
+                )),
+            })
+            .collect(),
     ]
     .into_iter()
     .flatten()

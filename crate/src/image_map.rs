@@ -1,4 +1,5 @@
 use crate::helpers;
+use crate::opponent::Difficulty;
 use crate::paint::ImageType;
 
 use nzscq::choices::{Booster, Character, Move};
@@ -63,6 +64,20 @@ impl ImageMapBuilder {
         self.insert(ImageType::SinglePlayerButton, "SinglePlayerButton")?;
         self.insert(ImageType::MultiPlayerButton, "MultiPlayerButton")?;
         self.insert(ImageType::SettingsButton, "SettingsButton")?;
+        self.insert(ImageType::Star, "Star")?;
+        self.insert(ImageType::EmptyStar, "EmptyStar")?;
+        self.insert(
+            ImageType::ComputerDifficulty(Difficulty::Stupid),
+            "ComputerDifficultyStupid",
+        )?;
+        self.insert(
+            ImageType::ComputerDifficulty(Difficulty::Easy),
+            "ComputerDifficultyEasy",
+        )?;
+        self.insert(
+            ImageType::ComputerDifficulty(Difficulty::Medium),
+            "ComputerDifficultyMedium",
+        )?;
 
         Ok(ImageMap(self.map))
     }

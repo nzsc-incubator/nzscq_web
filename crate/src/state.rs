@@ -1,6 +1,6 @@
 use crate::app::JsPrng;
 use crate::helpers;
-use crate::opponent::Opponent;
+use crate::opponent::{Difficulty, Opponent};
 use crate::phase::{ChooseActionPhase, ChooseBoosterPhase, ChooseFirstDequeuePhase, ChooseSubsequentDequeuePhase, GameOverPhase, Phase, RechooseCharacterPhase};
 
 use nzscq::choices::{Action as NzscAction, BatchChoice, Booster, Character, DequeueChoice};

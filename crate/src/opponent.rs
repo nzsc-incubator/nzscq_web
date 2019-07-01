@@ -3,6 +3,8 @@ use nzscq::{
     game::BatchChoiceGame,
 };
 
+use std::convert::TryFrom;
+
 pub struct Opponent<T: Random> {
     prng: T,
 }
@@ -106,7 +108,20 @@ pub trait Random {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Difficulty {
-    Stupid,
-    Easy,
-    Medium,
+    Stupid = 0,
+    Easy = 1,
+    Medium = 2,
+}
+
+impl TryFrom<u8> for Difficulty {
+    type Error = ();
+
+    fn try_from(x: u8) -> Result<Difficulty, ()> {
+        match x {
+            0 => Ok(Difficulty::Stupid),
+            1 => Ok(Difficulty::Easy),
+            2 => Ok(Difficulty::Medium),
+            _ => Err(()),
+        }
+    }
 }

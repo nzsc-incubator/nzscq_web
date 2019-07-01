@@ -35,6 +35,11 @@ import Homescreen from "./images/Homescreen.png";
 import SinglePlayerButton from "./images/SinglePlayerButton.png";
 import MultiPlayerButton from "./images/MultiPlayerButton.png";
 import SettingsButton from "./images/SettingsButton.png";
+import Star from "./images/Star.png";
+import EmptyStar from "./images/EmptyStar.png";
+import ComputerDifficultyStupid from "./images/ComputerDifficultyStupid.png";
+import ComputerDifficultyEasy from "./images/ComputerDifficultyEasy.png";
+import ComputerDifficultyMedium from "./images/ComputerDifficultyMedium.png";
 
 import "./shims";
 
@@ -75,7 +80,12 @@ const srcs = {
   Homescreen,
   SinglePlayerButton,
   MultiPlayerButton,
-  SettingsButton
+  SettingsButton,
+  Star,
+  EmptyStar,
+  ComputerDifficultyStupid,
+  ComputerDifficultyEasy,
+  ComputerDifficultyMedium
 };
 
 function loadImages() {
