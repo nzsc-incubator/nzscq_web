@@ -40,6 +40,9 @@ import EmptyStar from "./images/EmptyStar.png";
 import ComputerDifficultyStupid from "./images/ComputerDifficultyStupid.png";
 import ComputerDifficultyEasy from "./images/ComputerDifficultyEasy.png";
 import ComputerDifficultyMedium from "./images/ComputerDifficultyMedium.png";
+import TutorialButton from "./images/TutorialButton.png";
+import PassAndPlayButton from "./images/PassAndPlayButton.png";
+import CustomSeedButton from "./images/CustomSeedButton.png";
 
 import "./shims";
 
@@ -85,7 +88,10 @@ const srcs = {
   EmptyStar,
   ComputerDifficultyStupid,
   ComputerDifficultyEasy,
-  ComputerDifficultyMedium
+  ComputerDifficultyMedium,
+  TutorialButton,
+  PassAndPlayButton,
+  CustomSeedButton
 };
 
 function loadImages() {

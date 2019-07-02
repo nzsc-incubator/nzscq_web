@@ -400,6 +400,9 @@ pub enum ImageType {
     Star,
     EmptyStar,
     ComputerDifficulty(Difficulty),
+    TutorialButton,
+    PassAndPlayButton,
+    CustomSeedButton,
 }
 
 impl From<ArsenalItem> for ImageType {

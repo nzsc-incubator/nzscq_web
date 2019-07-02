@@ -78,6 +78,9 @@ impl ImageMapBuilder {
             ImageType::ComputerDifficulty(Difficulty::Medium),
             "ComputerDifficultyMedium",
         )?;
+        self.insert(ImageType::TutorialButton, "TutorialButton")?;
+        self.insert(ImageType::PassAndPlayButton, "PassAndPlayButton")?;
+        self.insert(ImageType::CustomSeedButton, "CustomSeedButton")?;
 
         Ok(ImageMap(self.map))
     }
