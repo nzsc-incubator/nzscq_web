@@ -16,6 +16,7 @@ mod shapes;
 mod side;
 mod state;
 mod transform;
+mod xorshift;
 
 use app::App;
 
