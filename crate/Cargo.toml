@@ -33,6 +33,7 @@ version = "0.3"
 features = [
   "console",
   "Window",
+  "Storage",
   "Document",
   "CssStyleDeclaration",
   "Node",

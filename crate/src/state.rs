@@ -1,4 +1,3 @@
-use crate::app::JsPrng;
 use crate::helpers;
 use crate::opponent::{Difficulty, Opponent};
 use crate::phase::{
@@ -11,17 +10,17 @@ use nzscq::game::BatchChoiceGame;
 use nzscq::outcomes::Outcome;
 use nzscq::scoreboard::{ActionlessPlayer, DequeueingPlayer};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum State {
     HomeScreen,
     SettingsScreen,
     SinglePlayer(Box<SinglePlayerState>),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct SinglePlayerState {
     pub game: BatchChoiceGame,
-    pub computer: Opponent<JsPrng>,
+    pub computer: Opponent,
     pub phase: Phase,
 }
 

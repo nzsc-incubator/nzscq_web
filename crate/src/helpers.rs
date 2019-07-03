@@ -1,6 +1,6 @@
 use nzscq::choices::{Booster, Character, Move};
 use wasm_bindgen::JsValue;
-use web_sys::console;
+use web_sys::{console, Window};
 
 pub fn log<T: std::fmt::Debug>(message: &T) {
     let message = format!("{:?}", message);
@@ -57,6 +57,26 @@ pub fn vec2_to_arr2<T>(mut vec: Vec<T>) -> [T; 2] {
 
 pub fn height_in_rows<T>(items: &[T], columns: usize) -> usize {
     (items.len() + columns - 1) / columns
+}
+
+pub fn get_local_storage_item(window: &Window, key: &str) -> Option<String> {
+    if let Ok(opt_storage) = window.local_storage() {
+        if let Some(storage) = opt_storage {
+            storage.get_item(key).unwrap_or(None)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
+}
+
+pub fn set_local_storage_item(window: &Window, key: &str, value: &str) {
+    if let Ok(opt_storage) = window.local_storage() {
+        if let Some(storage) = opt_storage {
+            storage.set_item(key, value).expect("should be able to set local storage item");
+        }
+    }
 }
 
 pub const SQRT_3: f64 = 1.732_050_807_568_877_2;

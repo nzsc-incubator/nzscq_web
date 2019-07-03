@@ -8,7 +8,16 @@ pub struct Xorshift128Plus(u64, u64);
 
 impl Xorshift128Plus {
     pub fn new(seed: (u64, u64)) -> Xorshift128Plus {
-        Xorshift128Plus(seed.0, seed.1)
+        let mut generator = Xorshift128Plus(seed.0, seed.1);
+        generator.warmup();
+
+        generator
+    }
+
+    fn warmup(&mut self) {
+        for _ in 0..WARMUP_CYCLES {
+            self.random();
+        }
     }
 
     fn random_u32(&mut self) -> u32 {
@@ -26,9 +35,11 @@ impl Xorshift128Plus {
         t ^= s ^ (s >> 26);
         self.1 = t;
 
-        t + s
+        t.wrapping_add(s)
     }
 }
+
+const WARMUP_CYCLES: usize = 256;
 
 impl Random for Xorshift128Plus {
     fn random(&mut self) -> f64 {

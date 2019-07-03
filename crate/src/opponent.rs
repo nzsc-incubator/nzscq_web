@@ -1,38 +1,36 @@
 use nzscq::{
-    choices::{Action, BatchChoices, Booster, Character, DequeueChoice},
+    choices::{Action, BatchChoices, Booster, Character, DequeueChoice, PointsAgainst},
     game::BatchChoiceGame,
 };
 
 use std::convert::TryFrom;
+use std::fmt::{self, Debug, Display, Formatter};
 
-pub struct Opponent<T: Random> {
-    prng: T,
+pub struct Opponent {
+    difficulty: Difficulty,
+    prng: Box<dyn Random>,
 }
 
-impl<T: std::fmt::Debug + Random> std::fmt::Debug for Opponent<T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Opponent {{ prng: {:?} }}", self.prng)
+impl Debug for Opponent {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(
+            f,
+            "Opponent {{ difficulty: {:?}, prng: {:?} }}",
+            self.difficulty, self.prng,
+        )
     }
 }
 
-impl<T: Clone + Random> Clone for Opponent<T> {
-    fn clone(&self) -> Opponent<T> {
-        Opponent {
-            prng: self.prng.clone(),
-        }
-    }
-}
-
-impl<T: Random> Opponent<T> {
+impl Opponent {
     const COMPUTER: usize = 1;
 
-    pub fn new(prng: T) -> Opponent<T> {
-        Opponent { prng }
+    pub fn new(difficulty: Difficulty, prng: Box<dyn Random>) -> Opponent {
+        Opponent { difficulty, prng }
     }
 
     pub fn choose_character(&mut self, game: &BatchChoiceGame) -> Option<Character> {
         if let BatchChoices::Characters(mut choices) = game.choices() {
-            let computer_choices = choices.remove(Opponent::<T>::COMPUTER);
+            let computer_choices = choices.remove(Opponent::COMPUTER);
             Some(self.rand_choice(computer_choices))
         } else {
             None
@@ -41,11 +39,15 @@ impl<T: Random> Opponent<T> {
 
     pub fn choose_booster(&mut self, game: &BatchChoiceGame) -> Option<Booster> {
         if let BatchChoices::Boosters(mut choices) = game.choices() {
-            let computer_choices: Vec<Booster> = choices
-                .remove(Opponent::<T>::COMPUTER)
-                .into_iter()
-                .filter(|&booster| booster != Booster::None)
-                .collect();
+            let computer_choices = choices.remove(Opponent::COMPUTER);
+            let computer_choices: Vec<Booster> = match self.difficulty {
+                Difficulty::Stupid => computer_choices,
+                _ => computer_choices
+                    .into_iter()
+                    .filter(|&booster| booster != Booster::None)
+                    .collect(),
+            };
+
             Some(self.rand_choice(computer_choices))
         } else {
             None
@@ -54,7 +56,13 @@ impl<T: Random> Opponent<T> {
 
     pub fn choose_dequeue(&mut self, game: &BatchChoiceGame) -> Option<DequeueChoice> {
         if let BatchChoices::DequeueChoices(mut choices) = game.choices() {
-            let computer_choices = prefer_drain_and_exit(choices.remove(Opponent::<T>::COMPUTER));
+            let computer_choices = choices.remove(Opponent::COMPUTER);
+            let computer_choices = match self.difficulty {
+                Difficulty::Stupid => computer_choices,
+                // TODO Make medium drain more cautiously
+                _ => prefer_drain_and_exit(computer_choices),
+            };
+
             Some(self.rand_choice(computer_choices))
         } else {
             None
@@ -62,12 +70,19 @@ impl<T: Random> Opponent<T> {
     }
 
     pub fn choose_action(&mut self, game: &BatchChoiceGame) -> Option<Action> {
-        if let BatchChoices::Actions(mut choices) = game.choices() {
-            let computer_choices = choices.remove(Opponent::<T>::COMPUTER);
-            Some(self.rand_choice(computer_choices))
-        } else {
-            None
+        match self.difficulty {
+            Difficulty::Stupid | Difficulty::Easy => {
+                if let BatchChoices::Actions(mut choices) = game.choices() {
+                    let computer_choices = choices.remove(Opponent::COMPUTER);
+                    Some(self.rand_choice(computer_choices))
+                } else {
+                    None
+                }
+            }
+            Difficulty::Medium => actions_that_make_sense_for_medium_difficulty_computer(game)
+                .map(|actions| self.rand_choice(actions)),
         }
+
     }
 
     fn rand_choice<C>(&mut self, mut choices: Vec<C>) -> C {
@@ -102,7 +117,84 @@ fn is_just_exit(&choice: &DequeueChoice) -> bool {
     choice == DequeueChoice::JustExit
 }
 
-pub trait Random {
+fn actions_that_make_sense_for_medium_difficulty_computer(
+    game: &BatchChoiceGame,
+) -> Option<Vec<Action>> {
+    if let BatchChoices::Actions(mut choices) = game.choices() {
+        let human_choices = choices.remove(0);
+        let computer_choices = choices.remove(0);
+        let mut scoreboard = game
+            .scoreboard()
+            .actionless()
+            .expect("should be on action-choosing phase");
+        let human = scoreboard.remove(0);
+        let guarantees_win: Box<dyn Fn(&Action) -> bool> = Box::new(|&action| {
+            human_choices
+                .iter()
+                .all(|&human_action| PointsAgainst::points_of(&[action, human_action]) == [1, 0])
+        });
+        let guarantees_point: Box<dyn Fn(&Action) -> bool> = Box::new(|&action| {
+            human_choices
+                .iter()
+                .all(|&human_action| PointsAgainst::points_of(&[action, human_action])[0] == 1)
+        });
+        let guarantees_human_wont_get_point: Box<dyn Fn(&Action) -> bool> = Box::new(|&action| {
+            human_choices
+                .iter()
+                .all(|&human_action| PointsAgainst::points_of(&[action, human_action])[1] == 0)
+        });
+        let win_possible: Box<dyn Fn(&Action) -> bool> = Box::new(|&action| {
+            human_choices
+                .iter()
+                .any(|&human_action| PointsAgainst::points_of(&[action, human_action]) == [1, 0])
+        });
+        let non_loss_possible: Box<dyn Fn(&Action) -> bool> = Box::new(|&action| {
+            human_choices
+                .iter()
+                .any(|&human_action| PointsAgainst::points_of(&[action, human_action]) != [0, 1])
+        });
+
+        if human.points == 4 {
+            Some(prefer(
+                computer_choices,
+                vec![
+                    guarantees_win,
+                    guarantees_human_wont_get_point,
+                    win_possible,
+                    non_loss_possible,
+                ],
+            ))
+        } else {
+            Some(prefer(
+                computer_choices,
+                vec![
+                    guarantees_win,
+                    guarantees_point,
+                    win_possible,
+                    non_loss_possible,
+                ],
+            ))
+        }
+    } else {
+        None
+    }
+}
+
+fn prefer<'a, T>(choices: Vec<T>, predicates: Vec<Box<dyn (Fn(&T) -> bool) + 'a>>) -> Vec<T>
+where
+    T: Clone,
+{
+    for p in predicates {
+        let satisfactory_choices: Vec<T> = choices.iter().cloned().filter(|i| p(i)).collect();
+        if !satisfactory_choices.is_empty() {
+            return satisfactory_choices;
+        }
+    }
+
+    choices
+}
+
+pub trait Random: Debug {
     fn random(&mut self) -> f64;
 }
 
@@ -122,6 +214,37 @@ impl TryFrom<u8> for Difficulty {
             1 => Ok(Difficulty::Easy),
             2 => Ok(Difficulty::Medium),
             _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<&str> for Difficulty {
+    type Error = ();
+
+    fn try_from(x: &str) -> Result<Difficulty, ()> {
+        match &x.to_ascii_lowercase()[..] {
+            "stupid" => Ok(Difficulty::Stupid),
+            "easy" => Ok(Difficulty::Easy),
+            "medium" => Ok(Difficulty::Medium),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<String> for Difficulty {
+    type Error = ();
+
+    fn try_from(x: String) -> Result<Difficulty, ()> {
+        Difficulty::try_from(&x[..])
+    }
+}
+
+impl Display for Difficulty {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Difficulty::Stupid => write!(f, "Stupid"),
+            Difficulty::Easy => write!(f, "Easy"),
+            Difficulty::Medium => write!(f, "Medium"),
         }
     }
 }

@@ -19,6 +19,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 use std::convert::TryInto;
 use std::f64;
 use std::mem;
+use std::string::ToString;
 
 #[wasm_bindgen]
 pub struct App {
@@ -51,6 +52,11 @@ impl App {
             .get_context("2d")?
             .unwrap()
             .dyn_into::<CanvasRenderingContext2d>()?;
+        let computer_difficulty =
+            helpers::get_local_storage_item(&window, "nzscq_computer_difficulty")
+                .unwrap_or_else(|| "fail".to_string())
+                .try_into()
+                .unwrap_or(Difficulty::Medium);
 
         let mut app = App {
             window,
@@ -61,7 +67,7 @@ impl App {
                 .try_into()
                 .expect("should be able to create image map from js image getter"),
             context: Context {
-                computer_difficulty: Difficulty::Stupid,
+                computer_difficulty,
             },
             state: State::HomeScreen,
             animation_start_secs: helpers::millis_to_secs(Date::now()),
@@ -169,7 +175,8 @@ impl App {
             State::HomeScreen => match action {
                 click::Action::StartSinglePlayerGame => {
                     let game = BatchChoiceGame::default();
-                    let computer = Opponent::<JsPrng>::new(JsPrng);
+                    let computer =
+                        Opponent::new(self.context.computer_difficulty, Box::new(JsPrng));
                     let initial_human_choices =
                         game.choices().characters().unwrap().remove(App::HUMAN);
 
@@ -196,7 +203,12 @@ impl App {
             State::SettingsScreen => match action {
                 click::Action::NavigateHome => self.state = State::HomeScreen,
                 click::Action::SetComputerDifficulty(difficulty) => {
-                    self.context.computer_difficulty = difficulty
+                    self.context.computer_difficulty = difficulty;
+                    helpers::set_local_storage_item(
+                        &self.window,
+                        "nzscq_computer_difficulty",
+                        &difficulty.to_string()[..],
+                    )
                 }
 
                 action => panic!(
