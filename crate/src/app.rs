@@ -9,7 +9,7 @@ use crate::{
     phase::{ChooseCharacterPhase, Phase},
     render::{self, Render},
     state::{SinglePlayerState, State},
-    xorshift::Xorshift128Plus
+    xorshift::Xorshift128Plus,
 };
 
 use js_sys::{Date, Function, Math};
@@ -175,21 +175,9 @@ impl App {
         match &mut self.state {
             State::HomeScreen => match action {
                 click::Action::StartSinglePlayerGame => {
-                    let game = BatchChoiceGame::default();
-                    let computer =
-                        Opponent::new(self.context.computer_difficulty, Box::new(Xorshift128Plus::from(JsPrng)));
-                    let initial_human_choices =
-                        game.choices().characters().unwrap().remove(App::HUMAN);
-
-                    mem::replace(
-                        &mut self.state,
-                        State::SinglePlayer(Box::new(SinglePlayerState {
-                            game,
-                            computer,
-                            phase: Phase::ChooseCharacter(ChooseCharacterPhase {
-                                available_characters: initial_human_choices,
-                            }),
-                        })),
+                    self.state.start_single_player_game(
+                        &JsPrng.random().to_string()[..],
+                        self.context.computer_difficulty,
                     );
                 }
 
@@ -211,9 +199,27 @@ impl App {
                         &difficulty.to_string()[..],
                     )
                 }
+                click::Action::NavigateToCustomSeedScreen => {
+                    self.state = State::CustomSeedScreen("my awesome seed".to_owned())
+                }
 
                 action => panic!(
                     "Action {:?} should never be emitted when state == SettingsScreen",
+                    action
+                ),
+            },
+
+            State::CustomSeedScreen(seed) => match action {
+                click::Action::NavigateHome => self.state = State::HomeScreen,
+                click::Action::NavigateToSettingsScreen => self.state = State::SettingsScreen,
+                click::Action::StartSinglePlayerGame => {
+                    let seed = seed.to_owned();
+                    self.state
+                        .start_single_player_game(&seed[..], self.context.computer_difficulty);
+                }
+
+                action => panic!(
+                    "Action {:?} should never be emitted when state == CustomSeedScreen",
                     action
                 ),
             },
@@ -279,6 +285,7 @@ impl App {
         match &self.state {
             State::HomeScreen => render::home_screen(),
             State::SettingsScreen => render::settings_screen(&self.context),
+            State::CustomSeedScreen(seed) => render::custom_seed_screen(&seed[..], &self.context),
             State::SinglePlayer(state) => (
                 self.completion_factor()
                     .expect("should have completion factor when state == SinglePlayer"),
@@ -292,6 +299,7 @@ impl App {
         match &self.state {
             State::HomeScreen => None,
             State::SettingsScreen => None,
+            State::CustomSeedScreen(_) => None,
             State::SinglePlayer(state) => Some({
                 let current_time = helpers::millis_to_secs(Date::now());
                 let time_after_start = current_time - self.animation_start_secs;

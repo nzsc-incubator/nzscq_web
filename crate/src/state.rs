@@ -1,9 +1,10 @@
 use crate::helpers;
-use crate::opponent::Opponent;
+use crate::opponent::{Difficulty, Opponent};
 use crate::phase::{
-    ChooseActionPhase, ChooseBoosterPhase, ChooseFirstDequeuePhase, ChooseSubsequentDequeuePhase,
+    ChooseActionPhase, ChooseBoosterPhase, ChooseCharacterPhase, ChooseFirstDequeuePhase, ChooseSubsequentDequeuePhase,
     GameOverPhase, Phase, RechooseCharacterPhase,
 };
+use crate::xorshift::Xorshift128Plus;
 
 use nzscq::choices::{Action as NzscAction, BatchChoice, Booster, Character, DequeueChoice};
 use nzscq::game::BatchChoiceGame;
@@ -14,7 +15,26 @@ use nzscq::scoreboard::{ActionlessPlayer, DequeueingPlayer};
 pub enum State {
     HomeScreen,
     SettingsScreen,
+    CustomSeedScreen(String),
     SinglePlayer(Box<SinglePlayerState>),
+}
+
+impl State {
+    pub fn start_single_player_game(&mut self, seed: &str, computer_difficulty: Difficulty) {
+        let game = BatchChoiceGame::default();
+                    let computer =
+                        Opponent::new(computer_difficulty, Box::new(Xorshift128Plus::from(seed)));
+                    let initial_human_choices =
+                        game.choices().characters().unwrap().remove(0);
+
+                        *self =  State::SinglePlayer(Box::new(SinglePlayerState {
+                            game,
+                            computer,
+                            phase: Phase::ChooseCharacter(ChooseCharacterPhase {
+                                available_characters: initial_human_choices,
+                            }),
+                        }));
+    }
 }
 
 #[derive(Debug)]

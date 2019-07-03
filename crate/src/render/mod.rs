@@ -13,6 +13,8 @@ mod home_screen;
 pub use home_screen::home_screen;
 mod settings_screen;
 pub use settings_screen::settings_screen;
+mod custom_seed_screen;
+pub use custom_seed_screen::custom_seed_screen;
 
 use crate::{paint::Component, phase::Phase};
 use phase_specific_renderers::{

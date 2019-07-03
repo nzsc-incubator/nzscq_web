@@ -81,14 +81,14 @@ pub fn settings_screen(context: &Context) -> Vec<Component> {
             },
             Component::Image {
                 image_type: ImageType::CustomSeedButton,
-                alpha: 0.5,
+                alpha: 1.0,
                 shape: Rect {
                     x: 160.0 + 2.0 * (388.0 + 40.0),
                     y: 150.0,
                     width: 388.0,
                     height: 240.0,
                 },
-                on_click: None,
+                on_click: Some(Action::NavigateToCustomSeedScreen),
             },
         ],
     ]

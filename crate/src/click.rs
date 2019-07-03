@@ -34,6 +34,7 @@ pub enum Action {
 
     SetComputerDifficulty(Difficulty),
     NavigateHome,
+    NavigateToCustomSeedScreen,
 
     StopPropagation,
 }
