@@ -9,6 +9,7 @@ use crate::{
     phase::{ChooseCharacterPhase, Phase},
     render::{self, Render},
     state::{SinglePlayerState, State},
+    xorshift::Xorshift128Plus
 };
 
 use js_sys::{Date, Function, Math};
@@ -176,7 +177,7 @@ impl App {
                 click::Action::StartSinglePlayerGame => {
                     let game = BatchChoiceGame::default();
                     let computer =
-                        Opponent::new(self.context.computer_difficulty, Box::new(JsPrng));
+                        Opponent::new(self.context.computer_difficulty, Box::new(Xorshift128Plus::from(JsPrng)));
                     let initial_human_choices =
                         game.choices().characters().unwrap().remove(App::HUMAN);
 

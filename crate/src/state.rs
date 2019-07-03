@@ -1,5 +1,5 @@
 use crate::helpers;
-use crate::opponent::{Difficulty, Opponent};
+use crate::opponent::Opponent;
 use crate::phase::{
     ChooseActionPhase, ChooseBoosterPhase, ChooseFirstDequeuePhase, ChooseSubsequentDequeuePhase,
     GameOverPhase, Phase, RechooseCharacterPhase,

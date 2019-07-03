@@ -1,4 +1,5 @@
 // https://en.wikipedia.org/wiki/Xorshift#xorshift+
+use crate::app::JsPrng;
 use crate::opponent::Random;
 
 use std::{f64, u32};
@@ -44,5 +45,50 @@ const WARMUP_CYCLES: usize = 256;
 impl Random for Xorshift128Plus {
     fn random(&mut self) -> f64 {
         f64::from(self.random_u32()) / f64::from(u32::MAX)
+    }
+}
+
+impl From<[u32; 4]> for Xorshift128Plus {
+    fn from(seed: [u32; 4]) -> Xorshift128Plus {
+        let bytes: Vec<[u8; 4]> = seed
+            .iter()
+            .map(|component| component.to_be_bytes())
+            .collect();
+
+        Xorshift128Plus::new((
+            u64::from_be_bytes([
+                bytes[0][0],
+                bytes[0][1],
+                bytes[0][2],
+                bytes[0][3],
+                bytes[1][0],
+                bytes[1][1],
+                bytes[1][2],
+                bytes[1][3],
+            ]),
+            u64::from_be_bytes([
+                bytes[2][0],
+                bytes[2][1],
+                bytes[2][2],
+                bytes[2][3],
+                bytes[3][0],
+                bytes[3][1],
+                bytes[3][2],
+                bytes[3][3],
+            ]),
+        ))
+    }
+}
+
+impl From<JsPrng> for Xorshift128Plus {
+    fn from(mut prng: JsPrng) -> Xorshift128Plus {
+        let seed = [
+            (prng.random() * f64::from(u32::MAX)) as u32,
+            (prng.random() * f64::from(u32::MAX)) as u32,
+            (prng.random() * f64::from(u32::MAX)) as u32,
+            (prng.random() * f64::from(u32::MAX)) as u32,
+        ];
+
+        seed.into()
     }
 }
