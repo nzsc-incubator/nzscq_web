@@ -4,22 +4,18 @@ use crate::{
     helpers,
     image_map::ImageMap,
     letterbox::Letterbox,
-    opponent::{Difficulty, Opponent, Random},
+    opponent::{Difficulty, Random},
     paint::{Component, Painter},
-    phase::{ChooseCharacterPhase, Phase},
     render::{self, Render},
-    state::{SinglePlayerState, State},
-    xorshift::Xorshift128Plus,
+    state::State,
 };
 
 use js_sys::{Date, Function, Math};
-use nzscq::game::BatchChoiceGame;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 
 use std::convert::TryInto;
 use std::f64;
-use std::mem;
 use std::string::ToString;
 
 #[wasm_bindgen]
@@ -37,7 +33,6 @@ pub struct App {
 
 impl App {
     const IDEAL_DIMENSIONS: (u32, u32) = (1800, 1000);
-    const HUMAN: usize = 0;
 }
 
 #[wasm_bindgen]
