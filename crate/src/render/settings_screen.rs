@@ -88,7 +88,7 @@ pub fn settings_screen(context: &Context) -> Vec<Component> {
                     width: 388.0,
                     height: 240.0,
                 },
-                on_click: Some(Action::NavigateToCustomSeedScreen),
+                on_click: Some(Action::PromptUserForCustomSeed),
             },
         ],
     ]

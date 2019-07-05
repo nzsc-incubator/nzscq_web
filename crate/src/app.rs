@@ -199,27 +199,19 @@ impl App {
                         &difficulty.to_string()[..],
                     )
                 }
-                click::Action::NavigateToCustomSeedScreen => {
-                    self.state = State::CustomSeedScreen("my awesome seed".to_owned())
+                click::Action::PromptUserForCustomSeed => {
+                    let seed = self
+                        .window
+                        .prompt_with_message("Enter your seed:")
+                        .expect("should be able to prompt user for seed");
+                    if let Some(seed) = seed {
+                        self.state
+                            .start_single_player_game(&seed[..], self.context.computer_difficulty);
+                    }
                 }
 
                 action => panic!(
                     "Action {:?} should never be emitted when state == SettingsScreen",
-                    action
-                ),
-            },
-
-            State::CustomSeedScreen(seed) => match action {
-                click::Action::NavigateHome => self.state = State::HomeScreen,
-                click::Action::NavigateToSettingsScreen => self.state = State::SettingsScreen,
-                click::Action::StartSinglePlayerGame => {
-                    let seed = seed.to_owned();
-                    self.state
-                        .start_single_player_game(&seed[..], self.context.computer_difficulty);
-                }
-
-                action => panic!(
-                    "Action {:?} should never be emitted when state == CustomSeedScreen",
                     action
                 ),
             },
@@ -285,7 +277,6 @@ impl App {
         match &self.state {
             State::HomeScreen => render::home_screen(),
             State::SettingsScreen => render::settings_screen(&self.context),
-            State::CustomSeedScreen(seed) => render::custom_seed_screen(&seed[..], &self.context),
             State::SinglePlayer(state) => (
                 self.completion_factor()
                     .expect("should have completion factor when state == SinglePlayer"),
@@ -299,7 +290,6 @@ impl App {
         match &self.state {
             State::HomeScreen => None,
             State::SettingsScreen => None,
-            State::CustomSeedScreen(_) => None,
             State::SinglePlayer(state) => Some({
                 let current_time = helpers::millis_to_secs(Date::now());
                 let time_after_start = current_time - self.animation_start_secs;
