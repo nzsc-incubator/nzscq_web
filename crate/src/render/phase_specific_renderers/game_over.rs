@@ -25,7 +25,6 @@ use nzscq::{
 };
 
 pub struct GameOverPhaseRenderer<'a> {
-    completion_factor: f64,
     previous_scoreboard: &'a [ActionlessPlayer; 2],
     previously_available_actions: &'a [Vec<NzscAction>; 2],
     previous_outcome: &'a [ActionPointsDestroyed; 2],
@@ -33,32 +32,13 @@ pub struct GameOverPhaseRenderer<'a> {
 }
 
 impl<'a> GameOverPhaseRenderer<'a> {
-    pub fn new(phase: &'a GameOverPhase, completion_factor: f64) -> GameOverPhaseRenderer<'a> {
+    pub fn new(phase: &'a GameOverPhase) -> GameOverPhaseRenderer<'a> {
         GameOverPhaseRenderer {
-            completion_factor,
             previous_scoreboard: &phase.previous_scoreboard,
             previously_available_actions: &phase.previously_available_actions,
             previous_outcome: &phase.previous_outcome,
             scoreboard: &phase.scoreboard,
         }
-    }
-
-    pub fn render(self) -> Vec<Component> {
-        let human_entrance = self.human_entrance();
-        let computer_entrance = self.computer_entrance();
-        let fade = self.fade();
-        let exit = self.exit();
-        let results = self.results();
-
-        Switch5(
-            (0.00..0.12, human_entrance),
-            (0.12..0.24, computer_entrance),
-            (0.24..0.68, fade),
-            (0.68..0.80, exit),
-            (0.80..=1.00, results),
-        )
-        .case(self.completion_factor)
-        .expect("should have legal completion range")
     }
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
@@ -284,7 +264,7 @@ impl<'a> GameOverPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
     }
@@ -321,7 +301,7 @@ impl<'a> GameOverPhaseRenderer<'a> {
                 side: Side::Left,
                 health: self.previous_human_health(),
             }
-            .render()
+            .render(())
         };
         let computer_components = if self.did_human_get_point() {
             vec![]
@@ -330,7 +310,7 @@ impl<'a> GameOverPhaseRenderer<'a> {
                 side: Side::Right,
                 health: self.previous_computer_health(),
             }
-            .render()
+            .render(())
         };
 
         vec![human_components, computer_components]
@@ -353,7 +333,7 @@ impl<'a> GameOverPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
     }
@@ -364,13 +344,13 @@ impl<'a> GameOverPhaseRenderer<'a> {
                 side: Side::Right,
                 health: 0,
             }
-            .render()
+            .render(())
         } else {
             ConstantHealthDisplay {
                 side: Side::Left,
                 health: 0,
             }
-            .render()
+            .render(())
         }
     }
 
@@ -386,7 +366,7 @@ impl<'a> GameOverPhaseRenderer<'a> {
                 health: helpers::opponent_points_to_own_health(self.scoreboard[HUMAN].points),
             }
         }
-        .render()
+        .render(())
     }
 
     fn previous_human_health(&self) -> u8 {
@@ -407,6 +387,26 @@ impl<'a> GameOverPhaseRenderer<'a> {
 
     fn did_computer_get_point(&self) -> bool {
         self.previous_outcome[COMPUTER].1 > 0
+    }
+}
+
+impl<'a> Render<f64> for GameOverPhaseRenderer<'a> {
+    fn render(&self, completion_factor: f64) -> Vec<Component> {
+        let human_entrance = self.human_entrance();
+        let computer_entrance = self.computer_entrance();
+        let fade = self.fade();
+        let exit = self.exit();
+        let results = self.results();
+
+        Switch5(
+            (0.00..0.12, human_entrance),
+            (0.12..0.24, computer_entrance),
+            (0.24..0.68, fade),
+            (0.68..0.80, exit),
+            (0.80..=1.00, results),
+        )
+        .case(completion_factor)
+        .expect("should have legal completion range")
     }
 }
 
@@ -515,7 +515,7 @@ fn action_choosing_pool_display<T: QueueArsenal>(
             }
         });
 
-    pill.render().into_iter().chain(pool).collect()
+    pill.render(()).into_iter().chain(pool).collect()
 }
 
 fn action_choosing_entrance_and_exit_display<T: QueueArsenal>(
@@ -541,7 +541,7 @@ fn action_choosing_entrance_and_exit_display<T: QueueArsenal>(
     };
 
     vec![
-        Some(pill.render()),
+        Some(pill.render(())),
         entrance.map(|entering_item| {
             arsenal_item_display(
                 entering_item,
@@ -627,7 +627,7 @@ fn action_choosing_arsenal_display_without_used_item<T: QueueArsenal>(
             }
         });
 
-    pill.render().into_iter().chain(arsenal_items).collect()
+    pill.render(()).into_iter().chain(arsenal_items).collect()
 }
 
 fn arrows<T: ArrowRenderArgs>(args: &T) -> Vec<Component> {

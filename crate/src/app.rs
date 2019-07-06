@@ -272,12 +272,10 @@ impl App {
         match &self.state {
             State::HomeScreen => render::home_screen(),
             State::SettingsScreen => render::settings_screen(&self.context),
-            State::SinglePlayer(state) => (
+            State::SinglePlayer(state) => state.phase.render(
                 self.completion_factor()
                     .expect("should have completion factor when state == SinglePlayer"),
-                &state.phase,
-            )
-                .render(),
+            ),
         }
     }
 

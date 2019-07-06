@@ -24,7 +24,6 @@ use nzscq::{
 };
 
 pub struct ActionChoosingPhaseRenderer<'a> {
-    completion_factor: f64,
     previous_scoreboard: &'a [DequeueingPlayer; 2],
     previously_available_dequeues: &'a [Vec<DequeueChoice>; 2],
     previous_outcome: &'a [DequeueChoice; 2],
@@ -35,34 +34,14 @@ pub struct ActionChoosingPhaseRenderer<'a> {
 impl<'a> ActionChoosingPhaseRenderer<'a> {
     pub fn new(
         phase: &'a ChooseActionPhase,
-        completion_factor: f64,
     ) -> ActionChoosingPhaseRenderer<'a> {
         ActionChoosingPhaseRenderer {
-            completion_factor,
             previous_scoreboard: &phase.previous_scoreboard,
             previously_available_dequeues: &phase.previously_available_dequeues,
             previous_outcome: &phase.previous_outcome,
             scoreboard: &phase.scoreboard,
             available_actions: &phase.available_actions,
         }
-    }
-
-    pub fn render(self) -> Vec<Component> {
-        let human_entrance = self.human_entrance();
-        let computer_entrance = self.computer_entrance();
-        let pause = self.pause();
-        let exit = self.exit();
-        let actions = self.actions();
-
-        Switch5(
-            (0.00..0.15, human_entrance),
-            (0.15..0.30, computer_entrance),
-            (0.30..0.85, pause),
-            (0.85..1.00, exit),
-            (1.00..=1.00, actions),
-        )
-        .case(self.completion_factor)
-        .expect("should have legal completion range")
     }
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
@@ -292,7 +271,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
     }
@@ -526,6 +505,26 @@ fn exiting_dequeue_choice(
     .collect()
 }
 
+impl<'a> Render<f64> for ActionChoosingPhaseRenderer<'a> {
+    fn render(&self, completion_factor: f64) -> Vec<Component> {
+        let human_entrance = self.human_entrance();
+        let computer_entrance = self.computer_entrance();
+        let pause = self.pause();
+        let exit = self.exit();
+        let actions = self.actions();
+
+        Switch5(
+            (0.00..0.15, human_entrance),
+            (0.15..0.30, computer_entrance),
+            (0.30..0.85, pause),
+            (0.85..1.00, exit),
+            (1.00..=1.00, actions),
+        )
+        .case(completion_factor)
+        .expect("should have legal completion range")
+    }
+}
+
 fn action_choosing_scoreboard(args: ActionChoosingRenderArgs) -> Vec<Component> {
     vec![
         action_choosing_pool_display(&args),
@@ -590,7 +589,7 @@ fn dequeueing_pool_display_without_drainee(
             }
         });
 
-    pill.render().into_iter().chain(pool).collect()
+    pill.render(()).into_iter().chain(pool).collect()
 }
 
 fn dequeueing_pool_display(args: &DequeueingRenderArgs) -> Vec<Component> {
@@ -646,8 +645,8 @@ fn dequeueing_entrance_decline_and_exit_display_with_hidable_exit(
     };
 
     vec![
-        Some(background_pill.render()),
-        Some(decline_and_exit_pill.render()),
+        Some(background_pill.render(())),
+        Some(decline_and_exit_pill.render(())),
         entrance.map(|entering_item| {
             arsenal_item_display(
                 entering_item,
@@ -730,7 +729,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
             )
         });
 
-    pill.render().into_iter().chain(arsenal_items).collect()
+    pill.render(()).into_iter().chain(arsenal_items).collect()
 }
 
 fn arrows<T: ArrowRenderArgs>(args: &T) -> Vec<Component> {
@@ -831,7 +830,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
             }
         });
 
-    pill.render().into_iter().chain(pool).collect()
+    pill.render(()).into_iter().chain(pool).collect()
 }
 
 fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) -> Vec<Component> {
@@ -855,7 +854,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
     };
 
     vec![
-        Some(pill.render()),
+        Some(pill.render(())),
         entrance.map(|entering_item| {
             arsenal_item_display(
                 entering_item,
@@ -944,13 +943,13 @@ fn action_choosing_arsenal_display(args: &ActionChoosingRenderArgs) -> Vec<Compo
             },
         ];
 
-        pill.render()
+        pill.render(())
             .into_iter()
             .chain(arsenal_items)
             .chain(concede_button)
             .collect()
     } else {
-        pill.render().into_iter().chain(arsenal_items).collect()
+        pill.render(()).into_iter().chain(arsenal_items).collect()
     }
 }
 

@@ -19,7 +19,6 @@ use nzscq::{
 };
 
 pub struct BoosterChoosingPhaseRenderer<'a> {
-    completion_factor: f64,
     previously_available_characters: &'a Vec<Character>,
     previous_outcome: &'a Vec<CharacterHeadstart>,
     available_boosters: &'a Vec<Booster>,
@@ -28,32 +27,12 @@ pub struct BoosterChoosingPhaseRenderer<'a> {
 impl<'a> BoosterChoosingPhaseRenderer<'a> {
     pub fn new(
         phase: &'a ChooseBoosterPhase,
-        completion_factor: f64,
     ) -> BoosterChoosingPhaseRenderer<'a> {
         BoosterChoosingPhaseRenderer {
-            completion_factor,
             previously_available_characters: &phase.previously_available_characters,
             previous_outcome: &phase.previous_outcome,
             available_boosters: &phase.available_boosters,
         }
-    }
-
-    pub fn render(self) -> Vec<Component> {
-        let human_entrance = self.human_entrance();
-        let computer_entrance = self.computer_entrance();
-        let fade = self.fade();
-        let exit = self.exit();
-        let boosters = self.boosters();
-
-        Switch5(
-            (0.00..0.12, human_entrance),
-            (0.12..0.24, computer_entrance),
-            (0.24..0.68, fade),
-            (0.68..0.80, exit),
-            (0.80..=1.00, boosters),
-        )
-        .case(self.completion_factor)
-        .expect("should have legal completion range")
     }
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
@@ -387,7 +366,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
     }
@@ -424,7 +403,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 side: Side::Left,
                 health: 5,
             }
-            .render()
+            .render(())
         };
         let computer_components = if self.did_human_get_point() {
             vec![]
@@ -433,7 +412,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
                 side: Side::Right,
                 health: 5,
             }
-            .render()
+            .render(())
         };
 
         vec![human_components, computer_components]
@@ -454,7 +433,7 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
     }
@@ -481,6 +460,26 @@ impl<'a> BoosterChoosingPhaseRenderer<'a> {
 
     fn did_human_get_point(&self) -> bool {
         self.previous_outcome[HUMAN].1 > 0
+    }
+}
+
+impl<'a> Render<f64> for BoosterChoosingPhaseRenderer<'a> {
+    fn render(&self, completion_factor: f64) -> Vec<Component> {
+        let human_entrance = self.human_entrance();
+        let computer_entrance = self.computer_entrance();
+        let fade = self.fade();
+        let exit = self.exit();
+        let boosters = self.boosters();
+
+        Switch5(
+            (0.00..0.12, human_entrance),
+            (0.12..0.24, computer_entrance),
+            (0.24..0.68, fade),
+            (0.68..0.80, exit),
+            (0.80..=1.00, boosters),
+        )
+        .case(completion_factor)
+        .expect("should have legal completion range")
     }
 }
 

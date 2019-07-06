@@ -114,8 +114,8 @@ impl Pill {
     }
 }
 
-impl Render for Pill {
-    fn render(&self) -> Vec<Component> {
+impl Render<()> for Pill {
+    fn render(&self, _: ()) -> Vec<Component> {
         if self.width_in_columns == 0 || self.height_in_rows == 0 {
             vec![]
         } else {
@@ -142,7 +142,7 @@ mod tests {
             height_in_rows: 1,
             enabled: true,
         };
-        assert!(pill.render().is_empty());
+        assert!(pill.render(()).is_empty());
     }
 
     #[test]
@@ -157,6 +157,6 @@ mod tests {
             height_in_rows: 0,
             enabled: true,
         };
-        assert!(pill.render().is_empty());
+        assert!(pill.render(()).is_empty());
     }
 }

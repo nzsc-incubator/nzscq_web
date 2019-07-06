@@ -25,7 +25,6 @@ use nzscq::{
 };
 
 pub struct SubsequentDequeueingPhaseRenderer<'a> {
-    completion_factor: f64,
     previous_scoreboard: &'a [ActionlessPlayer; 2],
     previously_available_actions: &'a [Vec<NzscAction>; 2],
     previous_outcome: &'a [ActionPointsDestroyed; 2],
@@ -36,34 +35,14 @@ pub struct SubsequentDequeueingPhaseRenderer<'a> {
 impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
     pub fn new(
         phase: &'a ChooseSubsequentDequeuePhase,
-        completion_factor: f64,
     ) -> SubsequentDequeueingPhaseRenderer<'a> {
         SubsequentDequeueingPhaseRenderer {
-            completion_factor,
             previous_scoreboard: &phase.previous_scoreboard,
             previously_available_actions: &phase.previously_available_actions,
             previous_outcome: &phase.previous_outcome,
             scoreboard: &phase.scoreboard,
             available_dequeues: &phase.available_dequeues,
         }
-    }
-
-    pub fn render(self) -> Vec<Component> {
-        let human_entrance = self.human_entrance();
-        let computer_entrance = self.computer_entrance();
-        let fade = self.fade();
-        let exit = self.exit();
-        let dequeues = self.dequeues();
-
-        Switch5(
-            (0.00..0.15, human_entrance),
-            (0.15..0.30, computer_entrance),
-            (0.30..0.85, fade),
-            (0.85..1.00, exit),
-            (1.00..=1.00, dequeues),
-        )
-        .case(self.completion_factor)
-        .expect("should have legal completion range")
     }
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
@@ -284,7 +263,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
     }
@@ -321,7 +300,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 side: Side::Left,
                 health: self.previous_human_health(),
             }
-            .render()
+            .render(())
         };
         let computer_components = if self.did_human_get_point() {
             vec![]
@@ -330,7 +309,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 side: Side::Right,
                 health: self.previous_computer_health(),
             }
-            .render()
+            .render(())
         };
 
         vec![human_components, computer_components]
@@ -353,7 +332,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
     }
@@ -376,6 +355,26 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
 
     fn did_computer_get_point(&self) -> bool {
         self.previous_outcome[COMPUTER].1 > 0
+    }
+}
+
+impl<'a> Render<f64> for SubsequentDequeueingPhaseRenderer<'a> {
+    fn render(&self, completion_factor: f64) -> Vec<Component> {
+        let human_entrance = self.human_entrance();
+        let computer_entrance = self.computer_entrance();
+        let fade = self.fade();
+        let exit = self.exit();
+        let dequeues = self.dequeues();
+
+        Switch5(
+            (0.00..0.15, human_entrance),
+            (0.15..0.30, computer_entrance),
+            (0.30..0.85, fade),
+            (0.85..1.00, exit),
+            (1.00..=1.00, dequeues),
+        )
+        .case(completion_factor)
+        .expect("should have legal completion range")
     }
 }
 
@@ -783,7 +782,7 @@ fn dequeueing_pool_display(args: &DequeueingRenderArgs) -> Vec<Component> {
             )
         });
 
-    pill.render().into_iter().chain(pool).collect()
+    pill.render(()).into_iter().chain(pool).collect()
 }
 
 fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> Vec<Component> {
@@ -834,9 +833,9 @@ fn dequeueing_entrance_decline_and_exit_display(args: &DequeueingRenderArgs) -> 
     };
 
     vec![
-        Some(background_pill.render()),
-        Some(decline_and_exit_pill.render()),
-        Some(exit_pill.render()),
+        Some(background_pill.render(())),
+        Some(decline_and_exit_pill.render(())),
+        Some(exit_pill.render(())),
         entrance.map(|entrance| {
             arsenal_item_display(
                 entrance,
@@ -915,7 +914,7 @@ fn dequeueing_arsenal_display(args: &DequeueingRenderArgs) -> Vec<Component> {
             )
         });
 
-    pill.render().into_iter().chain(arsenal_items).collect()
+    pill.render(()).into_iter().chain(arsenal_items).collect()
 }
 
 fn arrows<T: ArrowRenderArgs>(args: &T) -> Vec<Component> {
@@ -1016,7 +1015,7 @@ fn action_choosing_pool_display(args: &ActionChoosingRenderArgs) -> Vec<Componen
             }
         });
 
-    pill.render().into_iter().chain(pool).collect()
+    pill.render(()).into_iter().chain(pool).collect()
 }
 
 fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) -> Vec<Component> {
@@ -1040,7 +1039,7 @@ fn action_choosing_entrance_and_exit_display(args: &ActionChoosingRenderArgs) ->
     };
 
     vec![
-        Some(pill.render()),
+        Some(pill.render(())),
         entrance.map(|entering_item| {
             arsenal_item_display(
                 entering_item,
@@ -1124,7 +1123,7 @@ fn action_choosing_arsenal_display_without_used_item(
             }
         });
 
-    pill.render().into_iter().chain(arsenal_items).collect()
+    pill.render(()).into_iter().chain(arsenal_items).collect()
 }
 
 fn position_of(item: ArsenalItem, player: &QueueArsenal, side: Side) -> Option<CirclePosition> {

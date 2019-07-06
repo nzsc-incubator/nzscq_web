@@ -16,23 +16,39 @@ use crate::{
 use nzscq::choices::Character;
 
 pub struct CharacterChoosingPhaseRenderer<'a> {
-    completion_factor: f64,
     available_characters: &'a Vec<Character>,
 }
 
 impl<'a> CharacterChoosingPhaseRenderer<'a> {
     pub fn new(
         phase: &'a ChooseCharacterPhase,
-        completion_factor: f64,
     ) -> CharacterChoosingPhaseRenderer<'a> {
         CharacterChoosingPhaseRenderer {
-            completion_factor,
             available_characters: &phase.available_characters,
         }
     }
 
-    pub fn render(self) -> Vec<Component> {
-        let lerper = Lerper::from_completion_factor(self.completion_factor);
+    fn health_displays(&self) -> Vec<Component> {
+        let human_display = ConstantHealthDisplay {
+            side: Side::Left,
+            health: 5,
+        };
+        let computer_display = ConstantHealthDisplay {
+            side: Side::Right,
+            health: 5,
+        };
+
+        vec![human_display, computer_display]
+            .into_iter()
+            .map(|display| display.render(()))
+            .flatten()
+            .collect()
+    }
+}
+
+impl<'a> Render<f64> for CharacterChoosingPhaseRenderer<'a> {
+    fn render(&self, completion_factor: f64) -> Vec<Component> {
+        let lerper = Lerper::from_completion_factor(completion_factor);
         let mut components = vec![Component::Background {
             color: colors::BACKGROUND,
         }];
@@ -66,22 +82,5 @@ impl<'a> CharacterChoosingPhaseRenderer<'a> {
         components.extend(character_buttons);
         components.extend(self.health_displays());
         components
-    }
-
-    fn health_displays(&self) -> Vec<Component> {
-        let human_display = ConstantHealthDisplay {
-            side: Side::Left,
-            health: 5,
-        };
-        let computer_display = ConstantHealthDisplay {
-            side: Side::Right,
-            health: 5,
-        };
-
-        vec![human_display, computer_display]
-            .into_iter()
-            .map(|display| display.render())
-            .flatten()
-            .collect()
     }
 }

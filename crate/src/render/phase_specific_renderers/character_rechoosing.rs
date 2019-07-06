@@ -16,7 +16,6 @@ use crate::{
 use nzscq::choices::Character;
 
 pub struct CharacterRechoosingPhaseRenderer<'a> {
-    completion_factor: f64,
     previously_available_characters: &'a Vec<Character>,
     previously_mutually_chosen_character: Character,
     available_characters: &'a Vec<Character>,
@@ -25,32 +24,12 @@ pub struct CharacterRechoosingPhaseRenderer<'a> {
 impl<'a> CharacterRechoosingPhaseRenderer<'a> {
     pub fn new(
         phase: &'a RechooseCharacterPhase,
-        completion_factor: f64,
     ) -> CharacterRechoosingPhaseRenderer<'a> {
         CharacterRechoosingPhaseRenderer {
-            completion_factor,
             previously_available_characters: &phase.previously_available_characters,
             previously_mutually_chosen_character: phase.previously_mutually_chosen_character,
             available_characters: &phase.available_characters,
         }
-    }
-
-    pub fn render(self) -> Vec<Component> {
-        let human_entrance = self.human_entrance();
-        let computer_entrance = self.computer_entrance();
-        let pause = self.pause();
-        let exit = self.exit();
-        let rechoose_characters = self.rechoose_characters();
-
-        Switch5(
-            (0.00..0.15, human_entrance),
-            (0.15..0.30, computer_entrance),
-            (0.30..0.85, pause),
-            (0.85..1.00, exit),
-            (1.00..=1.00, rechoose_characters),
-        )
-        .case(self.completion_factor)
-        .expect("should have legal completion range")
     }
 
     fn human_entrance(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
@@ -326,8 +305,28 @@ impl<'a> CharacterRechoosingPhaseRenderer<'a> {
 
         vec![human_display, computer_display]
             .into_iter()
-            .map(|display| display.render())
+            .map(|display| display.render(()))
             .flatten()
             .collect()
+    }
+}
+
+impl<'a> Render<f64> for CharacterRechoosingPhaseRenderer<'a> {
+    fn render(&self, completion_factor: f64) -> Vec<Component> {
+        let human_entrance = self.human_entrance();
+        let computer_entrance = self.computer_entrance();
+        let pause = self.pause();
+        let exit = self.exit();
+        let rechoose_characters = self.rechoose_characters();
+
+        Switch5(
+            (0.00..0.15, human_entrance),
+            (0.15..0.30, computer_entrance),
+            (0.30..0.85, pause),
+            (0.85..1.00, exit),
+            (1.00..=1.00, rechoose_characters),
+        )
+        .case(completion_factor)
+        .expect("should have legal completion range")
     }
 }

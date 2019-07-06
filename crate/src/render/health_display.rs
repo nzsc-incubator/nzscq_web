@@ -18,8 +18,8 @@ pub struct ConstantHealthDisplay {
     pub health: u8,
 }
 
-impl Render for ConstantHealthDisplay {
-    fn render(&self) -> Vec<Component> {
+impl Render<()> for ConstantHealthDisplay {
+    fn render(&self, _: ()) -> Vec<Component> {
         let hearts = (0..self.health as usize)
             .map(|i| {
                 heart_from_position(HeartPosition {
@@ -32,7 +32,7 @@ impl Render for ConstantHealthDisplay {
             .flatten();
         let trapezoid = HealthTrapezoid { side: self.side };
 
-        trapezoid.render().into_iter().chain(hearts).collect()
+        trapezoid.render(()).into_iter().chain(hearts).collect()
     }
 }
 
@@ -61,7 +61,7 @@ impl LerpInto<Vec<Component>> for FadingHealthDisplay {
             .flatten();
         let trapezoid = HealthTrapezoid { side: self.side };
 
-        trapezoid.render().into_iter().chain(hearts).collect()
+        trapezoid.render(()).into_iter().chain(hearts).collect()
     }
 }
 
@@ -145,8 +145,8 @@ struct HealthTrapezoid {
     side: Side,
 }
 
-impl Render for HealthTrapezoid {
-    fn render(&self) -> Vec<Component> {
+impl Render<()> for HealthTrapezoid {
+    fn render(&self, _: ()) -> Vec<Component> {
         let dx = match self.side {
             Side::Left => 20.0,
             Side::Right => 1340.0,

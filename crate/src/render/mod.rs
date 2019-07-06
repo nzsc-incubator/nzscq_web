@@ -21,41 +21,38 @@ use phase_specific_renderers::{
     SubsequentDequeueingPhaseRenderer,
 };
 
-pub trait Render {
-    fn render(&self) -> Vec<Component>;
+pub trait Render<A> {
+    fn render(&self, args: A) -> Vec<Component>;
 }
 
-impl Render for (f64, &Phase) {
-    fn render(&self) -> Vec<Component> {
-        let (completion_factor, phase) = self;
-        let completion_factor = *completion_factor;
-
-        match phase {
+impl Render<f64> for Phase {
+    fn render(&self, completion_factor: f64) -> Vec<Component> {
+        match self {
             Phase::ChooseCharacter(phase) => {
-                CharacterChoosingPhaseRenderer::new(phase, completion_factor).render()
+                CharacterChoosingPhaseRenderer::new(phase).render(completion_factor)
             }
 
             Phase::RechooseCharacter(phase) => {
-                CharacterRechoosingPhaseRenderer::new(phase, completion_factor).render()
+                CharacterRechoosingPhaseRenderer::new(phase).render(completion_factor)
             }
 
             Phase::ChooseBooster(phase) => {
-                BoosterChoosingPhaseRenderer::new(phase, completion_factor).render()
+                BoosterChoosingPhaseRenderer::new(phase).render(completion_factor)
             }
 
             Phase::ChooseFirstDequeue(phase) => {
-                FirstDequeueingPhaseRenderer::new(phase, completion_factor).render()
+                FirstDequeueingPhaseRenderer::new(phase).render(completion_factor)
             }
 
             Phase::ChooseAction(phase) => {
-                ActionChoosingPhaseRenderer::new(phase, completion_factor).render()
+                ActionChoosingPhaseRenderer::new(phase).render(completion_factor)
             }
 
             Phase::ChooseSubsequentDequeue(phase) => {
-                SubsequentDequeueingPhaseRenderer::new(phase, completion_factor).render()
+                SubsequentDequeueingPhaseRenderer::new(phase).render(completion_factor)
             }
 
-            Phase::GameOver(phase) => GameOverPhaseRenderer::new(phase, completion_factor).render(),
+            Phase::GameOver(phase) => GameOverPhaseRenderer::new(phase).render(completion_factor),
         }
     }
 }
