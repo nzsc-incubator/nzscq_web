@@ -25,9 +25,7 @@ pub struct BoosterChoosingPhaseRenderer<'a> {
 }
 
 impl<'a> BoosterChoosingPhaseRenderer<'a> {
-    pub fn new(
-        phase: &'a ChooseBoosterPhase,
-    ) -> BoosterChoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseBoosterPhase) -> BoosterChoosingPhaseRenderer<'a> {
         BoosterChoosingPhaseRenderer {
             previously_available_characters: &phase.previously_available_characters,
             previous_outcome: &phase.previous_outcome,

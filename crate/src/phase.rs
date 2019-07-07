@@ -1,10 +1,20 @@
+use crate::paint::Component;
+use crate::render::{
+    phase_renderers::{
+        ActionChoosingPhaseRenderer, BoosterChoosingPhaseRenderer, CharacterChoosingPhaseRenderer,
+        CharacterRechoosingPhaseRenderer, FirstDequeueingPhaseRenderer, GameOverPhaseRenderer,
+        SubsequentDequeueingPhaseRenderer,
+    },
+    Render,
+};
+
 use nzscq::{
     choices::{Action, Booster, Character, DequeueChoice},
     outcomes::{ActionPointsDestroyed, CharacterHeadstart},
     scoreboard::{ActionlessPlayer, DequeueingPlayer, FinishedPlayer},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Phase {
     ChooseCharacter(ChooseCharacterPhase),
     RechooseCharacter(RechooseCharacterPhase),
@@ -16,7 +26,11 @@ pub enum Phase {
 }
 
 impl Phase {
-    pub fn duration_secs(&self) -> f64 {
+    pub fn is_elapsed_time_past_completion(&self, elapsed_time: f64) -> bool {
+        elapsed_time > self.duration()
+    }
+
+    fn duration(&self) -> f64 {
         match self {
             Phase::ChooseCharacter { .. } => durations::CHOOSING_CHARACTERS,
             Phase::RechooseCharacter { .. } => durations::RECHOOSING_CHARACTERS,
@@ -27,35 +41,76 @@ impl Phase {
             Phase::GameOver { .. } => durations::GAME_OVER,
         }
     }
+
+    fn completion_factor(&self, animation_start_time: f64, current_time: f64) -> f64 {
+        let elapsed_time = current_time - animation_start_time;
+        let factor = elapsed_time / self.duration();
+
+        factor.min(1.0)
+    }
 }
 
-#[derive(Debug, Clone)]
+impl Render<(f64, f64)> for Phase {
+    fn render(&self, (animation_start_time, current_time): (f64, f64)) -> Vec<Component> {
+        let completion_factor = self.completion_factor(animation_start_time, current_time);
+
+        match self {
+            Phase::ChooseCharacter(phase) => {
+                CharacterChoosingPhaseRenderer::new(phase).render(completion_factor)
+            }
+
+            Phase::RechooseCharacter(phase) => {
+                CharacterRechoosingPhaseRenderer::new(phase).render(completion_factor)
+            }
+
+            Phase::ChooseBooster(phase) => {
+                BoosterChoosingPhaseRenderer::new(phase).render(completion_factor)
+            }
+
+            Phase::ChooseFirstDequeue(phase) => {
+                FirstDequeueingPhaseRenderer::new(phase).render(completion_factor)
+            }
+
+            Phase::ChooseAction(phase) => {
+                ActionChoosingPhaseRenderer::new(phase).render(completion_factor)
+            }
+
+            Phase::ChooseSubsequentDequeue(phase) => {
+                SubsequentDequeueingPhaseRenderer::new(phase).render(completion_factor)
+            }
+
+            Phase::GameOver(phase) => GameOverPhaseRenderer::new(phase).render(completion_factor),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ChooseCharacterPhase {
     pub available_characters: Vec<Character>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RechooseCharacterPhase {
     pub previously_available_characters: Vec<Character>,
     pub previously_mutually_chosen_character: Character,
     pub available_characters: Vec<Character>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ChooseBoosterPhase {
     pub previously_available_characters: Vec<Character>,
     pub previous_outcome: Vec<CharacterHeadstart>,
     pub available_boosters: Vec<Booster>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ChooseFirstDequeuePhase {
     pub previously_available_boosters: Vec<Booster>,
     pub scoreboard: [DequeueingPlayer; 2],
     pub available_dequeues: [Vec<DequeueChoice>; 2],
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ChooseActionPhase {
     pub previous_scoreboard: [DequeueingPlayer; 2],
     pub previously_available_dequeues: [Vec<DequeueChoice>; 2],
@@ -64,7 +119,7 @@ pub struct ChooseActionPhase {
     pub available_actions: [Vec<Action>; 2],
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct ChooseSubsequentDequeuePhase {
     pub previous_scoreboard: [ActionlessPlayer; 2],
     pub previously_available_actions: [Vec<Action>; 2],
@@ -73,7 +128,7 @@ pub struct ChooseSubsequentDequeuePhase {
     pub available_dequeues: [Vec<DequeueChoice>; 2],
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct GameOverPhase {
     pub previous_scoreboard: [ActionlessPlayer; 2],
     pub previously_available_actions: [Vec<Action>; 2],

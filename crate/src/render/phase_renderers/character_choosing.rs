@@ -20,9 +20,7 @@ pub struct CharacterChoosingPhaseRenderer<'a> {
 }
 
 impl<'a> CharacterChoosingPhaseRenderer<'a> {
-    pub fn new(
-        phase: &'a ChooseCharacterPhase,
-    ) -> CharacterChoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseCharacterPhase) -> CharacterChoosingPhaseRenderer<'a> {
         CharacterChoosingPhaseRenderer {
             available_characters: &phase.available_characters,
         }

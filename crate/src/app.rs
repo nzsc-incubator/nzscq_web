@@ -11,11 +11,13 @@ use crate::{
 };
 
 use js_sys::{Date, Function, Math};
+use murmur3::murmur3_32::MurmurHasher;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 
 use std::convert::TryInto;
 use std::f64;
+use std::hash::{Hash, Hasher};
 use std::string::ToString;
 
 #[wasm_bindgen]
@@ -27,7 +29,6 @@ pub struct App {
     image_map: ImageMap,
     context: Context,
     state: State,
-    animation_start_secs: f64,
     has_drawn_past_completion: bool,
 }
 
@@ -53,6 +54,7 @@ impl App {
                 .unwrap_or_else(|| "fail".to_string())
                 .try_into()
                 .unwrap_or(Difficulty::Medium);
+        let current_time = helpers::millis_to_secs(Date::now());
 
         let mut app = App {
             window,
@@ -64,9 +66,9 @@ impl App {
                 .expect("should be able to create image map from js image getter"),
             context: Context {
                 computer_difficulty,
+                current_time,
             },
             state: State::HomeScreen,
-            animation_start_secs: helpers::millis_to_secs(Date::now()),
             has_drawn_past_completion: false,
         };
 
@@ -171,6 +173,7 @@ impl App {
             State::HomeScreen => match action {
                 click::Action::StartSinglePlayerGame => {
                     self.state.start_single_player_game(
+                        helpers::millis_to_secs(Date::now()),
                         &JsPrng.random().to_string()[..],
                         self.context.computer_difficulty,
                     );
@@ -200,8 +203,11 @@ impl App {
                         .prompt_with_message("Enter your seed:")
                         .expect("should be able to prompt user for seed");
                     if let Some(seed) = seed {
-                        self.state
-                            .start_single_player_game(&seed[..], self.context.computer_difficulty);
+                        self.state.start_single_player_game(
+                            helpers::millis_to_secs(Date::now()),
+                            &seed[..],
+                            self.context.computer_difficulty,
+                        );
                     }
                 }
 
@@ -243,19 +249,32 @@ impl App {
     }
 
     fn start_animation(&mut self) {
-        self.animation_start_secs = helpers::millis_to_secs(Date::now());
         self.has_drawn_past_completion = false;
+        self.state
+            .start_animation(helpers::millis_to_secs(Date::now()));
     }
 
     pub fn draw_if_needed(&mut self) -> Result<(), JsValue> {
-        if self.completion_factor().unwrap_or(1.0) < 1.0 {
-            self.draw()
-        } else if self.has_drawn_past_completion {
-            Ok(())
+        let current_time = helpers::millis_to_secs(Date::now());
+
+        if self.state.is_current_time_past_completion(current_time) {
+            if !self.has_drawn_past_completion {
+                self.has_drawn_past_completion = true;
+
+                self.draw()
+            } else {
+                Ok(())
+            }
         } else {
-            self.has_drawn_past_completion = true;
             self.draw()
         }
+    }
+
+    fn current_state_hash(&self) -> u64 {
+        let mut hasher: MurmurHasher = Default::default();
+        self.state.hash(&mut hasher);
+
+        hasher.finish()
     }
 
     fn draw(&mut self) -> Result<(), JsValue> {
@@ -268,29 +287,10 @@ impl App {
         Ok(())
     }
 
-    fn render(&self) -> Vec<Component> {
-        match &self.state {
-            State::HomeScreen => render::home_screen(),
-            State::SettingsScreen => render::settings_screen(&self.context),
-            State::SinglePlayer(state) => state.phase.render(
-                self.completion_factor()
-                    .expect("should have completion factor when state == SinglePlayer"),
-            ),
-        }
-    }
+    fn render(&mut self) -> Vec<Component> {
+        self.context.current_time = helpers::millis_to_secs(Date::now());
 
-    fn completion_factor(&self) -> Option<f64> {
-        match &self.state {
-            State::HomeScreen => None,
-            State::SettingsScreen => None,
-            State::SinglePlayer(state) => Some({
-                let current_time = helpers::millis_to_secs(Date::now());
-                let time_after_start = current_time - self.animation_start_secs;
-                let completion_factor = time_after_start / state.phase.duration_secs();
-
-                completion_factor.min(1.0)
-            }),
-        }
+        self.state.render(&self.context)
     }
 
     fn ideal_dimensions(&self) -> (u32, u32) {
@@ -305,7 +305,7 @@ impl App {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct JsPrng;
 
 impl Random for JsPrng {

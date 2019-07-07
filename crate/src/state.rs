@@ -1,9 +1,12 @@
+use crate::context::Context;
 use crate::helpers;
 use crate::opponent::{Difficulty, Opponent};
+use crate::paint::Component;
 use crate::phase::{
     ChooseActionPhase, ChooseBoosterPhase, ChooseCharacterPhase, ChooseFirstDequeuePhase,
     ChooseSubsequentDequeuePhase, GameOverPhase, Phase, RechooseCharacterPhase,
 };
+use crate::render::{self, Render};
 use crate::xorshift::Xorshift128Plus;
 
 use nzscq::choices::{Action as NzscAction, BatchChoice, Booster, Character, DequeueChoice};
@@ -11,7 +14,11 @@ use nzscq::game::BatchChoiceGame;
 use nzscq::outcomes::Outcome;
 use nzscq::scoreboard::{ActionlessPlayer, DequeueingPlayer};
 
-#[derive(Debug)]
+use ordered_float::NotNan;
+
+use std::hash::{Hash, Hasher};
+
+#[derive(Debug, Hash)]
 pub enum State {
     HomeScreen,
     SettingsScreen,
@@ -19,12 +26,19 @@ pub enum State {
 }
 
 impl State {
-    pub fn start_single_player_game(&mut self, seed: &str, computer_difficulty: Difficulty) {
+    pub fn start_single_player_game(
+        &mut self,
+        animation_start_time: f64,
+        seed: &str,
+        computer_difficulty: Difficulty,
+    ) {
         let game = BatchChoiceGame::default();
         let computer = Opponent::new(computer_difficulty, Box::new(Xorshift128Plus::from(seed)));
         let initial_human_choices = game.choices().characters().unwrap().remove(0);
 
         *self = State::SinglePlayer(Box::new(SinglePlayerState {
+            animation_start_time,
+
             game,
             computer,
             phase: Phase::ChooseCharacter(ChooseCharacterPhase {
@@ -32,10 +46,41 @@ impl State {
             }),
         }));
     }
+
+    pub fn start_animation(&mut self, animation_start_time: f64) {
+        match self {
+            State::SinglePlayer(state) => {
+                state.animation_start_time = animation_start_time;
+            }
+
+            _ => {}
+        }
+    }
+
+    pub fn is_current_time_past_completion(&mut self, current_time: f64) -> bool {
+        match self {
+            State::SinglePlayer(state) => state.is_current_time_past_completion(current_time),
+            _ => true,
+        }
+    }
+}
+
+impl Render<&Context> for State {
+    fn render(&self, context: &Context) -> Vec<Component> {
+        match &self {
+            State::HomeScreen => render::home_screen(),
+            State::SettingsScreen => render::settings_screen(context),
+            State::SinglePlayer(state) => state
+                .phase
+                .render((state.animation_start_time, context.current_time)),
+        }
+    }
 }
 
 #[derive(Debug)]
 pub struct SinglePlayerState {
+    pub animation_start_time: f64,
+
     pub game: BatchChoiceGame,
     pub computer: Opponent,
     pub phase: Phase,
@@ -228,6 +273,23 @@ impl SinglePlayerState {
 
             _ => panic!("outcome should be action outcome"),
         }
+    }
+
+    fn is_current_time_past_completion(&self, current_time: f64) -> bool {
+        let elapsed_time = current_time - self.animation_start_time;
+
+        self.phase.is_elapsed_time_past_completion(elapsed_time)
+    }
+}
+
+impl Hash for SinglePlayerState {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let animation_start_time =
+            NotNan::new(self.animation_start_time).expect("animation_start_time should not be NaN");
+        animation_start_time.hash(state);
+        self.game.hash(state);
+        self.computer.hash(state);
+        self.phase.hash(state);
     }
 }
 

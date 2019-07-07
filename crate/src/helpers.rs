@@ -74,7 +74,9 @@ pub fn get_local_storage_item(window: &Window, key: &str) -> Option<String> {
 pub fn set_local_storage_item(window: &Window, key: &str, value: &str) {
     if let Ok(opt_storage) = window.local_storage() {
         if let Some(storage) = opt_storage {
-            storage.set_item(key, value).expect("should be able to set local storage item");
+            storage
+                .set_item(key, value)
+                .expect("should be able to set local storage item");
         }
     }
 }

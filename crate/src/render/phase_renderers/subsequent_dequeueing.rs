@@ -33,9 +33,7 @@ pub struct SubsequentDequeueingPhaseRenderer<'a> {
 }
 
 impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
-    pub fn new(
-        phase: &'a ChooseSubsequentDequeuePhase,
-    ) -> SubsequentDequeueingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseSubsequentDequeuePhase) -> SubsequentDequeueingPhaseRenderer<'a> {
         SubsequentDequeueingPhaseRenderer {
             previous_scoreboard: &phase.previous_scoreboard,
             previously_available_actions: &phase.previously_available_actions,

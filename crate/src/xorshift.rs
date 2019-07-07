@@ -3,10 +3,9 @@ use crate::opponent::Random;
 
 use murmur3::murmur3_32::MurmurHasher;
 
-
 use std::hash::Hasher;
 use std::{f64, u32};
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Xorshift128Plus(u64, u64);
 
 impl Xorshift128Plus {

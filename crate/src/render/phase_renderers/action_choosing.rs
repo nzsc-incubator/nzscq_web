@@ -32,9 +32,7 @@ pub struct ActionChoosingPhaseRenderer<'a> {
 }
 
 impl<'a> ActionChoosingPhaseRenderer<'a> {
-    pub fn new(
-        phase: &'a ChooseActionPhase,
-    ) -> ActionChoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a ChooseActionPhase) -> ActionChoosingPhaseRenderer<'a> {
         ActionChoosingPhaseRenderer {
             previous_scoreboard: &phase.previous_scoreboard,
             previously_available_dequeues: &phase.previously_available_dequeues,

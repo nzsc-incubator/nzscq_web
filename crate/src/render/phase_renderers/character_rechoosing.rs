@@ -22,9 +22,7 @@ pub struct CharacterRechoosingPhaseRenderer<'a> {
 }
 
 impl<'a> CharacterRechoosingPhaseRenderer<'a> {
-    pub fn new(
-        phase: &'a RechooseCharacterPhase,
-    ) -> CharacterRechoosingPhaseRenderer<'a> {
+    pub fn new(phase: &'a RechooseCharacterPhase) -> CharacterRechoosingPhaseRenderer<'a> {
         CharacterRechoosingPhaseRenderer {
             previously_available_characters: &phase.previously_available_characters,
             previously_mutually_chosen_character: phase.previously_mutually_chosen_character,

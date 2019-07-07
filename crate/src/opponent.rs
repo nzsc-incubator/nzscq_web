@@ -3,21 +3,25 @@ use nzscq::{
     game::BatchChoiceGame,
 };
 
+use murmur3::murmur3_32::MurmurHasher;
+
 use std::convert::TryFrom;
 use std::fmt::{self, Debug, Display, Formatter};
+use std::hash::{Hash, Hasher};
 
+#[derive(Debug)]
 pub struct Opponent {
     difficulty: Difficulty,
     prng: Box<dyn Random>,
 }
 
-impl Debug for Opponent {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(
-            f,
-            "Opponent {{ difficulty: {:?}, prng: {:?} }}",
-            self.difficulty, self.prng,
-        )
+impl Hash for Opponent {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let mut hasher: MurmurHasher = Default::default();
+        self.prng.murmur_hash(&mut hasher);
+
+        self.difficulty.hash(state);
+        state.write_u64(hasher.finish());
     }
 }
 
@@ -82,7 +86,6 @@ impl Opponent {
             Difficulty::Medium => actions_that_make_sense_for_medium_difficulty_computer(game)
                 .map(|actions| self.rand_choice(actions)),
         }
-
     }
 
     fn rand_choice<C>(&mut self, mut choices: Vec<C>) -> C {
@@ -194,8 +197,18 @@ where
     choices
 }
 
-pub trait Random: Debug {
+pub trait Random: Debug + MurmurHash {
     fn random(&mut self) -> f64;
+}
+
+pub trait MurmurHash {
+    fn murmur_hash(&self, state: &mut MurmurHasher);
+}
+
+impl<T: Hash> MurmurHash for T {
+    fn murmur_hash(&self, state: &mut MurmurHasher) {
+        self.hash(state);
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
