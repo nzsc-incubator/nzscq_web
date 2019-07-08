@@ -13,6 +13,7 @@ mod home_screen;
 pub use home_screen::home_screen;
 mod settings_screen;
 pub use settings_screen::settings_screen;
+pub mod inspect_move_button;
 
 use crate::{paint::Component, phase::Phase};
 

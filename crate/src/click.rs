@@ -31,6 +31,7 @@ pub enum Action {
     ChooseBooster(Booster),
     ChooseDequeue(DequeueChoice),
     ChooseAction(choices::Action),
+    WaitForUserToChooseMoveToInspect,
 
     SetComputerDifficulty(Difficulty),
     NavigateHome,

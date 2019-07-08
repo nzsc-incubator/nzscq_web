@@ -1,4 +1,5 @@
 use crate::{
+    canvas_dimensions,
     click::Action,
     colors, helpers,
     paint::{Component, ImageType},
@@ -6,6 +7,7 @@ use crate::{
     render::{
         arrow,
         health_display::ConstantHealthDisplay,
+        inspect_move_button::InspectMoveButton,
         lerp::{LerpableComponent, Lerper},
         pill::Pill,
         switch::{Switch, Switch5},
@@ -292,6 +294,14 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
                     .into_iter()
                     .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
                     .collect(),
+                InspectMoveButton {
+                    enabled: lerper.lerp(0.0, 1.0) == 1.0,
+                }
+                .render(())
+                .translate(
+                    0.0,
+                    lerper.lerp(canvas_dimensions::HEIGHT - InspectMoveButton::Y, 0.0),
+                ),
             ]
             .into_iter()
             .flatten()

@@ -403,6 +403,7 @@ pub enum ImageType {
     TutorialButton,
     PassAndPlayButton,
     CustomSeedButton,
+    InspectMoveButton,
 }
 
 impl From<ArsenalItem> for ImageType {

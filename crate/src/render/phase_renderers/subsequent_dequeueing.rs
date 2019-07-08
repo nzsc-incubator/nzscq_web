@@ -6,6 +6,7 @@ use crate::{
     render::{
         arrow, arsenal_item_display,
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
+        inspect_move_button::InspectMoveButton,
         lerp::{LerpableComponent, Lerper},
         pill::Pill,
         switch::{Switch, Switch5},
@@ -56,6 +57,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                         .and_then(|displacement| displacement.action.into()),
                 ),
                 action_choosing_scoreboard(self.action_choosing_computer_args()),
+                InspectMoveButton { enabled: false }.render(()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -99,6 +101,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                     self.computer_action_displacement()
                         .and_then(|displacement| displacement.action.into()),
                 ),
+                InspectMoveButton { enabled: false }.render(()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -142,6 +145,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                     self.computer_action_displacement()
                         .and_then(|displacement| displacement.action.into()),
                 ),
+                InspectMoveButton { enabled: false }.render(()),
                 self.fade_case_non_fading_health_displays(),
                 vec![Component::Background {
                     color: colors::OVERLAY,
@@ -181,6 +185,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                     self.computer_action_displacement()
                         .and_then(|displacement| displacement.action.into()),
                 ),
+                InspectMoveButton { enabled: false }.render(()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -210,6 +215,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 self.current_health_displays(),
                 dequeueing_scoreboard(self.dequeueing_human_args()),
                 dequeueing_scoreboard(self.dequeueing_computer_args()),
+                InspectMoveButton { enabled: true }.render(()),
             ]
             .into_iter()
             .flatten()

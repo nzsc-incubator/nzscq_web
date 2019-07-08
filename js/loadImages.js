@@ -43,6 +43,7 @@ import ComputerDifficultyMedium from "./images/ComputerDifficultyMedium.png";
 import TutorialButton from "./images/TutorialButton.png";
 import PassAndPlayButton from "./images/PassAndPlayButton.png";
 import CustomSeedButton from "./images/CustomSeedButton.png";
+import InspectMoveButton from "./images/InspectMoveButton.png";
 
 import "./shims";
 
@@ -91,7 +92,8 @@ const srcs = {
   ComputerDifficultyMedium,
   TutorialButton,
   PassAndPlayButton,
-  CustomSeedButton
+  CustomSeedButton,
+  InspectMoveButton
 };
 
 function loadImages() {

@@ -6,6 +6,7 @@ use crate::{
     render::{
         arrow, arsenal_item_display,
         health_display::ConstantHealthDisplay,
+        inspect_move_button::InspectMoveButton,
         lerp::{LerpableComponent, Lerper},
         pill::Pill,
         switch::{Switch, Switch5},
@@ -54,6 +55,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.human_dequeue_displacements(),
                 ),
                 dequeueing_scoreboard(self.dequeueing_computer_args()),
+                InspectMoveButton { enabled: false }.render(()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -109,6 +111,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.dequeueing_computer_args(),
                     self.computer_dequeue_displacements(),
                 ),
+                InspectMoveButton { enabled: false }.render(()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -170,6 +173,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.dequeueing_computer_args(),
                     self.computer_dequeue_displacements(),
                 ),
+                InspectMoveButton { enabled: false }.render(()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -197,6 +201,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.dequeueing_computer_args(),
                     self.computer_dequeue_displacements(),
                 ),
+                InspectMoveButton { enabled: false }.render(()),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -218,6 +223,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 self.health_displays(),
                 action_choosing_scoreboard(self.actionless_human_args()),
                 action_choosing_scoreboard(self.actionless_computer_args()),
+                InspectMoveButton { enabled: true }.render(()),
             ]
             .into_iter()
             .flatten()

@@ -81,6 +81,7 @@ impl ImageMapBuilder {
         self.insert(ImageType::TutorialButton, "TutorialButton")?;
         self.insert(ImageType::PassAndPlayButton, "PassAndPlayButton")?;
         self.insert(ImageType::CustomSeedButton, "CustomSeedButton")?;
+        self.insert(ImageType::InspectMoveButton, "InspectMoveButton")?;
 
         Ok(ImageMap(self.map))
     }
