@@ -2,12 +2,12 @@ use crate::{
     click::Action,
     colors, helpers,
     paint::{Component, ImageType},
-    phase::ChooseActionPhase,
+    phase::{ChooseActionPhase, MoveInspectorState},
     render::{
         arrow, arsenal_item_display,
         health_display::ConstantHealthDisplay,
-        inspect_move_button::InspectMoveButton,
         lerp::{LerpableComponent, Lerper},
+        move_inspector_buttons::RenderButton,
         pill::Pill,
         switch::{Switch, Switch5},
         Render,
@@ -30,6 +30,7 @@ pub struct ActionChoosingPhaseRenderer<'a> {
     previous_outcome: &'a [DequeueChoice; 2],
     scoreboard: &'a [ActionlessPlayer; 2],
     available_actions: &'a [Vec<NzscAction>; 2],
+    inspector_state: MoveInspectorState,
 }
 
 impl<'a> ActionChoosingPhaseRenderer<'a> {
@@ -40,6 +41,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
             previous_outcome: &phase.previous_outcome,
             scoreboard: &phase.scoreboard,
             available_actions: &phase.available_actions,
+            inspector_state: phase.inspector_state,
         }
     }
 
@@ -55,7 +57,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.human_dequeue_displacements(),
                 ),
                 dequeueing_scoreboard(self.dequeueing_computer_args()),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -111,7 +113,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.dequeueing_computer_args(),
                     self.computer_dequeue_displacements(),
                 ),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -173,7 +175,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.dequeueing_computer_args(),
                     self.computer_dequeue_displacements(),
                 ),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -201,7 +203,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                     self.dequeueing_computer_args(),
                     self.computer_dequeue_displacements(),
                 ),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -223,7 +225,7 @@ impl<'a> ActionChoosingPhaseRenderer<'a> {
                 self.health_displays(),
                 action_choosing_scoreboard(self.actionless_human_args()),
                 action_choosing_scoreboard(self.actionless_computer_args()),
-                InspectMoveButton { enabled: true }.render(()),
+                self.inspector_state.render_button(true),
             ]
             .into_iter()
             .flatten()

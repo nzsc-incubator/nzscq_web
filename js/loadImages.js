@@ -44,6 +44,7 @@ import TutorialButton from "./images/TutorialButton.png";
 import PassAndPlayButton from "./images/PassAndPlayButton.png";
 import CustomSeedButton from "./images/CustomSeedButton.png";
 import InspectMoveButton from "./images/InspectMoveButton.png";
+import StopInspectingButton from "./images/StopInspectingButton.png";
 
 import "./shims";
 
@@ -93,7 +94,8 @@ const srcs = {
   TutorialButton,
   PassAndPlayButton,
   CustomSeedButton,
-  InspectMoveButton
+  InspectMoveButton,
+  StopInspectingButton
 };
 
 function loadImages() {

@@ -2,12 +2,12 @@ use crate::{
     click::Action,
     colors, helpers,
     paint::{Component, ImageType},
-    phase::ChooseSubsequentDequeuePhase,
+    phase::{ChooseSubsequentDequeuePhase, MoveInspectorState},
     render::{
         arrow, arsenal_item_display,
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
-        inspect_move_button::InspectMoveButton,
         lerp::{LerpableComponent, Lerper},
+        move_inspector_buttons::RenderButton,
         pill::Pill,
         switch::{Switch, Switch5},
         Render,
@@ -31,6 +31,7 @@ pub struct SubsequentDequeueingPhaseRenderer<'a> {
     previous_outcome: &'a [ActionPointsDestroyed; 2],
     scoreboard: &'a [DequeueingPlayer; 2],
     available_dequeues: &'a [Vec<DequeueChoice>; 2],
+    inspector_state: MoveInspectorState,
 }
 
 impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
@@ -41,6 +42,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
             previous_outcome: &phase.previous_outcome,
             scoreboard: &phase.scoreboard,
             available_dequeues: &phase.available_dequeues,
+            inspector_state: phase.inspector_state,
         }
     }
 
@@ -57,7 +59,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                         .and_then(|displacement| displacement.action.into()),
                 ),
                 action_choosing_scoreboard(self.action_choosing_computer_args()),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -101,7 +103,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                     self.computer_action_displacement()
                         .and_then(|displacement| displacement.action.into()),
                 ),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -145,7 +147,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                     self.computer_action_displacement()
                         .and_then(|displacement| displacement.action.into()),
                 ),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 self.fade_case_non_fading_health_displays(),
                 vec![Component::Background {
                     color: colors::OVERLAY,
@@ -185,7 +187,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                     self.computer_action_displacement()
                         .and_then(|displacement| displacement.action.into()),
                 ),
-                InspectMoveButton { enabled: false }.render(()),
+                self.inspector_state.render_button(false),
                 vec![Component::Background {
                     color: colors::OVERLAY,
                 }],
@@ -215,7 +217,7 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
                 self.current_health_displays(),
                 dequeueing_scoreboard(self.dequeueing_human_args()),
                 dequeueing_scoreboard(self.dequeueing_computer_args()),
-                InspectMoveButton { enabled: true }.render(()),
+                self.inspector_state.render_button(true),
             ]
             .into_iter()
             .flatten()

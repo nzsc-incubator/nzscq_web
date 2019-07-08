@@ -13,9 +13,9 @@ mod home_screen;
 pub use home_screen::home_screen;
 mod settings_screen;
 pub use settings_screen::settings_screen;
-pub mod inspect_move_button;
+pub mod move_inspector_buttons;
 
-use crate::{paint::Component, phase::Phase};
+use crate::paint::Component;
 
 pub trait Render<A> {
     fn render(&self, args: A) -> Vec<Component>;

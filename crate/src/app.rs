@@ -6,18 +6,16 @@ use crate::{
     letterbox::Letterbox,
     opponent::{Difficulty, Random},
     paint::{Component, Painter},
-    render::{self, Render},
+    render::Render,
     state::State,
 };
 
 use js_sys::{Date, Function, Math};
-use murmur3::murmur3_32::MurmurHasher;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlElement, Window};
 
 use std::convert::TryInto;
 use std::f64;
-use std::hash::{Hash, Hasher};
 use std::string::ToString;
 
 #[wasm_bindgen]
@@ -169,6 +167,9 @@ impl App {
     }
 
     fn handle_action(&mut self, action: click::Action) {
+        let mut should_start_animation = true;
+        let mut prevent_animation_start = || should_start_animation = false;
+
         match &mut self.state {
             State::HomeScreen => match action {
                 click::Action::StartSinglePlayerGame => {
@@ -238,6 +239,22 @@ impl App {
                     self.state = State::HomeScreen;
                 }
 
+                click::Action::WaitForUserToChooseMoveToInspect => {
+                    prevent_animation_start();
+                    state
+                        .phase
+                        .wait_for_user_to_choose_move_to_inspect()
+                        .expect("should be able to wait for user to choose move to inspect");
+                }
+
+                click::Action::StopInspectingMove => {
+                    prevent_animation_start();
+                    state
+                        .phase
+                        .stop_inspecting_move()
+                        .expect("should be able to stop inspecting move");
+                }
+
                 action => panic!(
                     "Action {:?} should never be emitted when state == SinglePlayer",
                     action
@@ -245,7 +262,11 @@ impl App {
             },
         }
 
-        self.start_animation();
+        if should_start_animation {
+            self.start_animation();
+        } else {
+            self.has_drawn_past_completion = false;
+        }
     }
 
     fn start_animation(&mut self) {
@@ -268,13 +289,6 @@ impl App {
         } else {
             self.draw()
         }
-    }
-
-    fn current_state_hash(&self) -> u64 {
-        let mut hasher: MurmurHasher = Default::default();
-        self.state.hash(&mut hasher);
-
-        hasher.finish()
     }
 
     fn draw(&mut self) -> Result<(), JsValue> {

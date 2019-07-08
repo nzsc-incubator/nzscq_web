@@ -3,12 +3,12 @@ use crate::{
     click::Action,
     colors, helpers,
     paint::{Component, ImageType},
-    phase::ChooseFirstDequeuePhase,
+    phase::{ChooseFirstDequeuePhase, MoveInspectorState},
     render::{
         arrow,
         health_display::ConstantHealthDisplay,
-        inspect_move_button::InspectMoveButton,
         lerp::{LerpableComponent, Lerper},
+        move_inspector_buttons::{InspectMoveButton, RenderButton},
         pill::Pill,
         switch::{Switch, Switch5},
         Render,
@@ -32,6 +32,7 @@ pub struct FirstDequeueingPhaseRenderer<'a> {
     previously_available_boosters: &'a Vec<Booster>,
     scoreboard: &'a [DequeueingPlayer; 2],
     available_dequeues: &'a [Vec<DequeueChoice>; 2],
+    inspector_state: MoveInspectorState,
 }
 
 impl<'a> FirstDequeueingPhaseRenderer<'a> {
@@ -40,6 +41,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             previously_available_boosters: &phase.previously_available_boosters,
             scoreboard: &phase.scoreboard,
             available_dequeues: &phase.available_dequeues,
+            inspector_state: phase.inspector_state,
         }
     }
 
@@ -294,14 +296,12 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
                     .into_iter()
                     .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
                     .collect(),
-                InspectMoveButton {
-                    enabled: lerper.lerp(0.0, 1.0) == 1.0,
-                }
-                .render(())
-                .translate(
-                    0.0,
-                    lerper.lerp(canvas_dimensions::HEIGHT - InspectMoveButton::Y, 0.0),
-                ),
+                self.inspector_state
+                    .render_button(lerper.lerp(0.0, 1.0) == 1.0)
+                    .translate(
+                        0.0,
+                        lerper.lerp(canvas_dimensions::HEIGHT - InspectMoveButton::Y, 0.0),
+                    ),
             ]
             .into_iter()
             .flatten()

@@ -9,7 +9,7 @@ use crate::render::{
 };
 
 use nzscq::{
-    choices::{Action, Booster, Character, DequeueChoice},
+    choices::{Action, Booster, Character, DequeueChoice, Move},
     outcomes::{ActionPointsDestroyed, CharacterHeadstart},
     scoreboard::{ActionlessPlayer, DequeueingPlayer, FinishedPlayer},
 };
@@ -32,13 +32,57 @@ impl Phase {
 
     fn duration(&self) -> f64 {
         match self {
-            Phase::ChooseCharacter { .. } => durations::CHOOSING_CHARACTERS,
-            Phase::RechooseCharacter { .. } => durations::RECHOOSING_CHARACTERS,
-            Phase::ChooseBooster { .. } => durations::CHOOSING_BOOSTERS,
-            Phase::ChooseFirstDequeue { .. } => durations::CHOOSING_FIRST_DEQUEUE,
-            Phase::ChooseAction { .. } => durations::CHOOSING_ACTION,
-            Phase::ChooseSubsequentDequeue { .. } => durations::CHOOSING_SUBSEQUENT_DEQUEUE,
-            Phase::GameOver { .. } => durations::GAME_OVER,
+            Phase::ChooseCharacter(_) => durations::CHOOSING_CHARACTERS,
+            Phase::RechooseCharacter(_) => durations::RECHOOSING_CHARACTERS,
+            Phase::ChooseBooster(_) => durations::CHOOSING_BOOSTERS,
+            Phase::ChooseFirstDequeue(_) => durations::CHOOSING_FIRST_DEQUEUE,
+            Phase::ChooseAction(_) => durations::CHOOSING_ACTION,
+            Phase::ChooseSubsequentDequeue(_) => durations::CHOOSING_SUBSEQUENT_DEQUEUE,
+            Phase::GameOver(_) => durations::GAME_OVER,
+        }
+    }
+
+    pub fn wait_for_user_to_choose_move_to_inspect(&mut self) -> Result<(), ()> {
+        match self {
+            Phase::ChooseFirstDequeue(phase) => {
+                phase.inspector_state = MoveInspectorState::WaitingForUserToChooseMove;
+
+                Ok(())
+            }
+            Phase::ChooseAction(phase) => {
+                phase.inspector_state = MoveInspectorState::WaitingForUserToChooseMove;
+
+                Ok(())
+            }
+            Phase::ChooseSubsequentDequeue(phase) => {
+                phase.inspector_state = MoveInspectorState::WaitingForUserToChooseMove;
+
+                Ok(())
+            }
+
+            _ => Err(()),
+        }
+    }
+
+    pub fn stop_inspecting_move(&mut self) -> Result<(), ()> {
+        match self {
+            Phase::ChooseFirstDequeue(phase) => {
+                phase.inspector_state = MoveInspectorState::NotInspecting;
+
+                Ok(())
+            }
+            Phase::ChooseAction(phase) => {
+                phase.inspector_state = MoveInspectorState::NotInspecting;
+
+                Ok(())
+            }
+            Phase::ChooseSubsequentDequeue(phase) => {
+                phase.inspector_state = MoveInspectorState::NotInspecting;
+
+                Ok(())
+            }
+
+            _ => Err(()),
         }
     }
 
@@ -108,6 +152,7 @@ pub struct ChooseFirstDequeuePhase {
     pub previously_available_boosters: Vec<Booster>,
     pub scoreboard: [DequeueingPlayer; 2],
     pub available_dequeues: [Vec<DequeueChoice>; 2],
+    pub inspector_state: MoveInspectorState,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -117,6 +162,7 @@ pub struct ChooseActionPhase {
     pub previous_outcome: [DequeueChoice; 2],
     pub scoreboard: [ActionlessPlayer; 2],
     pub available_actions: [Vec<Action>; 2],
+    pub inspector_state: MoveInspectorState,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -126,6 +172,7 @@ pub struct ChooseSubsequentDequeuePhase {
     pub previous_outcome: [ActionPointsDestroyed; 2],
     pub scoreboard: [DequeueingPlayer; 2],
     pub available_dequeues: [Vec<DequeueChoice>; 2],
+    pub inspector_state: MoveInspectorState,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -134,6 +181,13 @@ pub struct GameOverPhase {
     pub previously_available_actions: [Vec<Action>; 2],
     pub previous_outcome: [ActionPointsDestroyed; 2],
     pub scoreboard: [FinishedPlayer; 2],
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum MoveInspectorState {
+    NotInspecting,
+    WaitingForUserToChooseMove,
+    Inspecting(Move),
 }
 
 mod durations {

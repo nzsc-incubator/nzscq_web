@@ -4,7 +4,7 @@ use crate::opponent::{Difficulty, Opponent};
 use crate::paint::Component;
 use crate::phase::{
     ChooseActionPhase, ChooseBoosterPhase, ChooseCharacterPhase, ChooseFirstDequeuePhase,
-    ChooseSubsequentDequeuePhase, GameOverPhase, Phase, RechooseCharacterPhase,
+    ChooseSubsequentDequeuePhase, GameOverPhase, MoveInspectorState, Phase, RechooseCharacterPhase,
 };
 use crate::render::{self, Render};
 use crate::xorshift::Xorshift128Plus;
@@ -162,6 +162,7 @@ impl SinglePlayerState {
                             .dequeue_choices()
                             .expect("should be able to choose dequeue"),
                     ),
+                    inspector_state: MoveInspectorState::NotInspecting,
                 })
             }
             _ => panic!("outcome should be booster outcome"),
@@ -211,6 +212,7 @@ impl SinglePlayerState {
                             .actions()
                             .expect("should be able to choose action"),
                     ),
+                    inspector_state: MoveInspectorState::NotInspecting,
                 })
             }
             _ => panic!("outcome should be dequeue outcome"),
@@ -254,6 +256,7 @@ impl SinglePlayerState {
                             .dequeue_choices()
                             .expect("should be able to choose dequeue"),
                     ),
+                    inspector_state: MoveInspectorState::NotInspecting,
                 })
             }
 

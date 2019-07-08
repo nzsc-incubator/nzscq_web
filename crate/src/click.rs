@@ -32,6 +32,7 @@ pub enum Action {
     ChooseDequeue(DequeueChoice),
     ChooseAction(choices::Action),
     WaitForUserToChooseMoveToInspect,
+    StopInspectingMove,
 
     SetComputerDifficulty(Difficulty),
     NavigateHome,
