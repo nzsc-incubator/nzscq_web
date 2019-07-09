@@ -75,7 +75,7 @@ pub trait RenderButton {
 
 impl RenderButton for MoveInspectorState {
     fn render_button(&self, enabled: bool) -> Vec<Component> {
-        if let MoveInspectorState::NotInspecting = self {
+        if MoveInspectorState::NotInspecting == *self {
             InspectMoveButton { enabled }.render(())
         } else {
             StopInspectingButton { enabled: true }.render(())
