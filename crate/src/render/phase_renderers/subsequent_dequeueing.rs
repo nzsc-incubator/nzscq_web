@@ -7,6 +7,7 @@ use crate::{
         arrow, arsenal_item_display,
         health_display::{ConstantHealthDisplay, FadingHealthDisplay},
         lerp::{LerpableComponent, Lerper},
+        move_inspector::{MoveInspector, MoveInspectorArgs},
         move_inspector_buttons::RenderButton,
         pill::Pill,
         switch::{Switch, Switch5},
@@ -208,21 +209,29 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
         }
     }
 
-    fn dequeues(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
-        move |_lerper| {
-            vec![
-                vec![Component::Background {
-                    color: colors::BACKGROUND,
-                }],
-                self.current_health_displays(),
-                dequeueing_scoreboard(self.dequeueing_human_args()),
-                dequeueing_scoreboard(self.dequeueing_computer_args()),
-                self.inspector_state.render_button(true),
-            ]
-            .into_iter()
-            .flatten()
-            .collect()
+    fn dequeues_or_inspector(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
+        move |_| {
+            if self.inspector_state == MoveInspectorState::NotInspecting {
+                self.dequeues()
+            } else {
+                self.move_inspector()
+            }
         }
+    }
+
+    fn dequeues(&self) -> Vec<Component> {
+        vec![
+            vec![Component::Background {
+                color: colors::BACKGROUND,
+            }],
+            self.current_health_displays(),
+            dequeueing_scoreboard(self.dequeueing_human_args()),
+            dequeueing_scoreboard(self.dequeueing_computer_args()),
+            self.inspector_state.render_button(true),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
     }
 
     fn action_choosing_human_args(&self) -> ActionChoosingRenderArgs {
@@ -362,6 +371,45 @@ impl<'a> SubsequentDequeueingPhaseRenderer<'a> {
     fn did_computer_get_point(&self) -> bool {
         self.previous_outcome[COMPUTER].1 > 0
     }
+
+    fn move_inspector(&self) -> Vec<Component> {
+        vec![
+            vec![Component::Background {
+                color: colors::BACKGROUND,
+            }],
+            self.current_health_displays(),
+            self.human_move_inspector(),
+            self.computer_move_inspector(),
+            self.inspector_state.render_button(true),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
+    }
+
+    fn human_move_inspector(&self) -> Vec<Component> {
+        MoveInspector::new(self.human_move_inspector_args()).render(())
+    }
+
+    fn human_move_inspector_args(&self) -> MoveInspectorArgs {
+        MoveInspectorArgs {
+            side: Side::Left,
+            player: self.dequeueing_human_args().player,
+            inspected_move: self.inspector_state.move_(),
+        }
+    }
+
+    fn computer_move_inspector(&self) -> Vec<Component> {
+        MoveInspector::new(self.computer_move_inspector_args()).render(())
+    }
+
+    fn computer_move_inspector_args(&self) -> MoveInspectorArgs {
+        MoveInspectorArgs {
+            side: Side::Right,
+            player: self.dequeueing_computer_args().player,
+            inspected_move: self.inspector_state.move_(),
+        }
+    }
 }
 
 impl<'a> Render<f64> for SubsequentDequeueingPhaseRenderer<'a> {
@@ -370,14 +418,14 @@ impl<'a> Render<f64> for SubsequentDequeueingPhaseRenderer<'a> {
         let computer_entrance = self.computer_entrance();
         let fade = self.fade();
         let exit = self.exit();
-        let dequeues = self.dequeues();
+        let dequeues_or_inspector = self.dequeues_or_inspector();
 
         Switch5(
             (0.00..0.15, human_entrance),
             (0.15..0.30, computer_entrance),
             (0.30..0.85, fade),
             (0.85..1.00, exit),
-            (1.00..=1.00, dequeues),
+            (1.00..=1.00, dequeues_or_inspector),
         )
         .case(completion_factor)
         .expect("should have legal completion range")

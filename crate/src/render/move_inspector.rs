@@ -49,20 +49,20 @@ impl<'a> MoveInspector<'a> {
             .flat_map(|(i, &arsenal_item)| {
                 let row = i / 3;
                 let column = i % 3;
+                let position = CirclePosition {
+                    side: self.side,
+                    column,
+                    row,
+                };
 
-                vec![
-                    Component::Circle {
-                        fill_color: colors::arsenal_item_color(arsenal_item),
-                        shape: dequeue_circle::background_at(self.side, row, column),
-                        on_click: inspection_handler(arsenal_item),
-                    },
-                    Component::Image {
-                        image_type: ImageType::from(arsenal_item),
-                        alpha: 1.0,
-                        shape: dequeue_circle::foreground_at(self.side, row, column),
-                        on_click: None,
-                    },
-                ]
+                self.highlighter(arsenal_item, position)
+                    .into_iter()
+                    .chain(arsenal_item_display(
+                        arsenal_item,
+                        true,
+                        inspection_handler(arsenal_item),
+                        position,
+                    ))
             });
 
         pill.render(()).into_iter().chain(pool).collect()
@@ -88,34 +88,38 @@ impl<'a> MoveInspector<'a> {
         vec![
             Some(background_pill.render(())),
             entrance.map(|entering_item| {
-                vec![
-                    Component::Circle {
-                        fill_color: colors::arsenal_item_color(entering_item),
-                        shape: dequeue_circle::background_at(self.side, row, 0),
-                        on_click: inspection_handler(entering_item),
-                    },
-                    Component::Image {
-                        image_type: ImageType::from(entering_item),
-                        alpha: 1.0,
-                        shape: dequeue_circle::foreground_at(self.side, row, 0),
-                        on_click: None,
-                    },
-                ]
+                let position = CirclePosition {
+                    side: self.side,
+                    column: 0,
+                    row,
+                };
+
+                self.highlighter(entering_item, position)
+                    .into_iter()
+                    .chain(arsenal_item_display(
+                        entering_item,
+                        true,
+                        inspection_handler(entering_item),
+                        position,
+                    ))
+                    .collect()
             }),
             exit.map(|exiting_item| {
-                vec![
-                    Component::Circle {
-                        fill_color: colors::arsenal_item_color(exiting_item),
-                        shape: dequeue_circle::background_at(self.side, row, 2),
-                        on_click: inspection_handler(exiting_item),
-                    },
-                    Component::Image {
-                        image_type: ImageType::from(exiting_item),
-                        alpha: 1.0,
-                        shape: dequeue_circle::foreground_at(self.side, row, 2),
-                        on_click: None,
-                    },
-                ]
+                let position = CirclePosition {
+                    side: self.side,
+                    column: 2,
+                    row,
+                };
+
+                self.highlighter(exiting_item, position)
+                    .into_iter()
+                    .chain(arsenal_item_display(
+                        exiting_item,
+                        true,
+                        inspection_handler(exiting_item),
+                        position,
+                    ))
+                    .collect()
             }),
         ]
         .into_iter()
