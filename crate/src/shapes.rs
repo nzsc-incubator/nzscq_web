@@ -380,7 +380,7 @@ pub mod action_focus {
     }
 }
 
-pub mod move_inspector_outcome_circle {
+pub mod move_inspector_highlighter {
     use super::{
         dequeue_circle::{self, CirclePosition},
         Circle,

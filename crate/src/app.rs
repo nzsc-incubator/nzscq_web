@@ -249,7 +249,10 @@ impl App {
 
                 click::Action::InspectMove(m) => {
                     prevent_animation_start();
-                    state.phase.inspect_move(m).expect("should be able to inspect move")
+                    state
+                        .phase
+                        .inspect_move(m)
+                        .expect("should be able to inspect move")
                 }
 
                 click::Action::StopInspectingMove => {

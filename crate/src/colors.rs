@@ -81,22 +81,24 @@ pub fn arsenal_item_color(arsenal_item: ArsenalItem) -> Rgba {
 
 const MIRROR_COLOR: Rgba = Rgba(0x88, 0x88, 0x88, 0xFF);
 
-pub fn move_inspector_outcome_color(human_points: u8, computer_points: u8) -> Option<Rgba> {
+pub fn move_inspector_highlighter_color(own_points: u8, opponent_points: u8) -> Option<Rgba> {
     const VICTORY: Rgba = Rgba(0x44, 0xCC, 0x44, 0xCC);
     const DEFEAT: Rgba = Rgba(0x99, 0x42, 0x42, 0xCC);
     const SPECIAL_TIE: Rgba = Rgba(0xAA, 0x99, 0x42, 0xCC);
 
-    match (human_points, computer_points) {
+    match (own_points, opponent_points) {
         (0, 0) => None,
         (1, 0) => Some(VICTORY),
         (0, 1) => Some(DEFEAT),
         (1, 1) => Some(SPECIAL_TIE),
         _ => panic!(
             "Human should never score {} while computer scores {}",
-            human_points, computer_points
+            own_points, opponent_points
         ),
     }
 }
+
+pub const INSPECTED_MOVE_HIGHLIGHT_COLOR: Rgba = Rgba(0x00, 0x88, 0xBB, 0xCC);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Rgba(pub u8, pub u8, pub u8, pub u8);

@@ -3,7 +3,10 @@ use crate::colors::{self, Rgba};
 use crate::helpers::{self, QueueArsenal};
 use crate::paint::{Component, ImageType};
 use crate::render::{arsenal_item_display, pill::Pill, Render};
-use crate::shapes::{dequeue_circle::{self, CirclePosition}, move_inspector_outcome_circle};
+use crate::shapes::{
+    dequeue_circle::{self, CirclePosition},
+    move_inspector_highlighter,
+};
 use crate::side::Side;
 
 use nzscq::choices::{ArsenalItem, Move, PointsAgainst};
@@ -148,37 +151,46 @@ impl<'a> MoveInspector<'a> {
                     row,
                 };
 
-                self.outcome_background(arsenal_item, position).into_iter().chain(arsenal_item_display(
-                    arsenal_item,
-                    true,
-                    inspection_handler(arsenal_item),
-                    position,
-                ))
-                
+                self.highlighter(arsenal_item, position)
+                    .into_iter()
+                    .chain(arsenal_item_display(
+                        arsenal_item,
+                        true,
+                        inspection_handler(arsenal_item),
+                        position,
+                    ))
             });
 
         pill.render(()).into_iter().chain(arsenal_items).collect()
     }
 
-    fn outcome_background(&self, opposing_arsenal_item: ArsenalItem, position: CirclePosition) -> Option<Component> {
+    fn highlighter(
+        &self,
+        opposing_arsenal_item: ArsenalItem,
+        position: CirclePosition,
+    ) -> Option<Component> {
         if let ArsenalItem::Move(opposing_move) = opposing_arsenal_item {
-            self.outcome_color(opposing_move).map(|fill_color| Component::Circle {
-                fill_color,
-                shape: move_inspector_outcome_circle::circle_at(position),
-                on_click: None,
-            })
+            self.highlighter_color(opposing_move)
+                .map(|fill_color| Component::Circle {
+                    fill_color,
+                    shape: move_inspector_highlighter::circle_at(position),
+                    on_click: None,
+                })
         } else {
             None
         }
-        
     }
 
-    fn outcome_color(&self, opposing_move: Move) -> Option<Rgba> {
-        self.inspected_move.map(|inspected_move| {
+    fn highlighter_color(&self, opposing_move: Move) -> Option<Rgba> {
+        if self.inspected_move == Some(opposing_move) {
+            Some(colors::INSPECTED_MOVE_HIGHLIGHT_COLOR)
+        } else if let Some(inspected_move) = self.inspected_move {
             let points = PointsAgainst::points_of(&[inspected_move, opposing_move]);
 
-        colors::move_inspector_outcome_color(points[0], points[1])
-        }).unwrap_or(None)
+            colors::move_inspector_highlighter_color(points[0], points[1])
+        } else {
+            None
+        }
     }
 }
 
@@ -195,13 +207,11 @@ impl<'a> Render<()> for MoveInspector<'a> {
     }
 }
 
-
 pub struct MoveInspectorArgs<'a> {
     pub side: Side,
     pub player: &'a QueueArsenal,
     pub inspected_move: Option<Move>,
 }
-
 
 fn inspection_handler(arsenal_item: ArsenalItem) -> Option<Action> {
     if let ArsenalItem::Move(m) = arsenal_item {
