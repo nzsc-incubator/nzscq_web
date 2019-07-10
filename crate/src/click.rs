@@ -4,7 +4,7 @@ use crate::{
     shapes::{Circle, Rect},
 };
 
-use nzscq::choices::{self, Booster, Character, DequeueChoice};
+use nzscq::choices::{self, Booster, Character, DequeueChoice, Move};
 
 pub fn action_triggered_by_click_at(
     canvas_coords: (f64, f64),
@@ -32,6 +32,7 @@ pub enum Action {
     ChooseDequeue(DequeueChoice),
     ChooseAction(choices::Action),
     WaitForUserToChooseMoveToInspect,
+    InspectMove(Move),
     StopInspectingMove,
 
     SetComputerDifficulty(Difficulty),

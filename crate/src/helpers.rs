@@ -1,4 +1,6 @@
-use nzscq::choices::{Booster, Character, Move};
+use nzscq::choices::{ArsenalItem, Booster, Character, Move};
+use nzscq::scoreboard::{ActionlessPlayer, DequeueingPlayer, Queue};
+
 use wasm_bindgen::JsValue;
 use web_sys::{console, Window};
 
@@ -82,3 +84,28 @@ pub fn set_local_storage_item(window: &Window, key: &str, value: &str) {
 }
 
 pub const SQRT_3: f64 = 1.732_050_807_568_877_2;
+
+pub trait QueueArsenal {
+    fn queue(&self) -> &Queue;
+    fn arsenal(&self) -> &Vec<ArsenalItem>;
+}
+
+impl QueueArsenal for ActionlessPlayer {
+    fn queue(&self) -> &Queue {
+        &self.queue
+    }
+
+    fn arsenal(&self) -> &Vec<ArsenalItem> {
+        &self.arsenal
+    }
+}
+
+impl QueueArsenal for DequeueingPlayer {
+    fn queue(&self) -> &Queue {
+        &self.queue
+    }
+
+    fn arsenal(&self) -> &Vec<ArsenalItem> {
+        &self.arsenal
+    }
+}

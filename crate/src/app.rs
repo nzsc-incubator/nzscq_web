@@ -247,6 +247,11 @@ impl App {
                         .expect("should be able to wait for user to choose move to inspect");
                 }
 
+                click::Action::InspectMove(m) => {
+                    prevent_animation_start();
+                    state.phase.inspect_move(m).expect("should be able to inspect move")
+                }
+
                 click::Action::StopInspectingMove => {
                     prevent_animation_start();
                     state

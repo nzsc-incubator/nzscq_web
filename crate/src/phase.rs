@@ -64,6 +64,30 @@ impl Phase {
         }
     }
 
+    pub fn inspect_move(&mut self, m: Move) -> Result<(), ()> {
+        match self {
+            Phase::ChooseFirstDequeue(phase) => {
+                phase.inspector_state = MoveInspectorState::Inspecting(m);
+
+                Ok(())
+            }
+
+            Phase::ChooseAction(phase) => {
+                phase.inspector_state = MoveInspectorState::Inspecting(m);
+
+                Ok(())
+            }
+
+            Phase::ChooseSubsequentDequeue(phase) => {
+                phase.inspector_state = MoveInspectorState::Inspecting(m);
+
+                Ok(())
+            }
+
+            _ => Err(())
+        }
+    }
+
     pub fn stop_inspecting_move(&mut self) -> Result<(), ()> {
         match self {
             Phase::ChooseFirstDequeue(phase) => {
@@ -188,6 +212,16 @@ pub enum MoveInspectorState {
     NotInspecting,
     WaitingForUserToChooseMove,
     Inspecting(Move),
+}
+
+impl MoveInspectorState {
+    pub fn move_(self) -> Option<Move> {
+        if let MoveInspectorState::Inspecting(m) = self {
+            Some(m)
+        } else {
+            None
+        }
+    }
 }
 
 mod durations {

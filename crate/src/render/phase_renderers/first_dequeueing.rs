@@ -8,6 +8,7 @@ use crate::{
         arrow,
         health_display::ConstantHealthDisplay,
         lerp::{LerpableComponent, Lerper},
+        move_inspector::{MoveInspector, MoveInspectorArgs},
         move_inspector_buttons::{InspectMoveButton, RenderButton},
         pill::Pill,
         switch::{Switch, Switch5},
@@ -281,32 +282,40 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
         self.scoreboard[COMPUTER].booster
     }
 
-    fn dequeues(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
+    fn dequeues_or_inspector(&'a self) -> impl 'a + FnOnce(Lerper) -> Vec<Component> {
         move |lerper| {
-            vec![
-                vec![Component::Background {
-                    color: colors::BACKGROUND,
-                }],
-                self.health_displays(),
-                self.human_scoreboard_display()
-                    .into_iter()
-                    .map(|component| component.translate(lerper.lerp(-553.2, 0.0), 0.0))
-                    .collect(),
-                self.computer_scoreboard_display()
-                    .into_iter()
-                    .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
-                    .collect(),
-                self.inspector_state
-                    .render_button(lerper.lerp(0.0, 1.0) == 1.0)
-                    .translate(
-                        0.0,
-                        lerper.lerp(canvas_dimensions::HEIGHT - InspectMoveButton::Y, 0.0),
-                    ),
-            ]
-            .into_iter()
-            .flatten()
-            .collect()
+            if self.inspector_state == MoveInspectorState::NotInspecting {
+                self.dequeues(lerper)
+            } else {
+                self.move_inspector(lerper)
+            }
         }
+    }
+
+    fn dequeues(&'a self, lerper: Lerper) -> Vec<Component> {
+        vec![
+            vec![Component::Background {
+                color: colors::BACKGROUND,
+            }],
+            self.health_displays(),
+            self.human_scoreboard_display()
+                .into_iter()
+                .map(|component| component.translate(lerper.lerp(-553.2, 0.0), 0.0))
+                .collect(),
+            self.computer_scoreboard_display()
+                .into_iter()
+                .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
+                .collect(),
+            self.inspector_state
+                .render_button(lerper.lerp(0.0, 1.0) == 1.0)
+                .translate(
+                    0.0,
+                    lerper.lerp(canvas_dimensions::HEIGHT - InspectMoveButton::Y, 0.0),
+                ),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
     }
 
     fn human_scoreboard_display(&self) -> Vec<Component> {
@@ -373,6 +382,46 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             dequeues: &self.available_dequeues[COMPUTER],
         }
     }
+
+    fn move_inspector(&'a self, lerper: Lerper) -> Vec<Component> {
+        vec![
+            vec![Component::Background {
+                color: colors::BACKGROUND,
+            }],
+            self.health_displays(),
+            self.human_move_inspector(),
+            self.computer_move_inspector(),
+            self.inspector_state
+                .render_button(lerper.lerp(0.0, 1.0) == 1.0),
+        ]
+        .into_iter()
+        .flatten()
+        .collect()
+    }
+
+    fn human_move_inspector(&self) -> Vec<Component> {
+        MoveInspector::new(self.human_move_inspector_args()).render(())
+    }
+
+    fn human_move_inspector_args(&self) -> MoveInspectorArgs {
+        MoveInspectorArgs {
+            side: Side::Left,
+            player: self.human().player,
+            inspected_move: self.inspector_state.move_(),
+        }
+    }
+
+    fn computer_move_inspector(&self) -> Vec<Component> {
+        MoveInspector::new(self.computer_move_inspector_args()).render(())
+    }
+
+    fn computer_move_inspector_args(&self) -> MoveInspectorArgs {
+        MoveInspectorArgs {
+            side: Side::Right,
+            player: self.computer().player,
+            inspected_move: self.inspector_state.move_(),
+        }
+    }
 }
 
 impl<'a> Render<f64> for FirstDequeueingPhaseRenderer<'a> {
@@ -381,14 +430,14 @@ impl<'a> Render<f64> for FirstDequeueingPhaseRenderer<'a> {
         let computer_entrance = self.computer_entrance();
         let pause = self.pause();
         let exit = self.exit();
-        let dequeues = self.dequeues();
+        let dequeues_or_inspector = self.dequeues_or_inspector();
 
         Switch5(
             (0.00..0.12, human_entrance),
             (0.12..0.24, computer_entrance),
             (0.24..0.68, pause),
             (0.68..0.80, exit),
-            (0.80..=1.00, dequeues),
+            (0.80..=1.00, dequeues_or_inspector),
         )
         .case(completion_factor)
         .expect("should have legal completion range")
