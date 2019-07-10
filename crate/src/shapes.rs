@@ -241,7 +241,7 @@ pub mod dequeue_circle {
         }
     }
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, Copy)]
     pub struct CirclePosition {
         pub side: Side,
         pub column: usize,
@@ -377,5 +377,23 @@ pub mod action_focus {
         };
 
         CENTER_X + offset
+    }
+}
+
+pub mod move_inspector_outcome_circle {
+    use super::{
+        dequeue_circle::{self, CirclePosition},
+        Circle,
+    };
+
+    const MARGIN: f64 = 10.0;
+
+    pub fn circle_at(position: CirclePosition) -> Circle {
+        let original = dequeue_circle::background_at(position.side, position.row, position.column);
+
+        Circle {
+            radius: original.radius + MARGIN,
+            ..original
+        }
     }
 }

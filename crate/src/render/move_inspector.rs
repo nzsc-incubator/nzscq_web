@@ -1,12 +1,12 @@
 use crate::click::Action;
-use crate::colors;
+use crate::colors::{self, Rgba};
 use crate::helpers::{self, QueueArsenal};
 use crate::paint::{Component, ImageType};
 use crate::render::{arsenal_item_display, pill::Pill, Render};
-use crate::shapes::dequeue_circle::{self, CirclePosition};
+use crate::shapes::{dequeue_circle::{self, CirclePosition}, move_inspector_outcome_circle};
 use crate::side::Side;
 
-use nzscq::choices::{ArsenalItem, Move};
+use nzscq::choices::{ArsenalItem, Move, PointsAgainst};
 use nzscq::scoreboard::Queue;
 
 pub struct MoveInspector<'a> {
@@ -142,20 +142,43 @@ impl<'a> MoveInspector<'a> {
                 let row = i / 3;
                 let column = i % 3;
                 let row = row + row_offset;
+                let position = CirclePosition {
+                    side: self.side,
+                    column,
+                    row,
+                };
 
-                arsenal_item_display(
+                self.outcome_background(arsenal_item, position).into_iter().chain(arsenal_item_display(
                     arsenal_item,
                     true,
                     inspection_handler(arsenal_item),
-                    CirclePosition {
-                        side: self.side,
-                        column,
-                        row,
-                    },
-                )
+                    position,
+                ))
+                
             });
 
         pill.render(()).into_iter().chain(arsenal_items).collect()
+    }
+
+    fn outcome_background(&self, opposing_arsenal_item: ArsenalItem, position: CirclePosition) -> Option<Component> {
+        if let ArsenalItem::Move(opposing_move) = opposing_arsenal_item {
+            self.outcome_color(opposing_move).map(|fill_color| Component::Circle {
+                fill_color,
+                shape: move_inspector_outcome_circle::circle_at(position),
+                on_click: None,
+            })
+        } else {
+            None
+        }
+        
+    }
+
+    fn outcome_color(&self, opposing_move: Move) -> Option<Rgba> {
+        self.inspected_move.map(|inspected_move| {
+            let points = PointsAgainst::points_of(&[inspected_move, opposing_move]);
+
+        colors::move_inspector_outcome_color(points[0], points[1])
+        }).unwrap_or(None)
     }
 }
 
