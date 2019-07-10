@@ -287,12 +287,12 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             if self.inspector_state == MoveInspectorState::NotInspecting {
                 self.dequeues(lerper)
             } else {
-                self.move_inspector(lerper)
+                self.move_inspector()
             }
         }
     }
 
-    fn dequeues(&'a self, lerper: Lerper) -> Vec<Component> {
+    fn dequeues(&self, lerper: Lerper) -> Vec<Component> {
         vec![
             vec![Component::Background {
                 color: colors::BACKGROUND,
@@ -306,12 +306,10 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
                 .into_iter()
                 .map(|component| component.translate(lerper.lerp(553.2, 0.0), 0.0))
                 .collect(),
-            self.inspector_state
-                .render_button(lerper.lerp(0.0, 1.0) == 1.0)
-                .translate(
-                    0.0,
-                    lerper.lerp(canvas_dimensions::HEIGHT - InspectMoveButton::Y, 0.0),
-                ),
+            self.inspector_state.render_button(true).translate(
+                0.0,
+                lerper.lerp(canvas_dimensions::HEIGHT - InspectMoveButton::Y, 0.0),
+            ),
         ]
         .into_iter()
         .flatten()
@@ -383,7 +381,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
         }
     }
 
-    fn move_inspector(&'a self, lerper: Lerper) -> Vec<Component> {
+    fn move_inspector(&self) -> Vec<Component> {
         vec![
             vec![Component::Background {
                 color: colors::BACKGROUND,
@@ -391,8 +389,7 @@ impl<'a> FirstDequeueingPhaseRenderer<'a> {
             self.health_displays(),
             self.human_move_inspector(),
             self.computer_move_inspector(),
-            self.inspector_state
-                .render_button(lerper.lerp(0.0, 1.0) == 1.0),
+            self.inspector_state.render_button(true),
         ]
         .into_iter()
         .flatten()
