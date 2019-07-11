@@ -1,0 +1,19 @@
+seed=da
+
+kick not
+nun jug
+run nose
+swo bmus
+(nun jug)
+chop acid
+(run not)
+nun mirror::nose
+(swo nose)
+run jug
+(nun bmus)
+mirror::kick nose
+(kick mirror)
+// free win for computer
+swo nos
+(mirror not)
+nun mirror::jug
